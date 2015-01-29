@@ -3,7 +3,8 @@ return array(
     'extends' => 'bootstrap3',
     'helpers' => array(
         'factories' => array(
-            'header' => 'Finna\View\Helper\Root\Factory::getHeader'
+            'content' => 'Finna\View\Helper\Root\Factory::getContent',
+            'header' => 'Finna\View\Helper\Root\Factory::getHeader',
         )
     ),
     'css' => array(
@@ -18,7 +19,7 @@ return array(
         'finna.js',
         'vendor/jquery.dataTables.js',
         'vendor/dataTables.bootstrap.js',
-        'slick.min.js'
+        'slick.min.js',
     ),
     'less' => array(
         'active' => false

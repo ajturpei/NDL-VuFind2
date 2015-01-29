@@ -1,10 +1,10 @@
 <?php
 /**
- * Factory for Root view helpers.
+ * Content page view helper
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2014.
+ * Copyright (C) The National Library of Finland 2014.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -23,49 +23,57 @@
  * @package  View_Helpers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
+ * @link     http://vufind.org   Main Site
  */
 namespace Finna\View\Helper\Root;
-use Zend\ServiceManager\ServiceManager;
 
 /**
- * Factory for Root view helpers.
+ * Content page view helper
  *
  * @category VuFind2
  * @package  View_Helpers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
- * @codeCoverageIgnore
+ * @link     http://vufind.org   Main Site
  */
-class Factory extends \VuFind\View\Helper\Root\Factory
+class Content extends \Zend\View\Helper\AbstractHelper
 {
     /**
-     * Construct the Header view helper.
+     * Page heading
      *
-     * @param ServiceManager $sm Service manager.
-     *
-     * @return Header
+     * @var string
      */
-    public static function getHeader(ServiceManager $sm)
-    {
-        $locator = $sm->getServiceLocator();
-        $translator = $locator->get('VuFind\Translator');
-        $menuConfig = $locator->get('VuFind\Config')->get('header-navigation');
-        $urlHelper = $sm->get('url');
+    protected $heading;
 
-        return new Header($menuConfig, $translator, $urlHelper);
+    /**
+     * Returns content page view helper.
+     *
+     * @return FInna\View\Helper\Root\Content
+     */
+    public function __invoke()
+    {
+        return $this;
     }
 
     /**
-     * Construct content page view helper.
+     * Set content page title.
      *
-     * @param ServiceManager $sm Service manager.
+     * @param string $heading Heading.
      *
-     * @return Header
+     * @return string
      */
-    public static function getContent(ServiceManager $sm)
+    public function setHeading($heading)
     {
-        return new Content();
+        return $this->heading = $heading;
+    }
+
+    /**
+     * Returns content page heading.
+     *
+     * @return string
+     */
+    public function getHeading()
+    {
+        return $this->heading;
     }
 }
