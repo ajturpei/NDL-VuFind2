@@ -241,3 +241,13 @@
   // Remove the top rounded corners here since there is a hard edge above the menu
   .border-top-radius(0);
 }
+
+// Fix dropdowns in navbar for wide screen
+@media (min-width: @screen-md-min) {
+    .navbar .dropdown-menu > li > a {
+        width: 280px; 
+        white-space: normal;
+        outline: 1px solid rgba(255,255,255,0.7);
+    }
+}
+
