@@ -16,9 +16,8 @@
 	font-family: 'icomoon';
 	speak: none;
 	text-transform: none;
+	font-weight: normal;
     font-size: inherit;
-    /* Make icon displayed always ========= */
-    min-width:14px;
 	/* Better Font Rendering =========== */
 	text-rendering: auto;
 	-webkit-font-smoothing: antialiased;
@@ -28,12 +27,12 @@
 	cursor: pointer;
 }
 .iconlabel {
-    color: #464646;
-    background: none;
-    padding: 0px;
-    font-weight: 400;
-    margin-right:10px;
-	font-size: 14px;
+  color: #464646;
+  background: none;
+  padding: 0px;
+  font-weight: 400;
+  margin-right:10px;
+  font-size: 14px;
 }
 .dateyeartype {
   font-size: 13px;
@@ -42,15 +41,15 @@
   margin-bottom: 5px;
 }
 .template-name-results .iconlabel {
-	letter-spacing: 0px;
-	font-size: 13px;
+  letter-spacing: 0px;
+  font-size: 13px;
 }
 .iconlabel:before {
-    padding-right: 3px;
+  padding-right: 3px;
 }
 .fa .checkboxFilter .checkbox {
-	padding:10px 15px;
-	line-height: 2.2em;	
+  padding:10px 15px;
+  line-height: 2.2em;	
 }
 .checkboxFilter .checkbox:hover {
 	cursor:pointer;	
@@ -70,7 +69,7 @@
 	margin-right: 4px;
 }
 .checkboxFilter .checkbox input[type="checkbox"] {
-	display:none;
+	
 }
 
 .prefilterdropdown {
@@ -175,10 +174,15 @@
   content: "\f14a";
   margin-top:-2px;
 }
+/* ---  set  navbar logo display only the logo --- */
+.navbar-header .fa-finnalogo {
+  width:30px;
+  overflow:hidden;
+  vertical-align: middle;	
+}
 .fa-finnalogo:before {
     content: "\e60b";
-	font-weight:400;
-	min-width:110px;
+	font-weight:300;
 }
 .icon-ebook:before {
 	content: "\e617";
