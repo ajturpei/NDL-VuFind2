@@ -393,6 +393,42 @@ label.list-group-item {border-radius:0;font-weight:normal;margin-top:0;padding-l
   overflow-x:hidden;
 }
 
+/* --- Record images--- */
+.recordcovers {
+   &.list {
+       position: absolute;
+       left: auto;
+       padding: 0;
+       width: 126px;
+       z-index: 3;
+       min-height: 20px;
+       text-align: center;
+       & a {
+           background: #fff;
+           opacity: @tooltip-opacity;
+           font-size: 1em;
+           display: inline-block;
+           border: 1px solid #cfcfcf;
+           width: 1em;
+           margin: 0 4px 4px 0;
+           text-align: center;
+       }
+   }
+
+   &.record a {
+       margin: 0 5px 5px 0;
+       display: block;
+       background-position: 50% 50%;
+       background-size: cover;
+       display: block;
+       loat: left;
+       height: 32px;
+       margin: 0 5px 5px 0;
+       overflow: hidden;
+       width: 32px;
+   }
+}
+
 /* --- Search --- */
 .bulkActionButtons {
   label {

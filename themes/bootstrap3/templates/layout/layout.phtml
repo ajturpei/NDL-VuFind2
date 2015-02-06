@@ -23,6 +23,8 @@
     <?
       // Set global path for Javascript code:
       $this->headScript()->prependScript("path = '" . rtrim($this->url('home'), '/') . "';");
+      $controllerName = Zend_Controller_Front::getInstance()->getRequest()->getControllerName();
+      $this->headScript()->prependScript("controller = '$controllerNamerollerName';");
 
       // Deal with cart stuff:
       if (!isset($this->renderingError)) {

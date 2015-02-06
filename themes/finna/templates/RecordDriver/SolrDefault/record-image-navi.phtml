@@ -1,0 +1,14 @@
+<div class="recordcovers <?= $type ?><?= count($thumbnails) == 1 ? ' hidden ' : ''?>">
+<? $ind = 0; ?>
+<? foreach ($thumbnails as $thumb): ?>
+<?
+  $content = null;
+  if ($type === 'list') {
+     $content = $ind === 4 ? '&hellip;' : $ind+1;
+  } else {
+     $content = '<img src="' . $thumb['small'] . '" />';
+  }
+?>
+<a href="<?= $thumb['large'] ?>" class="image-popup image-popup-navi<?= ($type === 'list' && $ind++ > 4) ? ' hide ' : '' ?>"><?= $content ?></a>
+<? endforeach; ?>
+</div>

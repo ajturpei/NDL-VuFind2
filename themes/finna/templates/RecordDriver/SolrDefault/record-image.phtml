@@ -1,0 +1,27 @@
+<div class="recordcover-holder">
+<?
+$thumbnails = null;
+if (count($allThumbs)) {
+  $thumbnails = $allThumbs;
+} else if ($largeThumb) {
+  $thumbnails = array('small' => $smallThumb, 'large' => $largeThumb);
+}
+$thumbNaviData = array('thumbnails' => $thumbnails, 'type' => $type);
+?>
+
+<? if ($type !== 'record'): ?>
+<?= $this->partial('RecordDriver/SolrDefault/record-image-navi.phtml', $thumbNaviData) ?>
+<? endif; ?>
+
+<? if ($mediumThumb): ?>
+<? if ($largeThumb): ?><a class="image-popup-trigger" href="<?=$this->escapeHtmlAttr($mediumThumb)?>"><? endif; ?>
+<img alt="<?=$this->transEsc('Cover Image')?>" class="recordcover" src="<?=$this->escapeHtmlAttr($mediumThumb);?>"/>
+<? if ($largeThumb): ?></a><? endif; ?>
+<? else: ?>
+<img src="<?=$this->url('cover-unavailable')?>" class="recordcover" alt="<?=$this->transEsc('No Cover Image')?>"/>
+<? endif; ?>
+
+<? if ($type === 'record'): ?>
+<?= $this->partial('RecordDriver/SolrDefault/record-image-navi.phtml', $thumbNaviData) ?>
+<? endif; ?>
+</div>

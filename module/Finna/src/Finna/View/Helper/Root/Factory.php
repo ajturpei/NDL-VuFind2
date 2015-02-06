@@ -41,6 +41,20 @@ use Zend\ServiceManager\ServiceManager;
 class Factory extends \VuFind\View\Helper\Root\Factory
 {
     /**
+     * Construct the Record helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Record
+     */
+    public static function getRecord(ServiceManager $sm)
+    {
+        return new Record(
+            $sm->getServiceLocator()->get('VuFind\Config')->get('config')
+        );
+    }
+
+    /**
      * Construct the Header view helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -67,5 +81,34 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     public static function getContent(ServiceManager $sm)
     {
         return new Content();
+    }
+
+    /**
+     * Construct record image view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Header
+     */
+    public static function getRecordImage(ServiceManager $sm)
+    {
+        return new RecordImage();
+    }
+
+    /**
+     * Construct page view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Header
+     */
+    public static function getPage(ServiceManager $sm)
+    {
+        $routeMatch = $sm->getServiceLocator()->get('Application')
+            ->getMvcEvent()->getRouteMatch();
+        $controller = $routeMatch->getParam('controller');
+        $action = $routeMatch->getParam('action');
+
+        return new Page($controller, $action);
     }
 }

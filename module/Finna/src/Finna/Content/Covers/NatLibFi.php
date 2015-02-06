@@ -59,12 +59,36 @@ class NatLibFi extends \VuFind\Content\AbstractCover
      */
     public function getUrl($key, $size, $ids)
     {
-        if (!isset($ids['isbn'])) {
-            return false;
+        if (isset($ids['url'])) {
+            return $ids['url'];
+        } else if (isset($ids['isbn'])) {
+            $isbn = $ids['isbn']->get13();
+            return 'http://siilo-kk.lib.helsinki.fi/getImage.php?query=' . $isbn
+                . '&return_error=true';
         }
-        $isbn = $ids['isbn']->get13();
-
-        return 'http://siilo-kk.lib.helsinki.fi/getImage.php?query=' . $isbn
-            . '&return_error=true';
+        return false;
     }
+
+    /**
+     * Does this plugin support the provided ID array?
+     *
+     * @param array $ids IDs that will later be sent to load() -- see below.
+     *
+     * @return bool
+     */
+    public function supports($ids)
+    {
+        return isset($ids['url']) || parent::supports($ids);
+    }
+
+    /**
+     * Are we allowed to cache images from this source?
+     *
+     * @return bool
+     */
+    public function isCacheAllowed()
+    {
+        return true;
+    }
+
 }
