@@ -7,7 +7,9 @@ return array(
             'header' => 'Finna\View\Helper\Root\Factory::getHeader',
             'page' => 'Finna\View\Helper\Root\Factory::getPage',
             'record' => 'Finna\View\Helper\Root\Factory::getRecord',
-            'recordImage' => 'Finna\View\Helper\Root\Factory::getRecordImage'
+            'recordImage' => 'Finna\View\Helper\Root\Factory::getRecordImage',
+            'tabs' => 'Finna\View\Helper\Root\Factory::getTabs'
+
         )
     ),
     'css' => array(

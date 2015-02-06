@@ -111,4 +111,16 @@ class Factory extends \VuFind\View\Helper\Root\Factory
 
         return new Page($controller, $action);
     }
+
+    /**
+     * Construct tabs view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Tabs
+     */
+    public static function getTabs(ServiceManager $sm)
+    {
+        return new Tabs();
+    }
 }

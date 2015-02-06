@@ -48,7 +48,7 @@
   );
 
   // Set up Finna Main Tabs:
-  //$this->layout()->finnaMainTabs = '...';
+  $this->layout()->finnaMainTabs = $this->tabs();
 
   // Enable cart if appropriate:
   $this->showCartControls = $this->params->getOptions()->supportsCart() && $this->cart()->isActive();
