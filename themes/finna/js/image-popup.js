@@ -104,7 +104,10 @@ finna.imagePopup = (function(finna) {
                 items: urls,
                 index: $(this).data('ind'),
                 type: 'ajax',
-	            tLoading: vufindString.loading,
+	            tLoading: '',
+	            preloader: true,
+	            preload: [1,3],
+	            removalDelay: 200,
                 ajax: {
                     cursor: ''
                 },
