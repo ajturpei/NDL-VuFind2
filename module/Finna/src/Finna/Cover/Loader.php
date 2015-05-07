@@ -69,6 +69,13 @@ class Loader extends \VuFind\Cover\Loader
     protected $bgColor;
 
     /**
+     * TODO
+     *
+     * @var string
+     */
+    protected $fillBg;
+
+    /**
      * Image width
      *
      * @var int
@@ -105,6 +112,10 @@ class Loader extends \VuFind\Cover\Loader
         $this->height = $height;
         $this->maxHeight = $maxHeight;
         $this->bgColor = $bgColor;
+        $this->fillBg = $this->bgColor !== null;
+        if (!$this->fillBg) {
+            $this->bgColor = 'ffffff';
+        }
     }
 
     /**
@@ -299,27 +310,33 @@ class Loader extends \VuFind\Cover\Loader
         $reqWidth = $this->width;
         $reqHeight = $this->height;
         $maxHeight = $this->maxHeight ? $this->maxHeight : $reqHeight;
+        $reqHeight = $reqHeight ? $reqHeight : $maxHeight;
         $bg = $this->bgColor;
+        $fillBg = $this->fillBg;
 
-        if ($reqWidth && $reqHeight && $bg) {
-            if ($height > $maxHeight && $height > $width) {
-                $reqHeight = $reqWidth * $height / $width;
-                if ($reqHeight > $maxHeight) {
-                    $reqHeight = $maxHeight;
-                }
-            }
-            $imageGDResized = imagecreatetruecolor($reqWidth, $reqHeight);
-            $background = imagecolorallocate(
-                $imageGDResized, hexdec(substr($bg, 0, 2)),
-                hexdec(substr($bg, 2, 2)), hexdec(substr($bg, 4, 2))
-            );
-            imagefill($imageGDResized, 0, 0, $background);
-
+        if ($reqWidth && $reqHeight) {
             $quality = 90;
+            $imageGDResized = null;
+
+            if ($fillBg) {
+                if ($height > $maxHeight && $height > $width) {
+                    $reqHeight = $reqWidth * $height / $width;
+                    if ($fillBg && $reqHeight > $maxHeight) {
+                        $reqHeight = $maxHeight;
+                    }
+                }
+                $imageGDResized = imagecreatetruecolor($reqWidth, $reqHeight);
+                $background = imagecolorallocate(
+                    $imageGDResized, hexdec(substr($bg, 0, 2)),
+                    hexdec(substr($bg, 2, 2)), hexdec(substr($bg, 4, 2))
+                );
+                imagefill($imageGDResized, 0, 0, $background);
+            }
+
 
             // If both dimensions are smaller than the new image,
             // just copy to center. Otherwise resample to fit if necessary.
-            if ($width < $reqWidth && $height < $reqHeight) {
+            if ($fillBg && $width < $reqWidth && $height < $reqHeight) {
                 $imgX = floor(($reqWidth - $width) / 2);
                 $imgY = 0; // no centering here.. floor(($reqHeight - $height) / 2);
                 imagecopy(
@@ -329,22 +346,41 @@ class Loader extends \VuFind\Cover\Loader
                     return false;
                 }
             } elseif ($width > $reqWidth || $height > $reqHeight) {
-                if (($width / $height) * $reqHeight < $reqWidth) {
-                    $newHeight = $reqHeight;
-                    $newWidth = round($newHeight * ($width / $height));
-                    $imgY = 0;
-                    $imgX = round(($reqWidth - $newWidth) / 2);
-                    imagecopyresampled(
-                        $imageGDResized, $imageGD, $imgX, $imgY, 0, 0,
-                        $newWidth, $newHeight, $width, $height
-                    );
+                $newWidth = null;
+                $newHeight = null;
+
+                if ($fillBg) {
+                    if ((($width / $height) * $reqHeight < $reqWidth)) {
+                        $newHeight = $reqHeight;
+                        $newWidth = round($newHeight * ($width / $height));
+                        $imgY = 0;
+                        $imgX = round(($reqWidth - $newWidth) / 2);
+                        imagecopyresampled(
+                            $imageGDResized, $imageGD, $imgX, $imgY, 0, 0,
+                            $newWidth, $newHeight, $width, $height
+                        );
+                    } else {
+                        $newWidth = $reqWidth;
+                        $newHeight = round($newWidth * ($height / $width));
+                    }
                 } else {
-                    $newWidth = $reqWidth;
-                    $newHeight = round($newWidth * ($height / $width));
-                    $imgX = 0;
-                    $imgY = 0;
+                    if ($height > $width) {
+                        $newHeight = min($height, $reqHeight);
+                        $newWidth = round($newHeight * ($width / $height));
+                    } else {
+                        $newWidth = min($width, $reqHeight);
+                        $newHeight = min(
+                            $reqHeight,
+                            round($newWidth * ($height / $width))
+                        );
+                    }
+                    $imageGDResized = imagecreatetruecolor($newWidth, $newHeight);
+                    $background = imagecolorallocate(
+                        $imageGDResized, hexdec(substr($bg, 0, 2)),
+                        hexdec(substr($bg, 2, 2)), hexdec(substr($bg, 4, 2))
+                    );
                     imagecopyresampled(
-                        $imageGDResized, $imageGD, $imgX, $imgY, 0, 0,
+                        $imageGDResized, $imageGD, 0, 0, 0, 0,
                         $newWidth, $newHeight, $width, $height
                     );
                 }
