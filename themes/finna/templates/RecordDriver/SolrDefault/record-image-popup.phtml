@@ -1,5 +1,5 @@
 <?
-$largeImage = $this->recordImage($this->record($this->driver))->getLargeImage($this->index, ['w' => 1200, 'h' => 1200, 'maxh' => 1200]);
+$largeImage = $this->recordImage($this->record($this->driver))->getLargeImage($this->index, ['w' => 1200, 'maxh' => 1200]);
 $originalImage = $this->recordImage($this->record($this->driver))->getLargeImage($this->index, ['bg' => null]);
 $currentImage = $this->index+1;
 $numOfImages = $this->record($this->driver)->getNumOfRecordImages('large');
@@ -8,6 +8,12 @@ $numOfImages = $this->record($this->driver)->getNumOfRecordImages('large');
 <? $format = $this->driver->getRecordType(); ?>
 <div class="imagepopup-holder <?= $format ?>" data-type="<?= $format ?>" data-id="<?= $this->driver->getUniqueID() ?>">
   <div class="imagepopup-container">
+    <div class="image-info">
+        <? if ($numOfImages > 1): ?>
+        <div class="image-index"><?= $this->translate('Image') . " $currentImage / $numOfImages" ?></div>
+        <? endif; ?> 
+        <div class="record-index"><span class="index"></span> / <span class="total"></span></div>
+    </div>
     <div class="image iconlabel format-<?=$this->record($this->driver)->getFormatClass(end($unprocessedFormats))?>">
       <img src="<?= $largeImage ?>" />
     </div>
@@ -40,14 +46,7 @@ $numOfImages = $this->record($this->driver)->getNumOfRecordImages('large');
       </div>
       <div class="record-link"><a href="<?= $this->recordLink()->getUrl($this->driver) ?>"><i class="fa fa-arrow-right"></i><?= $this->translate('To the record') ?></a></div>
       <? $rights = $this->driver->getImageRights($this->layout()->userLang) ?>
-      <div class="image-info">
-        <div class="record-index"><?= $this->translate('Record') ?> <span class="index"></span>/<span class="total"></span></div>
-        <? if ($numOfImages > 1): ?>
-        <div class="image-index"><?= $this->translate('Image') . " $currentImage/$numOfImages" ?></div>
-        <? endif; ?>
-        <div class="open-link"><a target="_blank" href="<?= $originalImage ?>"><i class="fa fa-new-window"></i></a></div>
-      </div>
-
+      <div class="open-link"><a target="_blank" href="<?= $originalImage ?>"><i class="fa fa-new-window"></i> <?= $this->translate('Show image in new window') ?></a></div>
       <div class="image-rights">
         <div class="rights">
           <? $hasLink = isset($rights['link']); ?>
