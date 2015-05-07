@@ -10,11 +10,22 @@ finna.imagePopup = (function(finna) {
     }
 
     var initThumbnailNavi = function() {
+        // Assign record indices
+        var recordIndex = null;
+        if ($(".paginationSimple").length) {
+            recordIndex = $(".paginationSimple .index").text();
+            $(".image-popup-trigger").each(function() {
+                $(this).data('recordInd', recordIndex++);
+            });
+        }
 
-        // Assign image indices to UI components. 
+        // Assign image indices
         var index = 0;
         $(".image-popup").each(function() {
             $(this).data('ind', index++);
+            if (recordIndex = $(this).closest('.recordcover-holder').find('.image-popup-trigger').data('recordInd')) {
+                $(this).data('recordInd', recordIndex);
+            }
         });
 
         // Assign image indices for individual images.
@@ -76,11 +87,13 @@ finna.imagePopup = (function(finna) {
 
                 var ind = $(this).data('ind');
                 var thumbInd = $(this).data('thumbInd');
+                var recordInd = $(this).data('recordInd');
                 var src = path + '/AJAX/JSON?method=getImagePopup&id=' + encodeURIComponent(id) + '&index=' + thumbInd;
                 return {
                     src: src,
                     href: $(this).attr('href'),
                     ind: ind,
+                    recordInd: recordInd
                 }
             } 
         ).toArray();
@@ -101,6 +114,7 @@ finna.imagePopup = (function(finna) {
                         var popup = $(".imagepopup-holder");
                         var type = popup.data("type");
                         var id = popup.data("id");
+                        var recordIndex = $.magnificPopup.instance.currItem.data.recordInd;
 
                         $(".imagepopup-holder .image img").one("load", function() {
 				            $(".imagepopup-holder .image").addClass('loaded');
@@ -127,6 +141,15 @@ finna.imagePopup = (function(finna) {
                             cancelThreshold:20,
                             });   
                         }                        
+
+                        // Record index
+                        if (recordIndex) {
+                            var recIndex = $('.imagepopup-holder .image-info .record-index');
+                            var recordCount = $(".paginationSimple .total").text();
+                            recIndex.find('.index').html(recordIndex);
+                            recIndex.find('.total').html(recordCount);
+                            recIndex.show();
+                        }
 
                         // Image copyright information
                         $(".imagepopup-holder .image-rights .copyright-link a").on("click", function() {
