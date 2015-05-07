@@ -1,10 +1,9 @@
 <?php
 /**
- * ILS authentication module.
+ * Command-line tool to send scheduled alerts.
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2010.
  * Copyright (C) The National Library of Finland 2015.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,29 +20,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @category VuFind2
- * @package  Authentication
- * @author   Franck Borel <franck.borel@gbv.de>
- * @author   Demian Katz <demian.katz@villanova.edu>
- * @author   Ere Maijala <ere.maijala@helsinki.fi>
+ * @package  Utilities
+ * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     http://vufind.org/wiki/vufind2:authentication_handlers Wiki
+ * @link     http://vufind.org/jira/browse/VUFIND-235 JIRA Ticket
  */
-namespace VuFind\Auth;
 
-use VuFind\Exception\Auth as AuthException;
-
-/**
- * ILS authentication module.
- *
- * @category VuFind2
- * @package  Authentication
- * @author   Franck Borel <franck.borel@gbv.de>
- * @author   Demian Katz <demian.katz@villanova.edu>
- * @author   Ere Maijala <ere.maijala@helsinki.fi>
- * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
- * @link     http://vufind.org/wiki/vufind2:authentication_handlers Wiki
- */
-class ILS extends \VuFind\Auth\ILS
-{
-    use ILSFinna;
-}
+// Load the Zend framework -- this will automatically trigger the appropriate
+// controller action based on directory and file names
+define('CLI_DIR', __DIR__);     // save directory name of current script
+require_once __DIR__ . '/../public/index.php';

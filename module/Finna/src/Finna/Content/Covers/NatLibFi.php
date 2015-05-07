@@ -44,7 +44,7 @@ class NatLibFi extends \VuFind\Content\AbstractCover
     public function __construct()
     {
         $this->supportsIsbn = true;
-        $this->cacheAllowed = true;
+        $this->cacheAllowed = false;
     }
 
     /**
