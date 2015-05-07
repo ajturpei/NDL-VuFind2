@@ -355,14 +355,14 @@ class Loader extends \VuFind\Cover\Loader
                         $newWidth = round($newHeight * ($width / $height));
                         $imgY = 0;
                         $imgX = round(($reqWidth - $newWidth) / 2);
-                        imagecopyresampled(
-                            $imageGDResized, $imageGD, $imgX, $imgY, 0, 0,
-                            $newWidth, $newHeight, $width, $height
-                        );
                     } else {
                         $newWidth = $reqWidth;
                         $newHeight = round($newWidth * ($height / $width));
                     }
+                    imagecopyresampled(
+                        $imageGDResized, $imageGD, $imgX, $imgY, 0, 0,
+                        $newWidth, $newHeight, $width, $height
+                    );
                 } else {
                     if ($height > $width) {
                         $newHeight = min($height, $reqHeight);
