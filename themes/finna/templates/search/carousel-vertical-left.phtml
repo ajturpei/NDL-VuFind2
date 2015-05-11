@@ -1,0 +1,74 @@
+<h2 class="carouselHeader">
+    <?=$this->transEsc('Carousel1 Header')?>
+</h2>
+<div class="carouselFeed_vertical">
+  <div>
+    <div class="carouselSlideHeader">
+      <p><?=$this->transEsc('Carousel1 Slide1 Header')?></p>
+    </div>
+    <div class="carouselText">
+      <p><?=$this->transEsc('Carousel1 Slide1 Text')?></p>
+      <p><a href="" class="btn btn-primary"><?=$this->transEsc('To the Record')?></a></p>
+    </div>
+    <img src="https://www.finna.fi/interface/themes/national/images/01lapset.jpg" />
+  </div>
+  <div>
+    <div class="carouselSlideHeader">
+      <p>Lasten uusi mediakulttuuri: vauvatkin jo netissä</p>
+    </div>
+    <div class="carouselText">
+      <p>Digitaaliset mediat ovat jo vauvojenkin arkipäivää, ja lasten mediakulttuuri muuttuu nopeasti, kertovat Finnasta löytyvät lähteet. Esimerkiksi vuoden 2013 Lasten mediabarometrin mukaan 40 prosenttia 0–2-vuotiaista käyttää internetiä viikoittain.</p>
+    </div>
+    <img src="https://www.finna.fi/interface/themes/national/images/03ss.jpg" />
+  </div>
+  <div><img src="https://www.finna.fi/interface/themes/national/images/03ss.jpg" /></div>
+  <div><img src="https://www.finna.fi/interface/themes/national/images/06jumissa.jpg" /></div>
+</div>
+<script>
+$(document).ready(function() {
+  $('.carouselFeed_vertical').slick({
+  dots: true,
+  infinite: true,
+  autoplay: false,
+  autoplaySpeed: 5000,
+  speed: 500,
+  slidesToShow: 2,
+  slidesToScroll: 2,
+  vertical: true,
+  adaptiveHeight: true,
+  responsive: [
+    {
+      breakpoint: 992,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        infinite: true,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 650,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+        infinite: true,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 530,
+      settings: {
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        infinite: true,
+        dots: true
+      }
+    }
+  ]
+});
+$(".carousel .slick-vertical .carouselSlideHeader p, .carousel .slick-vertical .carouselText").width($('.slick-vertical .slick-slide').width()*0.58);
+  $( window ).resize(function() {
+    $(".carousel .slick-vertical .carouselSlideHeader p, .carousel .slick-vertical .carouselText").width($('.slick-vertical .slick-slide').width()*0.58);
+  });
+});
+</script>

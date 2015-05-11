@@ -1,0 +1,80 @@
+<h2 class="carouselHeader">
+    <?=$this->transEsc('Carousel1 Header')?>
+</h2>
+<div class="carouselFeed">
+  <div>
+    <div class="carouselSlideHeader">
+      <p><?=$this->transEsc('Carousel1 Slide1 Header')?></p>
+    </div>
+    <div class="carouselText">
+      <p><?=$this->transEsc('Carousel1 Slide1 Text')?></p>
+      <p><a href="" class="btn btn-primary"><?=$this->transEsc('To the Record')?></a></p>
+    </div>
+    <div class="wrapper">
+      <img src="https://www.finna.fi/interface/themes/national/images/01lapset.jpg" />
+    </div>
+  </div>
+  <div>
+    <div class="carouselSlideHeader">
+      <p>Lasten uusi mediakulttuuri: vauvatkin jo netissä</p>
+    </div>
+    <div class="carouselText">
+      <p>Digitaaliset mediat ovat jo vauvojenkin arkipäivää, ja lasten mediakulttuuri muuttuu nopeasti, kertovat Finnasta löytyvät lähteet. Esimerkiksi vuoden 2013 Lasten mediabarometrin mukaan 40 prosenttia 0–2-vuotiaista käyttää internetiä viikoittain.</p>
+    </div>
+    <img src="https://www.finna.fi/interface/themes/national/images/03ss.jpg" />
+  </div>
+  <div><img src="https://www.finna.fi/interface/themes/national/images/06jumissa.jpg" /></div>
+  <div><img src="http://m.cdn.blog.hu/mo/mobinga/postimage/ebook-reader_1347015824.jpg" /></div>
+  <div><img src="https://www.finna.fi/interface/themes/national/images/03ss.jpg" /></div>
+</div>
+<script>
+$(document).ready(function() {
+  $('.carouselFeed').slick({
+  dots: true,
+  swipe: false,
+  infinite: true,
+  autoplay: true,
+  autoplaySpeed: 5000,
+  speed: 500,
+  slidesToShow: 3,
+  slidesToScroll: 3,
+  vertical: false,
+  responsive: [
+    {
+      breakpoint: 992,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        infinite: true,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 650,
+      settings: {
+        slidesToShow: 2,
+        slidesToScroll: 2,
+        infinite: true,
+        dots: true
+      }
+    },
+    {
+      breakpoint: 530,
+      settings: {
+        lazyLoad: 'progressive',
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        infinite: true,
+        dots: true
+      }
+    }
+  ]
+});
+$(".carouselFeed .carouselSlideHeader p, .carousel .carouselText").width($('.carouselFeed .slick-slide').width()-20);
+$( window ).resize(function() {
+  $(".carouselFeed .carouselSlideHeader p, .carousel .carouselText").width($('.carouselFeed .slick-slide').width()-20);
+});
+    
+
+});
+</script>
