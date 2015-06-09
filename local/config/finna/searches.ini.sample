@@ -8,6 +8,11 @@ default_handler      = AllFields    ; Search handler to use if none is specified
 ; below.
 default_sort         = relevance
 
+; This setting controls the sort order to be used for empty search when relevance
+; sort is selected. Since relevance doesn't have a meaningful function with an empty
+; search, this can be set to e.g. "title".
+empty_search_relevance_override = title
+
 ; This setting controls the default view for search results; the selected option
 ; should be one of the options present in the [Views] section below.
 default_view         = list
@@ -40,11 +45,13 @@ case_sensitive_ranges = true
 ; See the comments above those sections for details on legal settings.  You may
 ; repeat these lines to load multiple recommendations.
 default_top_recommend[] = TopFacets:ResultsTop
+default_top_recommend[] = SpellingSuggestions
 ; TODO - not implemented:
 ;default_side_recommend[] = DateRangeVisAjax:true:search_sdaterange_mv:main_date_str
 default_side_recommend[] = SideFacets:Results:CheckboxFacets
 default_noresults_recommend[] = SwitchType
 default_noresults_recommend[] = SwitchQuery
+default_noresults_recommend[] = SpellingSuggestions
 
 ; Set this to true in order to highlight keywords from the search query when they
 ; appear in fields displayed in search results.
@@ -85,10 +92,10 @@ Title               = Title
 ;JournalTitle        = "Journal Title"
 Author              = Author
 Subject             = Subject
-CallNumber          = "Call Number"
-Classification      = Classification
-ISN                 = "ISBN/ISSN"
-tag                 = Tag
+;CallNumber          = "Call Number"
+;Classification      = Classification
+;ISN                 = "ISBN/ISSN"
+;tag                 = Tag
 
 ; This section defines which search options will be included on the advanced
 ; search screen.  All the notes above [Basic_Searches] also apply here.
@@ -316,9 +323,10 @@ author = sort_author
 
 [TopRecommendations]
 ;Author[]            = AuthorFacets
+Author[]            = SpellingSuggestions
 ;Author[]           = WorldCatIdentities
 ;Subject[]          = WorldCatTerms
-Author[]            = WikipediaDeferred:Author
+;Author[]            = WikipediaDeferred:Author
 
 [NoResultsRecommendations]
 
@@ -425,7 +433,7 @@ Author = "Solr:Author:author,author2"
 Subject = "Solr:Subject:topic,genre,geographic,era"
 CallNumber = "SolrCN"
 ISN = "Solr:ISN:isbn,issn"
-tag = "Tag"
+;tag = "Tag"
 
 ; When snippets are enabled, this section can be used to display captions based on
 ; the Solr fields from which the snippets were obtained.  Keys are the names of Solr

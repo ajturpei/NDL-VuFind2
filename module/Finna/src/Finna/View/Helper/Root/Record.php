@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2010.
+ * Copyright (C) The National Library of Finland
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -22,6 +22,7 @@
  * @category VuFind2
  * @package  View_Helpers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
  */
@@ -33,6 +34,7 @@ namespace Finna\View\Helper\Root;
  * @category VuFind2
  * @package  View_Helpers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
  */
@@ -61,10 +63,28 @@ class Record extends \VuFind\View\Helper\Root\Record
      * @param string $size Size of requested image
      *
      * @return int
-     */    
+     */
     public function getNumOfRecordImages($size)
     {
         $images = $this->driver->trymethod('getAllThumbnails', array($size));
         return count($images);
+    }
+
+    /**
+     * Render online URLs
+     *
+     * @param string $context Record context ('results', 'record' or 'holdings')
+     *
+     * @return string
+     */
+    public function getOnlineUrls($context)
+    {
+        return $this->renderTemplate(
+            'result-online-urls.phtml',
+            [
+                'driver' => $this->driver,
+                'context' => $context
+            ]
+        );
     }
 }

@@ -121,7 +121,14 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
             $this->cat_password = $password;
             $this->cat_pass_enc = null;
         }
-        return $this->save();
+
+        $result = $this->save();
+
+        // Update library card entry after saving the user so that we always have a
+        // user id:
+        $this->updateLibraryCardEntry();
+
+        return $result;
     }
 
     /**
@@ -184,7 +191,7 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
         }
 
         // Perform encryption:
-        $cipher = new BlockCipher(new Mcrypt(array('algorithm' => 'blowfish')));
+        $cipher = new BlockCipher(new Mcrypt(['algorithm' => 'blowfish']));
         $cipher->setKey($this->encryptionKey);
         return $encrypt ? $cipher->encrypt($text) : $cipher->decrypt($text);
     }
@@ -199,6 +206,7 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
     public function changeHomeLibrary($homeLibrary)
     {
         $this->home_library = $homeLibrary;
+        $this->updateLibraryCardEntry();
         return $this->save();
     }
 
@@ -220,29 +228,29 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
         $userId = $this->id;
         $callback = function ($select) use ($userId, $resourceId, $listId, $source) {
             $select->columns(
-                array(
+                [
                     'id' => new Expression(
-                        'min(?)', array('tags.id'),
-                        array(Expression::TYPE_IDENTIFIER)
+                        'min(?)', ['tags.id'],
+                        [Expression::TYPE_IDENTIFIER]
                     ),
                     'tag',
                     'cnt' => new Expression(
-                        'COUNT(DISTINCT(?))', array('rt.resource_id'),
-                        array(Expression::TYPE_IDENTIFIER)
+                        'COUNT(DISTINCT(?))', ['rt.resource_id'],
+                        [Expression::TYPE_IDENTIFIER]
                     )
-                )
+                ]
             );
             $select->join(
-                array('rt' => 'resource_tags'), 'tags.id = rt.tag_id', array()
+                ['rt' => 'resource_tags'], 'tags.id = rt.tag_id', []
             );
             $select->join(
-                array('r' => 'resource'), 'rt.resource_id = r.id', array()
+                ['r' => 'resource'], 'rt.resource_id = r.id', []
             );
             $select->join(
-                array('ur' => 'user_resource'), 'r.id = ur.resource_id', array()
+                ['ur' => 'user_resource'], 'r.id = ur.resource_id', []
             );
-            $select->group(array('tag'))
-                ->order(array('tag'));
+            $select->group(['tag'])
+                ->order(['tag']);
 
             $select->where->equalTo('ur.user_id', $userId)
                 ->equalTo('rt.user_id', $userId)
@@ -303,26 +311,26 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
         $userId = $this->id;
         $callback = function ($select) use ($userId) {
             $select->columns(
-                array(
+                [
                     '*',
                     'cnt' => new Expression(
-                        'COUNT(DISTINCT(?))', array('ur.resource_id'),
-                        array(Expression::TYPE_IDENTIFIER)
+                        'COUNT(DISTINCT(?))', ['ur.resource_id'],
+                        [Expression::TYPE_IDENTIFIER]
                     )
-                )
+                ]
             );
             $select->join(
-                array('ur' => 'user_resource'), 'user_list.id = ur.list_id',
-                array(), $select::JOIN_LEFT
+                ['ur' => 'user_resource'], 'user_list.id = ur.list_id',
+                [], $select::JOIN_LEFT
             );
             $select->where->equalTo('user_list.user_id', $userId);
             $select->group(
-                array(
+                [
                     'user_list.id', 'user_list.user_id', 'title', 'description',
                     'created', 'public'
-                )
+                ]
             );
-            $select->order(array('title'));
+            $select->order(['title']);
         };
 
         $table = $this->getDbTable('UserList');
@@ -393,14 +401,235 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
         $resourceTable = $this->getDbTable('Resource');
         $resources = $resourceTable->findResources($ids, $source);
 
-        $resourceIDs = array();
+        $resourceIDs = [];
         foreach ($resources as $current) {
             $resourceIDs[] = $current->id;
         }
 
         // Remove Resource (related tags are also removed implicitly)
         $userResourceTable = $this->getDbTable('UserResource');
-        $userResourceTable->destroyLinks($resourceIDs, $this->id);
+        // true here makes sure that only tags in lists are deleted
+        $userResourceTable->destroyLinks($resourceIDs, $this->id, true);
+    }
+
+    /**
+     * Whether library cards are enabled
+     *
+     * @return boolean
+     */
+    public function libraryCardsEnabled()
+    {
+        return isset($this->config->Catalog->library_cards)
+            && $this->config->Catalog->library_cards;
+    }
+
+    /**
+     * Get all library cards associated with the user.
+     *
+     * @return \Zend\Db\ResultSet\AbstractResultSet
+     * @throws \VuFind\Exception\LibraryCard
+     */
+    public function getLibraryCards()
+    {
+        if (!$this->libraryCardsEnabled()) {
+            return new \Zend\Db\ResultSet\ResultSet();
+        }
+        $userCard = $this->getDbTable('UserCard');
+        return $userCard->select(['user_id' => $this->id]);
+    }
+
+    /**
+     * Get library card data
+     *
+     * @param int $id Library card ID
+     *
+     * @return UserCard|false Card data if found, false otherwise
+     * @throws \VuFind\Exception\LibraryCard
+     */
+    public function getLibraryCard($id = null)
+    {
+        if (!$this->libraryCardsEnabled()) {
+            throw new \VuFind\Exception\LibraryCard('Library Cards Disabled');
+        }
+
+        $userCard = $this->getDbTable('UserCard');
+        if ($id === null) {
+            $row = $userCard->createRow();
+            $row->card_name = '';
+            $row->user_id = $this->id;
+            $row->cat_username = '';
+            $row->cat_password = '';
+        } else {
+            $row = $userCard->select(['user_id' => $this->id, 'id' => $id])
+                ->current();
+            if ($row === false) {
+                throw new \VuFind\Exception\LibraryCard('Library Card Not Found');
+            }
+            if ($this->passwordEncryptionEnabled()) {
+                $row->cat_password = $this->encryptOrDecrypt(
+                    $row->cat_pass_enc, false
+                );
+            }
+        }
+
+        return $row;
+    }
+
+    /**
+     * Delete library card
+     *
+     * @param int $id Library card ID
+     *
+     * @return void
+     * @throws \VuFind\Exception\LibraryCard
+     */
+    public function deleteLibraryCard($id)
+    {
+        if (!$this->libraryCardsEnabled()) {
+            throw new \VuFind\Exception\LibraryCard('Library Cards Disabled');
+        }
+
+        $userCard = $this->getDbTable('UserCard');
+        $row = $userCard->select(['id' => $id, 'user_id' => $this->id])->current();
+
+        if (empty($row)) {
+            throw new \Exception('Library card not found');
+        }
+        $row->delete();
+
+        if ($row->cat_username == $this->cat_username) {
+            // Activate another card (if any) or remove cat_username and cat_password
+            $cards = $this->getLibraryCards();
+            if ($cards->count() > 0) {
+                $this->activateLibraryCard($cards->current()->id);
+            } else {
+                $this->cat_username = null;
+                $this->cat_password = null;
+                $this->cat_pass_enc = null;
+                $this->save();
+            }
+        }
+    }
+
+    /**
+     * Activate a library card for the given username
+     *
+     * @param int $id Library card ID
+     *
+     * @return void
+     * @throws \VuFind\Exception\LibraryCard
+     */
+    public function activateLibraryCard($id)
+    {
+        if (!$this->libraryCardsEnabled()) {
+            throw new \VuFind\Exception\LibraryCard('Library Cards Disabled');
+        }
+        $userCard = $this->getDbTable('UserCard');
+        $row = $userCard->select(['id' => $id, 'user_id' => $this->id])->current();
+
+        if (!empty($row)) {
+            $this->cat_username = $row->cat_username;
+            $this->cat_password = $row->cat_password;
+            $this->cat_pass_enc = $row->cat_pass_enc;
+            $this->home_library = $row->home_library;
+            $this->save();
+        }
+    }
+
+    /**
+     * Save library card with the given information
+     *
+     * @param int    $id       Card ID
+     * @param string $cardName Card name
+     * @param string $username Username
+     * @param string $password Password
+     * @param string $homeLib  Home Library
+     *
+     * @return int Card ID
+     * @throws \VuFind\Exception\LibraryCard
+     */
+    public function saveLibraryCard($id, $cardName, $username,
+        $password, $homeLib = ''
+    ) {
+        if (!$this->libraryCardsEnabled()) {
+            throw new \VuFind\Exception\LibraryCard('Library Cards Disabled');
+        }
+        $userCard = $this->getDbTable('UserCard');
+
+        // Check that the username is not already in use in another card
+        $row = $userCard->select(
+            ['user_id' => $this->id, 'cat_username' => $username]
+        )->current();
+        if (!empty($row) && ($id === null || $row->id != $id)) {
+            throw new \VuFind\Exception\LibraryCard(
+                'Username is already in use in another library card'
+            );
+        }
+
+        $row = null;
+        if ($id !== null) {
+            $row = $userCard->select(['user_id' => $this->id, 'id' => $id])
+                ->current();
+        }
+        if (empty($row)) {
+            $row = $userCard->createRow();
+            $row->user_id = $this->id;
+            $row->created = date('Y-m-d H:i:s');
+        }
+        $row->card_name = $cardName;
+        $row->cat_username = $username;
+        if (!empty($homeLib)) {
+            $row->home_library = $homeLib;
+        }
+        if ($this->passwordEncryptionEnabled()) {
+            $row->cat_password = null;
+            $row->cat_pass_enc = $this->encryptOrDecrypt($password, true);
+        } else {
+            $row->cat_password = $password;
+            $row->cat_pass_enc = null;
+        }
+
+        $row->save();
+
+        // If this is the first library card or no credentials are currently set,
+        // activate the card now
+        if ($this->getLibraryCards()->count() == 1 || empty($this->cat_username)) {
+            $this->activateLibraryCard($row->id);
+        }
+
+        return $row->id;
+    }
+
+    /**
+     * Verify that the current card information exists in user's library cards
+     * (if enabled) and is up to date.
+     *
+     * @return void
+     * @throws \VuFind\Exception\PasswordSecurity
+     */
+    protected function updateLibraryCardEntry()
+    {
+        if (!$this->libraryCardsEnabled() || empty($this->cat_username)) {
+            return;
+        }
+
+        $userCard = $this->getDbTable('UserCard');
+        $row = $userCard->select(
+            ['user_id' => $this->id, 'cat_username' => $this->cat_username]
+        )->current();
+        if (empty($row)) {
+            $row = $userCard->createRow();
+            $row->user_id = $this->id;
+            $row->cat_username = $this->cat_username;
+            $row->card_name = $this->cat_username;
+            $row->created = date('Y-m-d H:i:s');
+        }
+        // Always update home library and password
+        $row->home_library = $this->home_library;
+        $row->cat_password = $this->cat_password;
+        $row->cat_pass_enc = $this->cat_pass_enc;
+
+        $row->save();
     }
 
     /**
@@ -431,9 +660,10 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
      */
     public function updateHash()
     {
-        $this->verify_hash = md5(
-            $this->username . $this->password . $this->pass_hash . rand()
-        ) . (time() % pow(10, 10));
+        $hash = md5($this->username . $this->password . $this->pass_hash . rand());
+        // Make totally sure the timestamp is exactly 10 characters:
+        $time = str_pad(substr((string) time(), 0, 10), 10, '0', STR_PAD_LEFT);
+        $this->verify_hash = $hash . $time;
         return $this->save();
     }
 
@@ -444,6 +674,6 @@ class User extends RowGateway implements \VuFind\Db\Table\DbTableAwareInterface,
      */
     public function getRoles()
     {
-        return array('loggedin');
+        return ['loggedin'];
     }
 }

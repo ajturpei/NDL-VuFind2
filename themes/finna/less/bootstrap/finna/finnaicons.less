@@ -1,0 +1,672 @@
+/* This is the file for using Finna font icons, use font icons for all icons and update this file when new icons are available */
+
+
+@font-face {
+    font-family: 'icomoon';
+    src:url('fonts/icomoon.eot?adcatf');
+    src:url('fonts/icomoon.eot?#iefixadcatf') format('embedded-opentype'),
+    url('fonts/icomoon.woff?adcatf') format('woff'),
+    url('fonts/icomoon.ttf?adcatf') format('truetype'),
+    url('fonts/icomoon.svg?adcatf#icomoon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+[class^="fa-"], [class*=" fa-"], .iconlabel:before, .slick-prev, .slick-next, .slick-dots li, .openUrlEmbed:before  {
+    font-family: 'icomoon';
+    speak: none;
+    text-transform: none;
+    font-weight: normal;
+    font-size: inherit;
+    /* Better Font Rendering =========== */
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.004);
+}
+[class^="fa-"]:hover, [class*=" fa-"]:hover {
+    cursor: pointer;
+}
+.iconlabel {
+  color: @gray;
+  background: none;
+  padding: 0px;
+  font-weight: 400;
+  margin-right: 10px;
+  font-size: 1.0em;
+  &:before {
+      padding-right: 3px;
+      font-size: 1.3em;
+      vertical-align: text-bottom;
+  }
+}
+.template-name-results .iconlabel {
+  letter-spacing: 0px;
+  font-size: 1em;
+}
+.image-popup-trigger {
+        & img {
+            box-shadow: 0px 0px 0px 4px @gray-lighter inset;
+            position: relative;
+            width: 100%;
+        }
+    
+        & .iconlabel {
+            width: 100%;
+            color: @body-bg;
+            &:before {
+                padding-right: 3px;
+                position: absolute;
+                top: 26%;
+                left: 36%;
+                font-size: 3em;
+                color: @gray-lighter;
+                z-index: 0;
+                @media (min-width:@screen-md-min) and (max-width:@screen-md-max) {
+                    top: 20%;
+                    left: 35%;
+                }
+                @media (max-width:@screen-sm-max) {
+                    font-size: 2em;
+                }
+            }   
+        }
+    @media (max-width:@screen-xs-max) {
+        & img {
+            box-shadow: none;
+            width: auto;
+        }
+        & .iconlabel:before {
+              top: 0px;
+              display: none;
+        }
+    }
+}
+ & .grid-image .image-popup-trigger {
+    & .iconlabel:before {
+        top: 32%;
+        left: 43%;
+    }
+    @media (max-width:@screen-xs-max) {
+        display: block;
+         & img {
+            box-shadow: 0px 0px 0px 4px @gray-lighter inset;
+        }
+    }
+    @media (min-width:@screen-md-min) and (max-width: @screen-md-max) {
+        & .iconlabel:before {
+            top: 27%;
+            left: 40%;   
+        }
+    }
+}
+.fa-spinner {
+  margin-left: 5px;
+  vertical-align: middle;   
+}
+.fa-spinner:before {
+  font-family:'Fontawesome';
+  content: "\f110";
+  color: gray;
+  font-size: 20px;
+}
+#description_text .fa-spinner {
+    position: absolute; 
+    right: 15px; 
+    top: 0;
+}
+.fa-square-o:before {
+  font-family:'Fontawesome';
+  content: "\f096";
+  margin-top:-2px;
+}
+.fa-check-square-o:before {
+  font-family:'Fontawesome';
+  content: "\f14a";
+  margin-top: -2px;
+}
+/* ---  set  navbar logo display only the logo --- */
+.navbar-header .fa-finnalogo {
+  width: 30px;
+  height: 40px;
+  background: url('../images/finna-logo.png'); // fallback if no svg support
+  background: url('../images/finna-logo.svg');
+  overflow: hidden;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: 0px 2px;
+  background-size: 340%;
+}
+.navbar-brand {
+  & div.navbar-lang-logo {
+    width: 30px;
+    height: 40px;
+    & div.logo-wrapper  {
+      position: absolute;
+      overflow: hidden;
+      width: 30px;
+      height: 40px;
+      & img {
+        position: relative;
+        top: -2px;
+        vertical-align: middle;
+        max-width: 340%;
+      }
+    }
+  }
+}
+.logo .finnalogo {
+    display: inline-block;
+    width: 200px;
+    height: 63px;
+    background: url('../images/finna-logo.png'); // fallback if no svg support
+    background: url('../images/finna-logo.svg');
+    &:hover {
+        cursor: pointer;    
+    }
+}
+.fa-external-link:before, .openUrlEmbed:before {
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+.fa-www-link:before, .iconlabel.format-electronic:before, .fa-external-link:before, .openUrlEmbed:before {
+    content: "\e615";
+}
+.fa-handle-left:before, .slick-prev:before {
+    content: "\e60a";
+}
+.fa-handle-right:before, .slick-next:before {
+    content: "\e611";
+}
+.fa-handle-close:before {
+    content: "\e612";
+}
+.fa-handle-open:before {
+    content: "\e613";
+}
+.fa-datevis:before {
+    content: "\e614";
+}
+.fa-ratehalf:before {
+    content: "\e607";
+}
+.fa-lock:before {
+    content: "\e602";
+}
+.fa-info:before {
+    content: "\e601";
+}
+.fa-zoom-out:before {
+    content: "\e603";
+}
+.fa-zoom-in:before {
+    content: "\e606";
+}
+.fa-info-database:before {
+    content: "\e608";
+}
+.fa-browse-database:before {
+    content: "\e609";
+}
+.fa-phone:before {
+    content: "\e618";
+}
+
+.fa-asterisk:before {
+    content: "\201d";
+    font-size: 35px;
+    vertical-align: bottom;
+    line-height: 0px;
+}
+.fa-heart:before, .fa-plus:before, .fa-plus-square:before {
+    content: "\e60c";
+}
+.fa-ratenone:before {
+    content: "\e60f";
+}
+.fa-google-plus:before {
+    content: "\e50";
+}
+.icon-checked:before {
+    content: "\e49";
+}
+.icon-question:before {
+    content: "\e610";
+}
+.fa-new-window:before {
+    content: "\e046";
+}
+.fa-close-big:before {
+    content: "\e045";
+}
+.fa-close:before {
+    content: "\e044";
+}
+.fa-Holdings:before {
+    content: "\e043";
+}
+.fa-ok:before, .slick-dots li button:before {
+    content: "\e7d";
+}
+.fa-sign-in:before {
+    content: "\e042";
+}
+.fa-sign-in.fa-flip-horizontal:before {
+    vertical-align: middle;   
+}
+.fa-sign-out:before {
+    vertical-align: middle;
+    content: "\e042";
+}
+.fa-home:before {
+    content: "\e041";
+}
+.navbar .fa-home:before {
+    color: @navbar-default-link-color;  
+}
+.fa-public:before {
+    content: "\e040";
+}
+.fa-files:before {
+    content: "\e03f";
+}
+.fa-Details:before {
+    content: "\e03e";
+}
+.fa-bookmark:before {
+    content: "\e03d";
+}
+.fa-qr-code:before {
+    content: "\e03c";
+}
+.fa-uniE03B:before {
+    content: "\e03b";
+}
+.fa-expand:before {
+    content: "\e03a";
+}
+.fa-search-adv:before, .fa-magnify:before {
+    content: "\e600";
+}
+.fa-pinterest:before {
+    content: "\e038";
+}
+.fa-twitter:before {
+    content: "\e037";
+}
+.fa-facebook:before {
+    content: "\e036";
+}
+.fa-bell:before {
+    content: "\e035";
+}
+.fa-list:before {
+    content: "\e034";
+}
+.fa-cart:before {
+    content: "\e033";
+}
+.fa-grid:before {
+    content: "\e032";
+}
+.fa-bars:before {
+    content: "\e031";
+}
+.fa-stop:before {
+    content: "\e030";
+}
+.fa-unhappy:before {
+    content: "\e02f";
+}
+.fa-times {
+    margin-top:1px;   
+}
+.fa-times:before, .fa-remove:before {
+    content: "\e02e";
+}
+.fa-available:before {
+    content: "\e02d";
+}
+.fa-sitemap:before {
+    content: "\e02c";
+}
+.fa-ratefull:before {
+    content: "\e02b";
+}
+.icon-uniE02A:before {
+    content: "\e02a";
+}
+.fa-arrow-left:before {
+    content: "\e029";
+}
+.icon-uniE028:before {
+    content: "\e028";
+}
+.fa-arrow-down:before {
+    content: "\e027";
+}
+.icon-uniE026:before {
+    content: "\e026";
+}
+.fa-arrow-right:before {
+    content: "\e025";
+}
+.icon-uniE024:before {
+    content: "\e024";
+}
+.fa-arrow-up:before {
+    content: "\e023";
+}
+.fa-background-arrow-up:before {
+    content: "\e022";
+}
+.fa-list-alt:before {
+    content: "\e021";
+}
+.fa-send-feedback:before {
+    content: "\e020";
+}
+.fa-envelope:before {
+    content: "\e01f";
+}
+.fa-user-document:before {
+    content: "\e01e";
+}
+.fa-UserComments:before {
+    content: "\e01d";
+}
+.fa-search-small:before {
+    content: "\e01c";
+}
+.fa-checked-file:before {
+    content: "\e01b";
+}
+.fa-reset:before {
+    content: "\e01a";
+}
+.fa-minus:before {
+    content: "\e019";
+}
+.fa-plus-big:before {
+    content: "\e018";
+}
+.fa-plus-small:before {
+    content: "\e017";
+}
+.fa-pen:before {
+    content: "\e016";
+}
+.icon-uniE014:before {
+    content: "\e014";
+}
+.icon-uniE013:before {
+    content: "\e013";
+}
+.fa-print:before {
+    content: "\e012";
+}
+.fa-search:before {
+    content: "\e011";
+}
+.fa-info2:before {
+    content: "\e010";
+}
+.fa-info-big:before {
+    content: "\e00f";
+}
+.fa-user:before {
+    content: "\e00e";
+}
+.iconlabel.format-1bookebook:before, .iconlabel.format-1bookebooksection:before, .iconlabel.format-1otherelectronic:before {
+    content: "\e617";
+}
+.iconlabel.format-kirja:before, .iconlabel.format-book:before, .iconlabel.format-1bookbook:before, .iconlabel.kirja:before, .iconlabel.format-1bookbooksection:before, .iconlabel.format-1bookbraille:before {
+    content: "\e616";
+}
+.iconlabel.format-1journalarticle:before, .iconlabel.format-1journaljournal:before, .iconlabel.format-1journalserial:before, .iconlabel.format-1journalnewspaper:before, .iconlabel.format-1journalappendix:before, .iconlabel.format-1journalnewspaperarticle:before, .iconlabel.format-journal:before, .iconlabel.format-newspaper:before {
+    content: "\e001";
+}
+.iconlabel.format-1journaleserial:before, .iconlabel.format-1journalearticle:before, .iconlabel.format-1journalejournal:before, .iconlabel.format-1journalenewspaper:before {
+    content: "\e60d";
+}
+.iconlabel.format-1placebuilding:before, .iconlabel.format-1placeplace:before, .iconlabel.format-1placearchaeologicalsite:before {
+    content: "\e60e";
+}
+.iconlabel.format-1otherother:before, .iconlabel.format-1otherkit:before, .iconlabel.format-1othermanuscript:before, .iconlabel.format-1othertext:before {
+    content: "\e00d";
+}
+.iconlabel.format-manuscript:before, .iconlabel.format-1thesisother:before, .iconlabel.format-1thesisgradu:before, .iconlabel.format-1thesisthesis:before, .iconlabel.format-1thesislaudatur:before, .iconlabel.format-1thesismasters:before, .iconlabel.format-1thesisbachelorspolytechnic:before, .iconlabel.format-1thesisbachelors:before, .iconlabel.format-1thesismasterspolytechnic:before, .iconlabel.yamk:before, .iconlabel.format-1thesislicentiate:before, .iconlabel.format-1otherresearchdata:before {
+    content: "\e00c";
+}
+.iconlabel.format-0workofart:before, .iconlabel.format-1workofartsculpture:before, .iconlabel.format-1workofartpainting:before, .iconlabel.format-1workofartinstallation:before, .iconlabel.format-1workofartdrawing:before, .iconlabel.format-1workofartgraphic:before, .iconlabel.format-1workofartscuplture:before, .iconlabel.format-1workofartartindustry:before, .iconlabel.format-1workofartphysical:before {
+    content: "\e00b";
+}
+.iconlabel.format-1videovideo:before, .iconlabel.format-1videodvd:before, .iconlabel.format-1videobluray:before, .iconlabel.format-1videovideodisc:before, .iconlabel.format-1videovideocassette:before, .iconlabel.format-1videomotionpicture:before {
+    content: "\e00a";
+}
+.iconlabel.format-1soundrecord:before, .iconlabel.format-1soundcd:before, .iconlabel.format-1soundsounddisc:before, .iconlabel.format-1soundsoundrecording:before, .iconlabel.format-1soundsoundcassette:before, .iconlabel.format-1soundmusicrecording:before {
+    content: "\e009";
+}
+.iconlabel.format-1imagephoto:before, .iconlabel.format-1imageimage:before, .iconlabel.format-1imagephotograph:before, .iconlabel.format-1imageslide:before, .iconlabel.format-1imagedrawing:before, .iconlabel.format-1imagetransparency:before {
+    content: "\e008";
+}
+.icon-smallpress:before {
+    content: "\e007";
+}
+.iconlabel.format-1document:before, .iconlabel.format-1documentarchive:before, .iconlabel.format-1documentarchivematerial:before, .iconlabel.format-1documentarchiveitem:before, .iconlabel.format-1documentarchivefonds:before, .iconlabel.format-1documentarchiveseries:before, .iconlabel.format-1documentarchivecollection:before, .iconlabel.format-1documentdigitizedarchiveitem:before {
+    content: "\e006";
+}
+.iconlabel.format-0note:before, .iconlabel.format-0manuscript:before, .iconlabel.format-0musicalscore:before {
+    content: "\e005";
+}
+.iconlabel.format-0database:before {
+    content: "\e004";
+}
+.iconlabel.esine:before, .iconlabel.format-1physicalobjectother:before, .iconlabel.format-1physicalobjectculturehistoricalobject:before {
+    content: "\e003";
+}
+.iconlabel.format-1mapmap:before, .iconlabel.format-1mapatlas:before, .iconlabel.karttapallo:before {
+    content: "\e002";
+}
+
+.fa-first-page:before {
+    content: "\e604";
+}
+.fa-last-page:before {
+    content: "\e605";
+}
+/** toolbar icons **/
+.nav-pills > li > a {
+    padding:0px 5px;
+}
+.nav-pills .fa {
+    font-size: 14px;
+    padding: 5px 6px 6px 6px;
+    border-radius: 50%;
+    margin-left:6px;
+    border: 2px solid @link-color;
+}
+
+.nav-pills .fa.fa-asterisk {
+    padding: 6px 7px;
+}
+@media(max-width: @screen-sm-max) {
+    .nav-pills .fa {
+        font-size: 16px;
+        padding: 8px 9px 9px 9px;
+        margin-left: 0px;
+    }
+    
+    .nav-pills .fa.fa-asterisk {
+        padding: 8px 10px;
+    }
+}
+.nav-pills .fa.fa-phone {
+    background: #64d448;
+    border: 2px solid #64d448;
+    color: #fff;
+}
+/* Addthis icons for sharing styling */
+.addthis-share-buttons {
+    margin-right: 5px !important;
+
+    @media(max-width:@screen-xs-max) {
+        clear: left;
+    }
+    @media(min-width:@screen-md-min) and (max-width:@screen-md-max) {
+        clear: both;
+        margin-left: 5px !important;
+    }
+}
+.addthis_default_style .at300b {
+    padding: 0px !important;
+}
+.addthis_toolbox.addthis_default_style i {
+    color: #fff;
+    font-size:15px;
+    margin-left: 5px;
+    
+}
+.addthis_toolbox.addthis_default_style .fa-facebook {
+    background: #3a5795;
+    border: 2px solid #3a5795;
+}
+.addthis_toolbox.addthis_default_style .fa-pinterest {
+    background: #cb2027;
+    border: 2px solid #cb2027;
+}
+.addthis_toolbox.addthis_default_style .fa-twitter {
+    background: #00aced;
+    border: 2px solid #00aced;
+}
+.addthis_toolbox.addthis_default_style .fa-google-plus {
+    background: #d34836;
+    border: 2px solid #d34836;
+}
+
+/* Image gallery popup icons */
+.fa-magnify {
+    position: absolute;
+    font-size: 1em;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+    color: @body-bg;
+    right: 20px;
+    top: 6px;
+    z-index: 2;
+    &:before {
+        padding: 1px 3px 3px;
+        background: rgba(1,1,1, 0.1);
+        font-size: 1.5em;
+    }
+    @media (max-width: @screen-sm-max) {
+        .opacity(0.3);   
+    }
+}
+.grid .fa-magnify {
+    right: 14px;
+    top: 5px;
+}
+.recordcover-holder:hover .fa-magnify {
+    opacity: 1;
+}
+
+.fa-zoom-in:before {
+    font-family: 'icomoon';
+    content: '\e606';
+    color: #fff;
+    padding: 3px;
+    background: rgba(1,1,1,0.05);
+
+}
+
+/* HIDING ICONS and custom styles for some occurences */
+.fa-ok {
+    color: #00B370;
+}
+.fa-remove {
+    color: #a94442;  
+}
+.fa-x:before {
+    content:"" !important;
+}
+.fa-button {
+    background: @gray;
+    padding: 3px 3px 3px 3.1px;
+    border-radius: 50%;
+    color: @body-bg;
+}
+.fa-file-o, .fa-folder {
+    display: none;
+}
+.sidebar .list-group-item i.fa.fa-square-o {
+    display: none;
+}
+.list-group-item.active i.fa.fa-check-square-o, .sidebar .list-group-item .main.applied i.fa.fa-check-square-o, .sidebar .list-group.facet a.list-group-item.active i.fa.fa-check {
+    font-size: 12px;
+    margin-top: 5px;
+    margin-right: 5px;
+    float: right;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+.jstree-container-ul>li.active .main.applied:hover {
+    text-decoration:line-through;
+}
+.list-group-item.active i.fa.fa-check-square-o:before, .sidebar .list-group-item .main.applied i.fa.fa-check-square-o:before, .sidebar .list-group.facet a.list-group-item.active i.fa.fa-check:before {
+    font-family: 'icomoon';
+    content: "\e02d";
+    color: white;
+}
+.sidebar .list-group-item .main.applied i.fa.fa-check-square-o {
+    margin-right:3px;
+}
+.searchbox .btn-link .fa-search-adv {
+    font-size: 1.55em;
+    margin-right: 5px;
+}
+.spelling-suggestions .fa-plus-small {
+    vertical-align: -2px;
+    font-size: 1.1em;
+    color: @gray;
+}
+
+.slick-vertical .slick-slide img { max-width:40%; height:auto;max-height:180px; width:auto; }
+.slick-vertical .slick-slide { display: block; height: auto; border: 1px solid transparent; }
+.slick-vertical.slick-initialized .slick-slide { max-height:300px !important; padding: 5px 10px; }
+.slick-vertical .slick-slide .carouselSlideHeader p { left:40%; }
+.slick-vertical.slick-initialized .slick-slide .carouselText { left:40%; top:inherit; bottom: inherit; }
+.slick-vertical.slick-initialized .slick-slide .carouselText p { opacity:1; }
+
+
+// COLORS for buttons
+
+i.gray {
+    color: @gray; 
+}
+i.brand-primary {
+    color: @brand-primary;   
+}
+i.bigger {
+    font-size: 1.3em;   
+}
+
+.fa-spin {
+    display: inline-block;
+    -moz-animation: spinner 2s infinite linear;
+    -o-animation: spinner 2s infinite linear;
+    -webkit-animation: spinner 2s infinite linear;
+    animation: spinner 2s infinite linear;
+}
+@-moz-keyframes spinner {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spinner {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spinner {
+    from {transform:rotate(0deg);}
+    to {transform:rotate(360deg);}
+}

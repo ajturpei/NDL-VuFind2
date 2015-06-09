@@ -36,6 +36,7 @@ use Zend\ServiceManager\ServiceManager;
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
+ *
  * @codeCoverageIgnore
  */
 class Factory
@@ -93,10 +94,9 @@ class Factory
             ? (bool)$config->Site->showBookBag : false;
         $size = isset($config->Site->bookBagMaxSize)
             ? $config->Site->bookBagMaxSize : 100;
-        $domain = isset($config->Site->bookBagCookieDomain)
-            ? $config->Site->bookBagCookieDomain : null;
         return new \VuFind\Cart(
-            $sm->get('VuFind\RecordLoader'), $size, $active, $_COOKIE, $domain
+            $sm->get('VuFind\RecordLoader'), $sm->get('VuFind\CookieManager'),
+            $size, $active
         );
     }
 
@@ -173,6 +173,31 @@ class Factory
     public static function getContentReviewsPluginManager(ServiceManager $sm)
     {
         return static::getGenericPluginManager($sm, 'Content\Reviews');
+    }
+
+    /**
+     * Construct the cookie manager.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \VuFind\Cookie\CookieManager
+     */
+    public static function getCookieManager(ServiceManager $sm)
+    {
+        $config = $sm->get('VuFind\Config')->get('config');
+        $path = '/';
+        if (isset($config->Cookies->limit_by_path)
+            && $config->Cookies->limit_by_path
+        ) {
+            $path = $sm->get('Request')->getBasePath();
+        }
+        $secure = isset($config->Cookies->only_secure)
+            ? $config->Cookies->only_secure
+            : false;
+        $domain = isset($config->Cookies->domain)
+            ? $config->Cookies->domain
+            : null;
+        return new \VuFind\Cookie\CookieManager($_COOKIE, $path, $domain, $secure);
     }
 
     /**
@@ -309,7 +334,7 @@ class Factory
     public static function getHttp(ServiceManager $sm)
     {
         $config = $sm->get('VuFind\Config')->get('config');
-        $options = array();
+        $options = [];
         if (isset($config->Proxy->host)) {
             $options['proxy_host'] = $config->Proxy->host;
             if (isset($config->Proxy->port)) {
@@ -317,7 +342,7 @@ class Factory
             }
         }
         $defaults = isset($config->Http)
-            ? $config->Http->toArray() : array();
+            ? $config->Http->toArray() : [];
         return new \VuFindHttp\HttpService($options, $defaults);
     }
 
@@ -433,42 +458,25 @@ class Factory
     public static function getRecaptcha(ServiceManager $sm)
     {
         $config = $sm->get('VuFind\Config')->get('config');
-        $recaptcha = new \ZendService\ReCaptcha\ReCaptcha(
-            isset($config->Captcha->publicKey) ? $config->Captcha->publicKey : '',
-            isset($config->Captcha->privateKey) ? $config->Captcha->privateKey : ''
-        );
+        $siteKey = isset($config->Captcha->siteKey)
+            ? $config->Captcha->siteKey
+            : (isset($config->Captcha->publicKey)
+                ? $config->Captcha->publicKey
+                : '');
+        $secretKey = isset($config->Captcha->secretKey)
+            ? $config->Captcha->secretKey
+            : (isset($config->Captcha->privateKey)
+                ? $config->Captcha->privateKey
+                : '');
+        $recaptcha = new \LosReCaptcha\Service\ReCaptcha($siteKey, $secretKey);
         if (isset($config->Captcha->theme)) {
             $recaptcha->setOption('theme', $config->Captcha->theme);
-            $recaptcha->setOption('custom_theme_widget', 'custom_recaptcha_widget');
-            $translator = $sm->get('VuFind\Translator');
-            $recaptcha->setOption(
-                'custom_translations',
-                array(
-                    'audio_challenge' =>
-                        $translator->translate('recaptcha_audio_challenge'),
-                    'cant_hear_this' =>
-                        $translator->translate('recaptcha_cant_hear_this'),
-                    'help_btn' =>
-                        $translator->translate('recaptcha_help_btn'),
-                    'image_alt_text' =>
-                        $translator->translate('recaptcha_image_alt_text'),
-                    'incorrect_try_again' =>
-                        $translator->translate('recaptcha_incorrect_try_again'),
-                    'instructions_audio' =>
-                        $translator->translate('recaptcha_instructions_audio'),
-                    'instructions_visual' =>
-                        $translator->translate('recaptcha_instructions_visual'),
-                    'play_again' =>
-                        $translator->translate('recaptcha_play_again'),
-                    'privacy_and_terms' =>
-                        $translator->translate('recaptcha_privacy_and_terms'),
-                    'refresh_btn' =>
-                        $translator->translate('recaptcha_refresh_btn'),
-                    'visual_challenge' =>
-                        $translator->translate('recaptcha_visual_challenge')
-                )
-            );
         }
+        $translator = $sm->get('VuFind\Translator');
+        $recaptcha->setOption('lang', $translator->getLocale());
+
+        $httpClient = $sm->get('VuFind\Http')->createClient();
+        $recaptcha->setHttpClient($httpClient);
         return $recaptcha;
     }
 
@@ -665,6 +673,31 @@ class Factory
     }
 
     /**
+     * Construct the Session Manager.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \Zend\Session\SessionManager
+     */
+    public static function getSessionManager(ServiceManager $sm)
+    {
+        $cookieManager = $sm->get('VuFind\CookieManager');
+        $sessionConfig = new \Zend\Session\Config\SessionConfig();
+        $options = [
+            'cookie_path' => $cookieManager->getPath(),
+            'cookie_secure' => $cookieManager->isSecure()
+        ];
+        $domain = $cookieManager->getDomain();
+        if (!empty($domain)) {
+            $options['cookie_domain'] = $domain;
+        }
+
+        $sessionConfig->setOptions($options);
+
+        return new \Zend\Session\SessionManager($sessionConfig);
+    }
+
+    /**
      * Construct the Session Plugin Manager.
      *
      * @param ServiceManager $sm Service manager.
@@ -732,13 +765,13 @@ class Factory
 
         // Set up the ExtendedIni plugin:
         $config = $sm->get('VuFind\Config')->get('config');
-        $pathStack = array(
+        $pathStack = [
             APPLICATION_PATH  . '/languages',
             LOCAL_OVERRIDE_DIR . '/languages'
-        );
+        ];
         $fallbackLocales = $config->Site->language == 'en'
             ? 'en'
-            : array($config->Site->language, 'en');
+            : [$config->Site->language, 'en'];
         try {
             $pm = $translator->getPluginManager();
         } catch (\Zend\Mvc\Exception\BadMethodCallException $ex) {

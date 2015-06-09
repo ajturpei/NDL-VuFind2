@@ -42,12 +42,12 @@ class DeduplicationListener extends \VuFind\Search\Solr\DeduplicationListener
 {
     /**
      * Append fields from dedup record to the selected local record
-     * 
+     *
      * @param array  $localRecordData Local record data
      * @param array  $dedupRecordData Dedup record data
      * @param string $recordSources   List of active record sources, empty if all
      * @param array  $sourcePriority  Array of source priorities keyed by source id
-     * 
+     *
      * @return array Local record data
      */
     protected function appendDedupRecordFields($localRecordData, $dedupRecordData,
@@ -59,13 +59,13 @@ class DeduplicationListener extends \VuFind\Search\Solr\DeduplicationListener
         );
 
         if (isset($dedupRecordData['online_urls_str_mv'])) {
-            $localRecordData['online_urls_str_mv'] = array();
+            $localRecordData['online_urls_str_mv'] = [];
             foreach ($dedupRecordData['online_urls_str_mv'] as $onlineURL) {
                 $onlineURLArray = json_decode($onlineURL, true);
                 if (!$recordSources
                     || isset($sourcePriority[$onlineURLArray['source']])
                 ) {
-                    $localFields['online_urls_str_mv'][] = $onlineURL;
+                    $localRecordData['online_urls_str_mv'][] = $onlineURL;
                 }
             }
         }

@@ -4,24 +4,26 @@
 
 
 .breadcrumb {
-  padding: @breadcrumb-padding-vertical @breadcrumb-padding-horizontal;
-  margin: 15px 0px 0px;
+  display: none;
+  margin: 0px;
+  margin-top:  15px;
   list-style: none;
-  background-color: @breadcrumb-bg;
   border-radius: @border-radius-base;
-  & a {
-    color: @breadcrumb-color;  
-  }
+
   > li {
     display: inline-block;
-
+    background-color: @breadcrumb-bg;
+    margin: 0px -2px;
+    padding: @breadcrumb-padding-vertical @breadcrumb-padding-horizontal;
     + li:before {
-      content: "@{breadcrumb-separator}\00a0"; // Unicode space added since inline-block means non-collapsing white-space
-      padding: 0 5px;
+      content: @breadcrumb-separator;
       color: @breadcrumb-color;
-    }
+      font-size: 12px;
+    }     
   }
-
+  > li a {
+    color: @breadcrumb-color;
+  }
   > .active {
     color: @breadcrumb-active-color;
   }

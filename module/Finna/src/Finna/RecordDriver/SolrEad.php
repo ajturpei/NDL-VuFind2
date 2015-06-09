@@ -63,7 +63,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     {
         $record = $this->getSimpleXML();
         return isset($record->accessrestrict->p)
-            ? $record->accessrestrict->p : array();
+            ? $record->accessrestrict->p : [];
     }
 
     /**
@@ -85,7 +85,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
         $attributes = $record->accessrestrict->attributes();
         if (isset($attributes['type'])) {
             $copyright = (string)$attributes['type'];
-            $data = array();
+            $data = [];
             $data['copyright'] = $copyright;
             if ($link = $this->getRightsLink(strtoupper($copyright), $language)) {
                 $data['link'] = $link;
@@ -96,6 +96,33 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Return an associative array of image URLs associated with this record
+     * (key = URL, value = description), if available; false otherwise.
+     *
+     * @param string $size Size of requested images
+     *
+     * @return mixed
+     * @access protected
+     */
+    public function getAllThumbnails($size = 'large')
+    {
+        $urls = [];
+        $url = '';
+        $role = $size == 'large'
+            ? 'image_reference'
+            : 'image_thumbnail';
+
+        foreach ($this->getSimpleXML()
+            ->xpath("did/daogrp/daoloc[@role=\"$role\"]") as $node
+        ) {
+            $url = (string)$node->attributes()->href;
+            $urls[$url] = '';
+        }
+
+        return $urls;
+    }
+
+    /**
      * Get notes on bibliography content.
      *
      * @return string[] Notes
@@ -103,7 +130,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getBibliographyNotes()
     {
         $record = $this->getSimpleXML();
-        $bibliography = array();
+        $bibliography = [];
         foreach ($record->xpath('//bibliography') as $node) {
             // Filter out Portti links since they're displayed in links
             if (!preg_match(
@@ -116,18 +143,6 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get data source id
-     *
-     * @return string
-     */
-    public function getDataSource()
-    {
-        return isset($this->fields['datasource_str_mv'])
-            ? $this->fields['datasource_str_mv'][0]
-            : '';
-    }
-
-    /**
      * Get notes on finding aids related to the record.
      *
      * @return array
@@ -135,7 +150,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getFindingAids()
     {
         $record = $this->getSimpleXML();
-        $findingAids = array();
+        $findingAids = [];
         if (isset($this->record->otherfindaid->p)) {
             foreach ($this->record->otherfindaid->p as $p) {
                 $findingAids[] = (string)$p;
@@ -158,33 +173,6 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Return an associative array of image URLs associated with this record 
-     * (key = URL, value = description), if available; false otherwise.
-     *
-     * @param string $size Size of requested images
-     *
-     * @return mixed
-     * @access protected
-     */
-    public function getAllThumbnails($size = 'large')
-    {
-        $urls = array();
-        $url = '';
-        $role = $size == 'large'
-            ? 'image_reference'
-            : 'image_thumbnail';
-
-        foreach ($this->getSimpleXML()
-            ->xpath("did/daogrp/daoloc[@role=\"$role\"]") as $node
-        ) {
-            $url = (string)$node->attributes()->href;
-            $urls[$url] = '';
-        }
-
-        return $urls;
-    }
-
-    /**
      * Return image rights.
      *
      * @param string $language Language
@@ -201,7 +189,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
             return false;
         }
 
-        $rights = array();
+        $rights = [];
 
         if ($type = $this->getAccessRestrictionsType($language)) {
             $rights['copyright'] = $type['copyright'];
@@ -212,7 +200,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
 
         $desc = $this->getAccessRestrictions();
         if ($desc && count($desc)) {
-            $description = array();
+            $description = [];
             foreach ($desc as $p) {
                 $description[] = (string)$p;
             }
@@ -221,26 +209,6 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
 
         return isset($rights['copyright']) || isset($rights['description'])
             ? $rights : false;
-    }
-
-    /**
-     * Get all authors apart from presenters
-     *
-     * @return array
-     */
-    public function getNonPresenterAuthors()
-    {
-        $authors = array();
-        if ($author = $this->getPrimaryAuthor()) {
-            $authors[] = array('name' => $author);
-        }
-        if ($author = $this->getCorporateAuthor()) {
-            $authors[] = array('name' => $author);
-        }
-        foreach ($this->getSecondaryAuthors() as $author) {
-            $authors[] = array('name' => $author);
-        }
-        return $authors;
     }
 
     /**
@@ -277,7 +245,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getPhysicalLocations()
     {
         $record = $this->getSimpleXML();
-        $locations = array();
+        $locations = [];
         if (isset($record->did->physloc)) {
             foreach ($record->did->physloc as $physloc) {
                 $locations[] = (string)$physloc;
@@ -307,15 +275,12 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
      */
     public function getServiceURLs()
     {
-        $urls = array();
+        $urls = [];
         $source = $this->getDataSource();
         $config = $this->recordConfig->Record;
-        $formats = isset($this->fields['__unprocessed_format'])
-            ? $this->fields['__unprocessed_format']
-            : $this->getFormats();
         if (isset($config->ead_document_order_link_template[$source])
             && !$this->isDigitized()
-            && in_array('1/Document/ArchiveItem/', $formats)
+            && in_array('1/Document/ArchiveItem/', $this->getFormats())
         ) {
             $urls[] = array(
                 'url' => $this->replaceURLPlaceholders(
@@ -366,7 +331,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
         }
 
         // If we got this far, no description was found:
-        return array();
+        return [];
     }
 
     /**
@@ -391,7 +356,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     */
     public function getURLs()
     {
-        $urls = array();
+        $urls = [];
         $url = '';
         $record = $this->getSimpleXML();
         foreach ($record->xpath('//daoloc') as $node) {
@@ -521,33 +486,5 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
             $url
         );
         return $url;
-    }
-
-    /**
-     * Check if a URL (typically from getURLs()) is blacklisted based on the URL
-     * itself and optionally its description.
-     *
-     * @param string $url  URL
-     * @param string $desc Optional description of the URL
-     *
-     * @return boolean Whether the URL is blacklisted
-     */
-    protected function urlBlacklisted($url, $desc = '')
-    {
-        if (!isset($this->recordConfig->Record->url_blacklist)) {
-            return false;
-        }
-        foreach ($this->recordConfig->Record->url_blacklist as $rule) {
-            if (substr($rule, 0, 1) == '/' && substr($rule, -1, 1) == '/') {
-                if (preg_match($rule, $url)
-                    || ($desc !== '' && preg_match($rule, $desc))
-                ) {
-                    return true;
-                }
-            } elseif ($rule == $url || $rule == $desc) {
-                return true;
-            }
-        }
-        return false;
     }
 }

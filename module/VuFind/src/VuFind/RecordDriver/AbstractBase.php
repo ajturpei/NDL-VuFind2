@@ -59,7 +59,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
      *
      * @var array
      */
-    protected $extraDetails = array();
+    protected $extraDetails = [];
 
     /**
      * Main VuFind configuration
@@ -80,7 +80,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
      *
      * @var array
      */
-    protected $fields = array();
+    protected $fields = [];
 
     /**
      * Constructor
@@ -159,7 +159,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
     public function getSortTitle()
     {
         // Child classes should override this with smarter behavior, and the "strip
-        // articles" logic probably belongs in a more appropriate place, but for now,
+        // articles" logic probably belongs in a more appropriate place, but for now
         // in the absence of a better plan, we'll just use the XSLT Importer's strip
         // articles functionality.
         return ArticleStripper::stripArticles($this->getBreadcrumb());
@@ -171,15 +171,18 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
      * @param int    $list_id ID of list to load tags from (null for all lists)
      * @param int    $user_id ID of user to load tags from (null for all users)
      * @param string $sort    Sort type ('count' or 'tag')
+     * @param int    $ownerId ID of user to check for ownership
      *
      * @return array
      */
-    public function getTags($list_id = null, $user_id = null, $sort = 'count')
-    {
+    public function getTags($list_id = null, $user_id = null, $sort = 'count',
+        $ownerId = null
+    ) {
         $tags = $this->getDbTable('Tags');
         return $tags->getForResource(
-            $this->getUniqueId(), $this->getResourceSource(), 0, $list_id, $user_id,
-            $sort
+            $this->getUniqueId(),
+            $this->getResourceSource(),
+            0, $list_id, $user_id, $sort, $ownerId
         );
     }
 
@@ -199,6 +202,25 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
         );
         foreach ($tags as $tag) {
             $resource->addTag($tag, $user);
+        }
+    }
+
+    /**
+     * Remove tags from the record.
+     *
+     * @param \VuFind\Db\Row\User $user The user posting the tag
+     * @param array               $tags The user-provided tags
+     *
+     * @return void
+     */
+    public function deleteTags($user, $tags)
+    {
+        $resources = $this->getDbTable('Resource');
+        $resource = $resources->findResource(
+            $this->getUniqueId(), $this->getResourceSource()
+        );
+        foreach ($tags as $tag) {
+            $resource->deleteTag($tag, $user);
         }
     }
 
@@ -231,6 +253,10 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
             $list->save($user);
         } else {
             $list = $table->getExisting($listId);
+            // Validate incoming list ID:
+            if (!$list->editAllowed($user)) {
+                throw new \VuFind\Exception\ListPermission('Access denied.');
+            }
             $list->rememberLastUsed(); // handled by save() in other case
         }
 
@@ -243,7 +269,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
         // Add the information to the user's account:
         $user->saveResource(
             $resource, $list,
-            isset($params['mytags']) ? $params['mytags'] : array(),
+            isset($params['mytags']) ? $params['mytags'] : [],
             isset($params['notes']) ? $params['notes'] : ''
         );
     }
@@ -262,7 +288,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
         $data = $db->getSavedData(
             $this->getUniqueId(), $this->getResourceSource(), $list_id, $user_id
         );
-        $notes = array();
+        $notes = [];
         foreach ($data as $current) {
             if (!empty($current->notes)) {
                 $notes[] = $current->notes;
@@ -339,9 +365,9 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
     {
         if (is_null($types)) {
             $types = isset($this->recordConfig->Record->related) ?
-                $this->recordConfig->Record->related : array();
+                $this->recordConfig->Record->related : [];
         }
-        $retVal = array();
+        $retVal = [];
         foreach ($types as $current) {
             $parts = explode(':', $current);
             $type = $parts[0];
@@ -436,7 +462,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
         if ($this->mainConfig->Record->citation_formats === false
             || $this->mainConfig->Record->citation_formats === 'false'
         ) {
-            return array();
+            return [];
         }
 
         // Whitelist:
@@ -455,7 +481,7 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
      */
     protected function getSupportedCitationFormats()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -480,10 +506,10 @@ abstract class AbstractBase implements \VuFind\Db\Table\DbTableAwareInterface,
      *
      * @return mixed
      */
-    public function tryMethod($method, $params = array())
+    public function tryMethod($method, $params = [])
     {
-        return is_callable(array($this, $method))
-            ? call_user_func_array(array($this, $method), $params)
+        return is_callable([$this, $method])
+            ? call_user_func_array([$this, $method], $params)
             : null;
     }
 }

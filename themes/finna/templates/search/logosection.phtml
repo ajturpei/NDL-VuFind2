@@ -1,3 +1,10 @@
-<i class="fa fa-finnalogo"></i>
+<? if ($srcUrl = $this->imageSrc('finna-logo_' . $this->layout()->userLang)): ?>
+  <a href="<?=$this->url('home');?>"><span class="sr-only"><?=$this->transEsc('Home');?></span>
+    <img src="<?=$srcUrl; ?>" alt="Logo" />
+  </a>
+<? else: ?>
+  <a href="<?=$this->url('home');?>" class="finnalogo"><span class="sr-only"><?=$this->transEsc('Home');?></span></a>
+<? endif; ?>
+<? if ($this->templateName == 'home'): ?>
 <hr>
-   
+<? endif; ?>

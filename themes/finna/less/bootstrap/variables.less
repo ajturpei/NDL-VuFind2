@@ -6,50 +6,93 @@
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
+@gray:                   #464646;
 
-@gray-darker:            lighten(#000, 13.5%); // #222
-@gray-dark:              lighten(#000, 20%);   // #333
-@gray:                   lighten(#000, 33.5%); // #555
-@gray-light:             lighten(#000, 60%);   // #999
-@gray-lighter:           lighten(#000, 93.5%); // #eee
+@gray-darker:            darken(@gray, 40%);
+@gray-dark:              darken(@gray, 10%);
+@gray-light:             lighten(@gray, 18%);
+@gray-mid-light:         lighten(@gray, 40%);     
+@gray-lighter:           lighten(@gray, 60%);
 
 // Brand Colors
 @brand-primary: #00a3b5;
 @brand-secondary: #B3E3E9;
 @brand-third: #d8f4ed;
+@brand-fourth: #ebd4f0;
 @brand-success: #00b270;
 @brand-warning: #fff48c;
 @brand-danger: #ff461e;
 @brand-info: #b2e3ea;
-@logo-color: #FFF;
+@logo-color: #fff;
 
-//== CUstom Finna styling
-@background-image-url: url('https://www.finna.fi/interface/themes/national/images/header_background_2.jpg');
+//== Custom Finna styling
+@background-image-url: url('../images/background.jpg');
+@background-start-color: rgba(1,1,1,0.3); // gradient color for background image
+@background-end-color:  rgba(1,1,1,0.7); // gradient color for background image
+@background-start-percent: 10%;
+@background-end-percent: 100%;
 @header-height: 43px;
 @navbar-logo-height: 35px;
 @logo-height: 66px;
-@header-background-color: rgba(10,10,10,0.8);
-@footer-background: #464646;
-@home-top-background: @brand-third;
-@finna-main-header-background: @brand-third;
+@logo-separator-color: #fff; // Color of hr line under main logo
+@header-background-color: rgba(1,1,1,0.8); // Color of navigation bar top
+@footer-background: @gray;
+@finna-main-header-background: @brand-secondary; // Color of page header background and search results tabs
+@finna-searchbox-link-color: #fff; // style searchbox link text color contrast with background
+@finna-searchbox-link-background: rgba(1,1,1,0.6); // style searchbox links (advanced search etc.) background contrast with background
+@finna-record-header-background: @gray-lighter;
 @field-margin-vertical: 20px;
 @field-margin-horizontal: 15px;
 @background-image-gradient: #000, #000, 55%, 30%;
 @finna-text-shadow: 1px 1px 1px black;
+@finna-search-input-width: 59.5%; //== THIS HAS TO BE % Change this if no prefilter-select to 80.5%
+@finna-button-radius: 10px; // Defines all button radiuses
+@finna-header-font-size: 1.6em;
+@record-title-font-size: 1.7em;
+
+//== Finna custom tooltip
+@finna-tooltip-opacity: 0.7;
+
+//== Finna home page
+@introduction-header: 3em;
+@home-content-background: @body-bg; // Add custom background color for home main section
+@home-1-background: @brand-third;
+@home-2-background: @gray-dark;
+@home-3-background: @gray-dark; // change the color of right column 
+@home-4-background: @brand-third;
+@home-left-column-background: none;
+@home-right-column-background: @body-bg;
+@infobox-background: @brand-third;
+@infobox-border: none;
+@infobox-text-color: @gray;
+@infobox-box-shadow: none;
+
+//== Finna facets
+@facet-background:  @gray;
+@facet-text-color: @body-bg;
+@facet-link-hover-background: rgba(1,1,1,0.05);
 
 //== Generated horizontal carousel styles
-    //== This is full background
-@carousel-background: @gray-darker;
    //== Styling the header of carousel
 @carousel-header-background: rgba(140, 140, 140, 0.8);
 @carousel-header-color: #fff;
    //== Styling the horizontal header of each slide
-@carousel-slide-header-background: rgba(140, 140, 140, 0.7);
+@carousel-slide-header-background: rgba(1, 1, 1, 0.6);
 @carousel-slide-header-color: @carousel-header-color;
     //== Vertical slider background
 @carousel-verticalslide-header-background: none;
-   //== Styling the text color of each slide
-@carousel-slide-text-color: rgb(252, 255, 217);
+   //== Styling the text color and background of each slide
+@carousel-text-background-color: rgba(1,1,1,0.75);
+@carousel-slide-text-color: rgb(255, 255, 255);
+@carousel-slide-link-color: @link-color;
+
+//== List feed styles
+@list-feed-background: @body-bg;
+@list-feed-padding: 10px;
+@list-feed-header-color: red;
+
+//== Myreresearch custom styles
+@myresearch-header-background: #b0e9db;
 
 //== Scaffolding
 //
@@ -57,17 +100,15 @@
 
 @body-bg: #fff;
 @text-color: @gray;
-@link-color: @brand-primary;
+@link-color: @brand-primary; // defines all link color, also for linked icons
 @link-hover-color: @link-color;
+@link-hover-decoration: #fff;
 @padding-base-vertical: 6px;
 @padding-base-horizontal: 12px;
 @padding-large-vertical: 10px;
 @padding-large-horizontal: 16px;
 @padding-small-vertical: 5px;
 @padding-small-horizontal: 10px;
-@border-radius-base: 12px;
-@border-radius-large: 16px;
-@border-radius-small: 10px;
 @line-height-large: 1.33;
 @line-height-small: 1.5;
 @component-active-bg: @brand-primary;
@@ -77,15 +118,15 @@
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-@font-family-sans-serif: 'Helvetica Neue';
+@font-family-sans-serif: "Helvetica Neue", Helvetica, Arial, sans-serif;
 @font-family-serif: PT Serif;
 @font-family-monospace: Monaco;
 @font-family-base: @font-family-sans-serif;
 @font-size-base: 13px;
 @font-size-icon-small: 14px;
-@font-size-icon-large: 1.3em;
-@font-size-large: ceil(@font-size-base * 1.25);
-@font-size-small: ceil(@font-size-base * 0.85);
+@font-size-icon-large: 1.5em;
+@font-size-large: ceil((@font-size-base * 1.25));
+@font-size-small: ceil((@font-size-base * 0.85));
 @font-size-h1: floor((@font-size-base * 2.6));
 @font-size-h2: floor((@font-size-base * 1.76));
 @font-size-h3: floor((@font-size-base * 1.6));
@@ -93,11 +134,25 @@
 @font-size-h5: @font-size-base;
 @font-size-h6: floor((@font-size-base * 0.85));
 @line-height-base: 1.5;
-@line-height-computed: floor(@font-size-base * @line-height-base);
+@line-height-computed: floor((@font-size-base * @line-height-base));
 @headings-font-family: @font-family-base;
 @headings-font-weight: 500;
 @headings-line-height: 1.1;
 @headings-color: inherit;
+
+
+//## Font size, line-height for content pages
+@content-font-size-base: 14px;
+@content-line-height-base: 1.6;
+@content-headings-font-size-h1: floor((@content-font-size-base * 1.777));
+@content-headings-font-size-h2: floor((@content-font-size-base * 1.777));
+@content-headings-font-size-h3: floor((@content-font-size-base * 1.333));
+@content-headings-font-size-h4: floor((@content-font-size-base * 1.15));
+@content-headings-font-size-h5: @content-font-size-base;
+@content-headings-font-size-h6: floor((@content-font-size-base * 0.875));
+@headings-font-weight: 700;
+@content-headings-line-height: @headings-line-height;
+@content-headings-color: @gray-dark;
 
 
 //-- Iconography
@@ -127,9 +182,9 @@
 @line-height-large:         1.33;
 @line-height-small:         1.5;
 
-@border-radius-base:        4px;
+@border-radius-base:        10px;
 @border-radius-large:       15px;
-@border-radius-small:       3px;
+@border-radius-small:       5px;
 
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color:    #fff;
@@ -150,17 +205,18 @@
 @table-cell-padding:            8px;
 //** Padding for cells in `.table-condensed`.
 @table-condensed-cell-padding:  5px;
-
+//** Finna tables
+@table-finna-record-cell-padding:  3px 0px;
 //** Default background color used for all tables.
 @table-bg:                      transparent;
 //** Background color used for `.table-striped`.
-@table-bg-accent:               #f9f9f9;
+@table-bg-accent:               #F7F7F7;    // Defines color for striped tables used in record details and holdings
 //** Background color used for `.table-hover`.
 @table-bg-hover:                #f5f5f5;
 @table-bg-active:               @table-bg-hover;
 
 //** Border color for table and cell borders.
-@table-border-color:            #ddd;
+@table-border-color:            transparent;
 
 
 //== Buttons
@@ -203,7 +259,7 @@
 //** `<input>` border color
 @input-border:                   #ccc;
 //** `<input>` border radius
-@input-border-radius:            @border-radius-base;
+@input-border-radius:            @border-radius-small;
 //** Border color for inputs on focus
 @input-border-focus:             #66afe9;
 
@@ -236,12 +292,12 @@
 @dropdown-link-active-color: #fff;
 @dropdown-link-active-bg: @component-active-bg;
 @dropdown-link-color: @gray-dark;
-@dropdown-link-hover-color: #fff;
-@dropdown-link-hover-bg: @dropdown-link-active-bg;
+@dropdown-link-hover-color: @dropdown-link-color;
+@dropdown-link-hover-bg: rgba(1,1,1,0.1);
 @dropdown-link-disabled-color: @gray-light;
 @dropdown-header-color: @gray-light;
 @dropdown-caret-color: #000;
-@dropdown-fallback-border:none;
+@dropdown-fallback-border: none;
 
 //-- Z-index master list
 //
@@ -253,7 +309,7 @@
 @zindex-navbar:            1000;
 @zindex-dropdown:          1000;
 @zindex-popover:           1010;
-@zindex-tooltip:           1030;
+@zindex-tooltip:           1020;
 @zindex-navbar-fixed:      1030;
 @zindex-modal-background:  1040;
 @zindex-modal:             1050;
@@ -303,7 +359,7 @@
 @grid-gutter-width:         30px;
 // Navbar collapse
 //** Point at which the navbar becomes uncollapsed.
-@grid-float-breakpoint:     @screen-sm-min;
+@grid-float-breakpoint:     @screen-sm-max;
 //** Point at which the navbar begins collapsing.
 @grid-float-breakpoint-max: (@grid-float-breakpoint - 1);
 
@@ -333,19 +389,21 @@
 //##
 
 // Basics of a navbar
-@navbar-height:                    40px;
+@navbar-height:                    45px;
 @navbar-margin-bottom:             0px;
 @navbar-border-radius:             @border-radius-base;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
-@navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
-@navbar-collapse-max-height:       340px;
+@navbar-padding-vertical:          0px;
+@navbar-collapse-max-height:       auto;
 
 @navbar-default-color:             #777;
 @navbar-default-bg:                #fff;
 @navbar-default-border:            darken(@navbar-default-bg, 6.5%);
 
 // Navbar links
-@navbar-default-link-color:                #777;
+@navbar-default-link-color:                #fff;  // Color of link texts in navbar
+@navbar-font-size:                         1.05em; // Font-size of navbar links
+@navbar-font-weight:                       500; // Font weight for navbar texts
 @navbar-default-link-hover-color:          #333;
 @navbar-default-link-hover-bg:             transparent;
 @navbar-default-link-active-color:         #555;
@@ -359,6 +417,7 @@
 @navbar-default-brand-hover-bg:            transparent;
 
 // Navbar toggle
+@navbar-toggle-color:                      @navbar-default-link-color;
 @navbar-default-toggle-hover-bg:           #ddd;
 @navbar-default-toggle-icon-bar-bg:        #888;
 @navbar-default-toggle-border-color:       #ddd;
@@ -395,7 +454,7 @@
 //##
 
 //=== Shared nav styles
-@nav-link-padding:                          10px 15px;
+@nav-link-padding:                          0px 15px;
 @nav-link-hover-bg:                         rgba(255,255,255,0.2);
 
 @nav-disabled-link-color:                   @gray-light;
@@ -404,9 +463,12 @@
 @nav-open-link-hover-color:                 #fff;
 
 //== Tabs
-@nav-tabs-border-color:                     #ddd;
-
-@nav-tabs-link-hover-border-color:          @gray-lighter;
+@nav-tabs-background-color:                 #fff;
+@nav-tabs-text-color:                       @gray;
+@nav-tabs-border-color:                     @brand-secondary;   // this will set the background and border color of tabs in record
+@nav-tabs-link-hover-border-color:          @brand-secondary;
+@nav-tabs-link-hover-color:                 @nav-tabs-active-link-hover-color;
+@tabs-border-radius:                        10px;
 
 @nav-tabs-active-link-hover-bg:             @body-bg;
 @nav-tabs-active-link-hover-color:          @gray;
@@ -424,18 +486,18 @@
 //== Pagination
 //
 //##
-
-@pagination-color:                     @link-color;
-@pagination-bg:                        #fff;
+@pagination-background:                @gray-lighter;
+@pagination-color:                     @body-bg;
+@pagination-bg:                        @link-color;
 @pagination-border:                    #ddd;
 
 @pagination-hover-color:               @link-hover-color;
-@pagination-hover-bg:                  @gray-lighter;
+@pagination-hover-bg:                  #f5f5f5;
 @pagination-hover-border:              #ddd;
 
-@pagination-active-color:              #fff;
-@pagination-active-bg:                 @brand-primary;
-@pagination-active-border:             @brand-primary;
+@pagination-active-color:              @gray-light;
+@pagination-active-bg:                 #f5f5f5;
+@pagination-active-border:             none;
 
 @pagination-disabled-color:            @gray-light;
 @pagination-disabled-bg:               #fff;
@@ -446,11 +508,11 @@
 //
 //##
 
-@pager-bg:                             @pagination-bg;
+@pager-bg:                             @link-color;
 @pager-border:                         @pagination-border;
 @pager-border-radius:                  15px;
 
-@pager-hover-bg:                       @pagination-hover-bg;
+@pager-hover-bg:                       @brand-primary;
 
 @pager-active-bg:                      @pagination-active-bg;
 @pager-active-color:                   @pagination-active-color;
@@ -563,7 +625,8 @@
 //== Modals
 //
 //##
-
+@modal-header-background: @brand-primary;
+@modal-header-color: @body-bg;
 //** Padding applied to the modal body
 @modal-inner-padding:         20px;
 
@@ -597,7 +660,7 @@
 //
 //## Define alert colors, border radius, and padding.
 
-@alert-padding:               15px;
+@alert-padding:               10px;
 @alert-border-radius:         @border-radius-base;
 @alert-link-font-weight:      bold;
 
@@ -670,7 +733,7 @@
 
 @panel-bg:                    #fff;
 @panel-body-padding:          15px;
-@panel-border-radius:         @border-radius-base;
+@panel-border-radius:         0px;
 
 //** Border color for elements within panels
 @panel-inner-border:          #ddd;
@@ -710,7 +773,7 @@
 //** Thumbnail background color
 @thumbnail-bg:                @body-bg;
 //** Thumbnail border color
-@thumbnail-border:            #ddd;
+@thumbnail-border:            none;
 //** Thumbnail border radius
 @thumbnail-border-radius:     @border-radius-base;
 
@@ -732,17 +795,17 @@
 //
 //##
 
-@badge-color:                 #fff;
+@badge-color:                 @gray-light;
 //** Linked badge text color on hover
 @badge-link-hover-color:      #fff;
-@badge-bg:                    #B2B2B2;
+@badge-bg:                    none;
 
 //** Badge text color in active nav link
 @badge-active-color:          @link-color;
 //** Badge background color in active nav link
 @badge-active-bg:             #fff;
 @badge-font-size:             0.9em;
-@badge-font-weight:           200;
+@badge-font-weight:           400;
 @badge-line-height:           1;
 @badge-border-radius:         10px;
 
@@ -752,7 +815,7 @@
 //##
 
 @breadcrumb-padding-vertical:   5px;
-@breadcrumb-padding-horizontal: 15px;
+@breadcrumb-padding-horizontal: 5px;
 //** Breadcrumb background color
 @breadcrumb-bg:                 rgba(1, 1, 1, 0.4);
 //** Breadcrumb text color
@@ -760,7 +823,7 @@
 //** Text color of current page in the breadcrumb
 @breadcrumb-active-color:       #fff;
 //** Textual separator for between breadcrumb elements
-@breadcrumb-separator:          "/";
+@breadcrumb-separator:          "/ ";
 
 
 //== Carousel
@@ -830,7 +893,12 @@
 //##
 
 //** Horizontal line color.
-@hr-border:                   @gray-lighter;
+@hr-border:                   rgba(255,255,255,0.2);
 
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
+
+@cursor-disabled: pointer;
+@progress-border-radius: none;
+@panel-heading-padding: 0;
+@panel-footer-padding: 0;

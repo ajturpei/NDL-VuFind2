@@ -101,7 +101,7 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
             $this->assertEquals(
                 "WARNING: This version of VuFind does not support "
                 . "the default theme.  Your config.ini [Site] theme setting "
-                . "has been reset to the default: blueprint.  You may need to "
+                . "has been reset to the default: bootprint3.  You may need to "
                 . "reimplement your custom theme.",
                 $warnings[0]
             );
@@ -121,7 +121,7 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
 
         // Make sure that spelling recommendations are set up appropriately:
         $this->assertEquals(
-            array('TopFacets:ResultsTop', 'SpellingSuggestions'),
+            ['TopFacets:ResultsTop', 'SpellingSuggestions'],
             $results['searches.ini']['General']['default_top_recommend']
         );
         $this->assertTrue(
@@ -131,14 +131,22 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
             )
         );
         $this->assertEquals(
-            array(
-                'Author' => array('AuthorFacets', 'SpellingSuggestions'),
-                'CallNumber' => array('TopFacets:ResultsTop')
-            ),
+            [
+                'Author' => ['AuthorFacets', 'SpellingSuggestions'],
+                'CallNumber' => ['TopFacets:ResultsTop']
+            ],
             $results['searches.ini']['TopRecommendations']
         );
         $this->assertEquals(
-            array('SummonDatabases', 'SpellingSuggestions'),
+            ['CallNumber' => 'callnumber-sort'],
+            $results['searches.ini']['DefaultSortingByType']
+        );
+        $this->assertEquals(
+            'sort_callnumber',
+            $results['searches.ini']['Sorting']['callnumber-sort']
+        );
+        $this->assertEquals(
+            ['SummonDatabases', 'SpellingSuggestions'],
             $results['Summon.ini']['General']['default_top_recommend']
         );
         $this->assertTrue(
@@ -148,11 +156,11 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
             )
         );
         $this->assertEquals(
-            array(),
+            [],
             $results['Summon.ini']['TopRecommendations']
         );
 
-        return array('configs' => $results, 'warnings' => $warnings);
+        return ['configs' => $results, 'warnings' => $warnings];
     }
 
     /**
@@ -373,7 +381,7 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
         );
         $this->assertFalse(
             $this->callMethod(
-                $upgrader, 'fileContainsMeaningfulLines', array($meaningless)
+                $upgrader, 'fileContainsMeaningfulLines', [$meaningless]
             )
         );
         $meaningful = realpath(
@@ -381,7 +389,7 @@ class UpgradeTest extends \VuFindTest\Unit\TestCase
         );
         $this->assertTrue(
             $this->callMethod(
-                $upgrader, 'fileContainsMeaningfulLines', array($meaningful)
+                $upgrader, 'fileContainsMeaningfulLines', [$meaningful]
             )
         );
     }

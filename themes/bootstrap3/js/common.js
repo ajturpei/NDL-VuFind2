@@ -1,4 +1,4 @@
-/*global ajaxLoadTab, btoa, checkSaveStatuses, console, extractSource, hexEncode, Lightbox, path, rc4Encrypt, refreshCommentList, unescape, vufindString */
+/*global ajaxLoadTab, btoa, checkSaveStatuses, console, extractSource, hexEncode, isPhoneNumberValid, Lightbox, path, rc4Encrypt, refreshCommentList, refreshTagList, unescape, vufindString */
 
 /* --- GLOBAL FUNCTIONS --- */
 function htmlEncode(value){
@@ -54,7 +54,7 @@ function deparam(url) {
   var pairs = url.substring(url.indexOf('?') + 1).split('&');
   for (var i = 0; i < pairs.length; i++) {
     var pair = pairs[i].split('=');
-    var name = decodeURIComponent(pair[0]);
+    var name = decodeURIComponent(pair[0].replace(/\+/g, ' '));
     if(name.length == 0) {
       continue;
     }
@@ -63,9 +63,9 @@ function deparam(url) {
       if(!request[name]) {
         request[name] = [];
       }
-      request[name].push(decodeURIComponent(pair[1]));
+      request[name].push(decodeURIComponent(pair[1].replace(/\+/g, ' ')));
     } else {
-      request[name] = decodeURIComponent(pair[1]);
+      request[name] = decodeURIComponent(pair[1].replace(/\+/g, ' '));
     }
   }
   return request;
@@ -81,16 +81,30 @@ function lessFacets(id) {
   $('#more-'+id).removeClass('hidden');
 }
 
-// Advanced facets
-function updateOrFacets(url, op) {
-  window.location.assign(url);
-  var list = $(op).parents('ul');
-  var header = $(list).find('li.nav-header');
-  list.html(header[0].outerHTML+'<div class="alert alert-info">'+vufindString.loading+'...</div>');
-}
-function setupOrFacets() {
-  $('.facetOR').find('.icon-check').replaceWith('<input type="checkbox" checked onChange="updateOrFacets($(this).parent().parent().attr(\'href\'), this)"/>');
-  $('.facetOR').find('.icon-check-empty').replaceWith('<input type="checkbox" onChange="updateOrFacets($(this).parent().attr(\'href\'), this)"/> ');
+// Phone number validation
+var libphoneTranslateCodes = ["libphonenumber_invalid", "libphonenumber_invalidcountry", "libphonenumber_invalidregion", "libphonenumber_notanumber", "libphonenumber_toolong", "libphonenumber_tooshort", "libphonenumber_tooshortidd"];
+var libphoneErrorStrings = ["Phone number invalid", "Invalid country calling code", "Invalid region code", "The string supplied did not seem to be a phone number", "The string supplied is too long to be a phone number", "The string supplied is too short to be a phone number", "Phone number too short after IDD"];
+function phoneNumberFormHandler(numID, regionCode) {
+  var phoneInput = document.getElementById(numID);
+  var number = phoneInput.value;
+  var valid = isPhoneNumberValid(number, regionCode);
+  if(valid != true) {
+    if(typeof valid === 'string') {
+      for(var i=libphoneErrorStrings.length;i--;) {
+        if(valid.match(libphoneErrorStrings[i])) {
+          valid = vufindString[libphoneTranslateCodes[i]];
+        }
+      }
+    } else {
+      valid = vufindString['libphonenumber_invalid'];
+    }
+    $(phoneInput).siblings('.help-block.with-errors').html(valid);
+    $(phoneInput).closest('.form-group').addClass('sms-error');
+  } else {
+    $(phoneInput).closest('.form-group').removeClass('sms-error');
+    $(phoneInput).siblings('.help-block.with-errors').html('');
+  }
+  return valid == true;
 }
 
 // Lightbox
@@ -101,7 +115,7 @@ function setupOrFacets() {
  * is called and the 'shown' lightbox event is triggered
  */
 function bulkActionSubmit($form) {
-  var submit = $form.find('input[type="submit"][clicked=true]').attr('name');
+  var submit = $form.find('[type="submit"][clicked=true]').attr('name');
   var checks = $form.find('input.checkbox-select-item:checked');
   if(checks.length == 0 && submit != 'empty') {
     return Lightbox.displayError(vufindString['bulk_noitems_advice']);
@@ -145,15 +159,17 @@ function registerLightboxEvents() {
     $(this).closest('.modal-body').find('.checkbox-select-all').prop('checked', false);
   });
   // Highlight which submit button clicked
-  $(modal).find("form input[type=submit]").click(function() {
+  $(modal).find("form [type=submit]").click(function() {
     // Abort requests triggered by the lightbox
     $('#modal .fa-spinner').remove();
     // Remove other clicks
-    $(modal).find('input[type="submit"][clicked=true]').attr('clicked', false);
+    $(modal).find('[type="submit"][clicked=true]').attr('clicked', false);
     // Add useful information
     $(this).attr("clicked", "true");
     // Add prettiness
-    $(this).after(' <i class="fa fa-spinner fa-spin"></i> ');
+    if($(modal).find('.has-error,.sms-error').length == 0 && !$(this).hasClass('dropdown-toggle')) {
+      $(this).after(' <i class="fa fa-spinner fa-spin"></i> ');
+    }
   });
   /**
    * Hide the header in the lightbox content
@@ -202,6 +218,11 @@ function updatePageForLogin() {
   if(!summon && recordTabs.length > 0) { // If summon, skip: about to reload anyway
     var tab = recordTabs.find('.active a').attr('id');
     ajaxLoadTab(tab);
+  }
+
+  // Refresh tag list
+  if(typeof refreshTagList === "function") {
+    refreshTagList(true);
   }
 }
 function newAccountHandler(html) {
@@ -277,8 +298,25 @@ function ajaxLogin(form) {
 }
 
 $(document).ready(function() {
+  // Off canvas
+  if($('.sidebar').length > 0) {
+    $('[data-toggle="offcanvas"]').click(function () {
+      $('body.offcanvas').toggleClass('active');
+      var active = $('body.offcanvas').hasClass('active');
+      var right = $('body.offcanvas').hasClass('offcanvas-right');
+      if((active && !right) || (!active && right)) {
+        $('.offcanvas-toggle .fa').removeClass('fa-chevron-right').addClass('fa-chevron-left');
+      } else {
+        $('.offcanvas-toggle .fa').removeClass('fa-chevron-left').addClass('fa-chevron-right');
+      }
+    });
+    $('[data-toggle="offcanvas"]').click().click();
+  } else {
+    $('[data-toggle="offcanvas"]').addClass('hidden');
+  }
+
   // support "jump menu" dropdown boxes
-  $('select.jumpMenu').change(function(){ $(this).closest('form').submit(); });
+  $('select.jumpMenu').change(function(){ $(this).parent('form').submit(); });
 
   // Highlight previous links, grey out following
   $('.backlink')
@@ -344,6 +382,10 @@ $(document).ready(function() {
       }
     }
   );
+  $('#searchForm_type').change(function() {
+    var query = $('#searchForm_lookfor').val();
+    $('#searchForm_lookfor').focus().typeahead('val', '').typeahead('val', query);
+  });
 
   // Checkbox select all
   $('.checkbox-select-all').change(function() {
@@ -360,7 +402,17 @@ $(document).ready(function() {
     } else {
       $(this).html(vufindString.qrcode_hide).addClass("active");
     }
-    $(this).next('.qrcode').toggleClass('hidden');
+
+    var holder = $(this).next('.qrcode');
+
+    if (holder.find('img').length == 0) {
+      // We need to insert the QRCode image
+      var template = holder.find('.qrCodeImgTag').html();
+      holder.html(template);
+    }
+
+    holder.toggleClass('hidden');
+
     return false;
   });
 
@@ -376,16 +428,19 @@ $(document).ready(function() {
   }
 
   // Advanced facets
-  setupOrFacets();
+  $('.facetOR').click(function() {
+    $(this).closest('.collapse').html('<div class="list-group-item">'+vufindString.loading+'...</div>');
+    window.location.assign($(this).attr('href'));
+  });
 
   $('[name=bulkActionForm]').submit(function() {
     return bulkActionSubmit($(this));
   });
-  $('[name=bulkActionForm]').find("input[type=submit]").click(function() {
+  $('[name=bulkActionForm]').find("[type=submit]").click(function() {
     // Abort requests triggered by the lightbox
     $('#modal .fa-spinner').remove();
     // Remove other clicks
-    $(this).closest('form').find('input[type="submit"][clicked=true]').attr('clicked', false);
+    $(this).closest('form').find('[type="submit"][clicked=true]').attr('clicked', false);
     // Add useful information
     $(this).attr("clicked", "true");
   });
@@ -394,12 +449,16 @@ $(document).ready(function() {
    * LIGHTBOX DEFAULT BEHAVIOUR *
    ******************************/
   Lightbox.addOpenAction(registerLightboxEvents);
+
   Lightbox.addFormCallback('newList', Lightbox.changeContent);
-  Lightbox.addFormHandler('loginForm', function(evt) {
-    ajaxLogin(evt.target);
-    return false;
-  });
   Lightbox.addFormCallback('accountForm', newAccountHandler);
+  Lightbox.addFormCallback('bulkDelete', function(html) {
+    location.reload();
+  });
+  Lightbox.addFormCallback('bulkRecord', function(html) {
+    Lightbox.close();
+    checkSaveStatuses();
+  });
   Lightbox.addFormCallback('emailSearch', function(html) {
     Lightbox.confirm(vufindString['bulk_email_success']);
   });
@@ -407,12 +466,25 @@ $(document).ready(function() {
     Lightbox.close();
     checkSaveStatuses();
   });
-  Lightbox.addFormCallback('bulkDelete', function(html) {
-    location.reload();
-  });
-  Lightbox.addFormCallback('bulkRecord', function(html) {
-    Lightbox.close();
-    checkSaveStatuses();
+
+  Lightbox.addFormHandler('exportForm', function(evt) {
+    $.ajax({
+      url: path + '/AJAX/JSON?' + $.param({method:'exportFavorites'}),
+      type:'POST',
+      dataType:'json',
+      data:Lightbox.getFormData($(evt.target)),
+      success:function(data) {
+        if(data.data.needs_redirect) {
+          document.location.href = data.data.result_url;
+        } else {
+          Lightbox.changeContent(data.data.result_additional);
+        }
+      },
+      error:function(d,e) {
+        //console.log(d,e); // Error reporting
+      }
+    });
+    return false;
   });
   Lightbox.addFormHandler('feedback', function(evt) {
     var $form = $(evt.target);
@@ -431,6 +503,10 @@ $(document).ready(function() {
         Lightbox.changeContent('<div class="alert alert-info">'+formSuccess+'</div>');
       });
     }
+    return false;
+  });
+  Lightbox.addFormHandler('loginForm', function(evt) {
+    ajaxLogin(evt.target);
     return false;
   });
 

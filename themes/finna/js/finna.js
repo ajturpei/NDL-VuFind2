@@ -1,37 +1,17 @@
 var finna = (function() {
 
-    var isTouchDevice = function() {
-        return !!('ontouchstart' in window) 
-            || !!('onmsgesturechange' in window); // IE10
-    };
-
-    // Append current anchor (location.hash) to selected links 
-    // in order to preserve the anchor when the link is clicked.
-    // This is used in top header language links. 
-    var initAnchorNavigationLinks = function() {
-        $('a.preserve-anchor').each(function() {
-            var hash = location.hash;
-            if (hash.length == 0) {
-                return;
-            }
-            $(this).attr('href', $(this).attr('href') + hash);
-        });
-    };
-    
-    var initFixFooter = function() {
-        var detectHeight = $(window).height() - $('header').height() - $('section.searchlayout').height() - $('section.main').height() - $('footer').height();
-        if (detectHeight > 0) {
-            var expandedFooter = $('footer').height() + detectHeight;
-            $('footer').height(expandedFooter);
-            }
-    };
-    
     var my = {
-        isTouchDevice: isTouchDevice,
-        init: function() {    
-            initAnchorNavigationLinks();
-            initFixFooter();
-            finna.imagePopup.init();
+        init: function() {
+            // List of modules to be inited
+            var modules = [
+                'feed', 'imagePopup', 'feedback', 'layout', 'myList', 'record', 'persona', 'common'
+            ];
+
+            $.each(modules, function(ind, module) {
+                if (typeof finna[module] !== 'undefined') {
+                    finna[module].init();
+                }
+            });
         },
     };
     

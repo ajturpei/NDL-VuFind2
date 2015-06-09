@@ -36,6 +36,7 @@ use Zend\ServiceManager\ServiceManager;
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:hierarchy_components Wiki
+ *
  * @codeCoverageIgnore
  */
 class Factory
@@ -162,8 +163,30 @@ class Factory
         $driver = new SolrMarc(
             $sm->getServiceLocator()->get('VuFind\Config')->get('config'),
             null,
-            $sm->getServiceLocator()->get('VuFind\Config')->get('searches'),
-            $sm->getServiceLocator()->get('VuFind\SearchResultsPluginManager')
+            $sm->getServiceLocator()->get('VuFind\Config')->get('searches')
+        );
+        $driver->attachILS(
+            $sm->getServiceLocator()->get('VuFind\ILSConnection'),
+            $sm->getServiceLocator()->get('VuFind\ILSHoldLogic'),
+            $sm->getServiceLocator()->get('VuFind\ILSTitleHoldLogic')
+        );
+        $driver->attachSearchService($sm->getServiceLocator()->get('VuFind\Search'));
+        return $driver;
+    }
+
+    /**
+     * Factory for SolrMarcRemote record driver.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return SolrMarc
+     */
+    public static function getSolrMarcRemote(ServiceManager $sm)
+    {
+        $driver = new SolrMarcRemote(
+            $sm->getServiceLocator()->get('VuFind\Config')->get('config'),
+            null,
+            $sm->getServiceLocator()->get('VuFind\Config')->get('searches')
         );
         $driver->attachILS(
             $sm->getServiceLocator()->get('VuFind\ILSConnection'),

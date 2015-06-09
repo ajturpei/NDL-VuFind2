@@ -84,6 +84,8 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
     /**
      * Test RemoteErrorException is thrown on a remote 5xx error.
      *
+     * @return void
+     *
      * @expectedException     VuFindSearch\Backend\Exception\RemoteErrorException
      * @expectedExceptionCode 500
      */
@@ -95,6 +97,8 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
 
     /**
      * Test RequestErrorException is thrown on a remote 4xx error.
+     *
+     * @return void
      *
      * @expectedException     VuFindSearch\Backend\Exception\RequestErrorException
      * @expectedExceptionCode 400
@@ -108,7 +112,9 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
     /**
      * Test InvalidArgumentException invalid adapter object.
      *
-     * @expectedException InvalidArgumentException
+     * @return void
+     *
+     * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage AdapterInterface
      */
     public function testSetAdapterThrowsInvalidObject()
@@ -119,6 +125,8 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
 
     /**
      * Test InvalidArgumentException unknown serialization format.
+     *
+     * @return void
      *
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage Unable to serialize
@@ -138,7 +146,7 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
     public function testGetters()
     {
         $url = 'http://example.tld/';
-        $map  = new HandlerMap(array('select' => array('fallback' => true)));
+        $map  = new HandlerMap(['select' => ['fallback' => true]]);
         $key = 'foo';
         $conn = new Connector($url, $map, $key);
         $this->assertEquals($url, $conn->getUrl());
@@ -175,7 +183,7 @@ class ConnectorTest extends PHPUnit_Framework_TestCase
             $this->response = file_get_contents($file);
         }
 
-        $map  = new HandlerMap(array('select' => array('fallback' => true)));
+        $map  = new HandlerMap(['select' => ['fallback' => true]]);
         $conn = new Connector('http://example.tld/', $map);
         $conn->setProxy($this);
         return $conn;

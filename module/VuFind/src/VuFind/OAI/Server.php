@@ -103,7 +103,7 @@ class Server
      *
      * @var array
      */
-    protected $metadataFormats = array();
+    protected $metadataFormats = [];
 
     /**
      * Namespace used for ID prefixing (if any)
@@ -166,7 +166,7 @@ class Server
      *
      * @var array
      */
-    protected $setQueries = array();
+    protected $setQueries = [];
 
     /**
      * Constructor
@@ -194,7 +194,7 @@ class Server
         if (isset($parts['port'])) {
             $this->baseHostURL .= $parts['port'];
         }
-        $this->params = isset($params) && is_array($params) ? $params : array();
+        $this->params = isset($params) && is_array($params) ? $params : [];
         $this->initializeMetadataFormats(); // Load details on supported formats
         $this->initializeSettings($config); // Load config.ini settings
     }
@@ -258,7 +258,7 @@ class Server
         $this->attachRecordHeader(
             $record, $this->prefixID($tracker['id']),
             date($this->iso8601, $this->normalizeDate($tracker['deleted'])),
-            array(),
+            [],
             'deleted'
         );
     }
@@ -274,7 +274,7 @@ class Server
      *
      * @return void
      */
-    protected function attachRecordHeader($xml, $id, $date, $sets = array(),
+    protected function attachRecordHeader($xml, $id, $date, $sets = [],
         $status = ''
     ) {
         $header = $xml->addChild('header');
@@ -312,12 +312,19 @@ class Server
             }
         }
 
+        // Headers should be returned only if the metadata format matching
+        // the supplied metadataPrefix is available.
+        // If RecordDriver returns nothing, skip this record.
+        if (empty($xml)) {
+            return true;
+        }
+
         // Check for sets:
         $fields = $record->getRawData();
         if (!is_null($this->setField) && !empty($fields[$this->setField])) {
             $sets = $fields[$this->setField];
         } else {
-            $sets = array();
+            $sets = [];
         }
 
         // Get modification date:
@@ -441,12 +448,12 @@ class Server
      */
     protected function initializeMetadataFormats()
     {
-        $this->metadataFormats['oai_dc'] = array(
+        $this->metadataFormats['oai_dc'] = [
             'schema' => 'http://www.openarchives.org/OAI/2.0/oai_dc.xsd',
-            'namespace' => 'http://www.openarchives.org/OAI/2.0/oai_dc/');
-        $this->metadataFormats['marc21'] = array(
+            'namespace' => 'http://www.openarchives.org/OAI/2.0/oai_dc/'];
+        $this->metadataFormats['marc21'] = [
             'schema' => 'http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd',
-            'namespace' => 'http://www.loc.gov/MARC21/slim');
+            'namespace' => 'http://www.loc.gov/MARC21/slim'];
     }
 
     /**
@@ -592,7 +599,7 @@ class Server
             $from, $until, $solrOffset, $solrLimit, $params['set']
         );
         $nonDeletedCount = $result->getResultTotal();
-        $format = $verb == 'ListIdentifiers' ? false : $params['metadataPrefix'];
+        $format = $params['metadataPrefix'];
         foreach ($result->getResults() as $doc) {
             if (!$this->attachNonDeleted($xml, $doc, $format, $headersOnly)) {
                 $this->unexpectedError('Cannot load document');
@@ -645,7 +652,7 @@ class Server
             // proves not to be the case:
             $results = $this->resultsManager->get($this->searchClassId);
             try {
-                $facets = $results->getFullFieldFacets(array($this->setField));
+                $facets = $results->getFullFieldFacets([$this->setField]);
             } catch (\Exception $e) {
                 $facets = null;
             }
@@ -722,7 +729,9 @@ class Server
         // Apply filters as needed.
         if (!empty($set)) {
             if (isset($this->setQueries[$set])) {
-                $params->addFilter($this->setQueries[$set]);
+                // use hidden filter here to allow for complex queries;
+                // plain old addFilter expects simple field:value queries.
+                $params->getOptions()->addHiddenFilter($this->setQueries[$set]);
             } else if (null !== $this->setField) {
                 $params->addFilter(
                     $this->setField . ':"' . addcslashes($set, '"') . '"'
@@ -933,7 +942,7 @@ class Server
         if (strlen($date) == 10) {
             $date .= ' ' . $time;
         } else {
-            $date = str_replace(array('T', 'Z'), array(' ', ''), $date);
+            $date = str_replace(['T', 'Z'], [' ', ''], $date);
         }
 
         // Translate to a timestamp:

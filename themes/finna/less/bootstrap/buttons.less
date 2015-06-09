@@ -7,110 +7,109 @@
 // --------------------------------------------------
 
 .btn {
-  display: inline-block;
-  margin-bottom: 0; // For input.btn
-  font-weight: @btn-font-weight;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
-  border: 1px solid transparent;
-  white-space: nowrap;
-  .button-size(@padding-base-vertical; @padding-base-horizontal; @font-size-base; @line-height-base; @finna-button-radius);
-  .user-select(none);
+    display: inline-block;
+    margin-bottom: 0; // For input.btn
+    font-weight: @btn-font-weight;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
+    border: 1px solid transparent;
+    white-space: nowrap;
+    .button-size(@padding-base-vertical; @padding-base-horizontal; @font-size-base; @line-height-base; @finna-button-radius);
+    .user-select(none);
 
-  &,
-  &:active,
-  &.active {
-    &:focus {
-      .tab-focus();
+    &,
+    &:active,
+    &.active {
+        &:focus {
+            .tab-focus();
+        }
     }
-  }
-
-  &:hover,
-  &:focus {
-    color: @btn-default-color;
-    text-decoration: none;
-  }
-
-  &:active,
-  &.active {
-    outline: 0;
-    background-image: none;
-    .box-shadow(inset 0 3px 5px rgba(0,0,0,.125));
-  }
-
-  &.disabled,
-  &[disabled],
-  fieldset[disabled] & {
-    cursor: not-allowed;
-    pointer-events: none; // Future-proof disabling of clicks
-    .opacity(.65);
-    .box-shadow(none);
-  }
+    
+    &:hover,
+    &:focus {
+        color: @btn-default-color;
+        text-decoration: none;
+    }
+    
+    &:active,
+    &.active {
+        outline: 0;
+        background-image: none;
+        .box-shadow(inset 0 3px 5px rgba(0,0,0,.125));
+    }
+    
+    &.disabled,
+    &[disabled],
+    fieldset[disabled] & {
+        cursor: not-allowed;
+        pointer-events: none; // Future-proof disabling of clicks
+        .opacity(.65);
+        .box-shadow(none);
+    }
 }
 
 
 // Alternate buttons
 // --------------------------------------------------
 .navbar-form .btn[type="submit"] {
-    color:@btn-primary-bg; 
-    padding:6px 0px;
-    border-radius:0px 15px 15px 0px;
-    padding: 3px 0px;
+    color: @btn-primary-bg;
+    padding: 6px 0px;
     border-radius: 15px;
     margin-left: -1px;
     margin-top: 2px;
     height: 35px;
     margin-bottom: 2px;
-    transition: background 0.1s ease-in-out;
-    display:inline-block;
-    float: right;
-    margin-right: 3px;
-    text-align: center;
+    transition: background .1s ease-in-out;
     width: 10%;
-}
-// Here we style the fake arrow for dropdown
-.navbar-form .btn[type="submit"]:before {
-    width: 15px;
-    content: "\e027";
-    font-family: "icomoon";
-    position: absolute;
-    margin-right: -30px;
-    z-index: 0;
-    color: grey;
-    margin-left: -7%;
-}
-.navbar-form .btn[type="submit"]:hover {
-    background:darken(@btn-primary-bg, 5%);   
-}
-.navbar-form .btn[type="submit"] i {
-    font-size: @font-size-icon-large;
-    color:@btn-default-bg;
-    vertical-align: inherit;
-    font-weight: 500;
+    float: right;
+    margin-right: 2px;
 
+    &:hover {
+        background: darken(@btn-primary-bg, 5%);   
+    }
+    & i {
+        font-size: @font-size-icon-large;
+        color: @btn-default-bg;
+        vertical-align: inherit;
+        font-weight: 500;
+    }
 }
 .searchHomeContent .btn-link {
     font-size: 1.2em;
     margin-top: 5px;
 }
-.nav.searchbox .btn-link {
-    color: #fff; 
-    font-size: 12px;
+.navbar-form {
+     & .clear-input {
+        position: absolute;
+        height: 22px;
+        width: 22px;
+         top: 7px;
+        right: 38%;
+        vertical-align: middle;
+        border-radius: 50%;
+        padding: 3px 5px;
+        color: rgb(66, 66, 66);   
+    }
+}
+.nav.searchbox .btn.btn-link {
+    color: @finna-searchbox-link-color; 
+    font-size: 1em;
     font-weight: bold;
-    background: rgba(1,1,1,0.4);
+    background: @finna-searchbox-link-background;
     border-radius: @finna-button-radius;
-    margin-top: 3px;
+    margin-top: 9px;
     margin-left: 10px;
     vertical-align: top;
     line-height: 25px;
+    padding: 2px 5px 0px;
     @media(max-width:@screen-xs-max) {
-         float:right;   
+        float:right;   
     }
     @media(min-width:@screen-sm-min) and (max-width:@screen-sm-max) {
-         float:right;
-         margin-right: 17%;
+        float:right;
+        margin-right: 17%;
     }
 }
 .searchbox .checkbox {
@@ -148,7 +147,10 @@
 
 //== Styling Finna checkboxes
 .checkboxFilter .checkbox {
-    padding: 5px 0px 5px 20px;   
+    padding: 5px 0px 0px 20px;
+}
+.checkboxFilter .checkbox:last-child {
+    padding-bottom: 5px;
 }
 .checkboxFilter label {
     font-size: 14px;
@@ -175,54 +177,134 @@
     content: "\f14a"; 
 }
 // Default styling of Finna Jump menus
-.jumpMenu {
+
+.jump-menu-style {
     border: none;
-    background: transparent;
-    color: #fff;
-    padding: 0px 20px 0px 10px;
-    z-index: 1;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0;
     position: relative;
+    width: auto;
+    z-index: 1;
+    display: inline-block;
+    min-width: 60px;
+    font-weight: 500;
+    
+    & select {
+        font-family: "Helvetica Neue", arial;
+        background-color: transparent;
+        border: 0 none;
+        box-shadow: none;
+        color: @body-bg;
+        display: block;
+        font-size: 100%;
+        font-weight: 500;
+        line-height: 1em;
+        margin: 0;
+        padding: 0px 20px 0px 8px;
+        width: 100%;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        &:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    }
+    & option {
+        background: @body-bg;
+        color: @gray;
+        padding: 5px;
+        &:hover {
+            background-color: @gray-light;   
+        }
+    }
+    
+    &:before {
+        display: block;
+        font-size: 1em;
+        height: 100%;
+        padding: 0 20px 0px 2px;
+        position: absolute;
+        top: 0;
+        right: 0px;
+        text-align: center;
+        width: 1em;
+        z-index: -1;    
+    }
+    &.controls {
+        border-radius: @finna-button-radius;
+        background-color: @brand-primary;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        margin-bottom: 10px;
+        height: 33px;
+        
+        & option:checked {
+            background: @btn-primary-bg;
+            color: @body-bg;
+        }   
+    }
+    &.controls:before {
+        background: @btn-primary-bg;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        color: @body-bg;
+        line-height: 34px;
+    }
+    &.prefilter-select {
+        color: @gray;
+        display: inline-block;
+        padding-right: 17px;
+        position: relative;
+        background: transparent;
+        height: 39px;
+        width: 25%;
+        height: auto;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        & select {
+          color: @gray;
+          height: 39px;
+          font-weight: 500;
+        }
+    }   
+    &.prefilter-select:before {
+        right: 12px;
+        background: @body-bg;
+        line-height: 39px;
+    }
 }
-.jumpMenuStyle {
-    background: @brand-primary;
-    padding: 8px 0px 10px;
-    border-radius: @finna-button-radius;
+.jump-menu-style select::-ms-expand {
+    display: none; /* to ie 10 */
 }
-.jumpMenu option {
-    background: #fff;
-    color: @gray;
-    border: 1px solid @gray-lighter;
-    padding: 8px 2px;
+:-moz-any(.prefilter-select,.jump-menu-style.controls):before {
+    background-color:  @body-bg; /* this is necessary for overcome the caret default browser */
+    pointer-events: none; /* https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events  */
+    z-index: 1; /* this is necessary for overcome the pseudo element */ 
 }
-.jumpMenu option:hover {
-    background:  @brand-primary;  
-}
-.jumpMenuForm i {
-  color: #fff;
-  top: 0px;
-  position: relative;
-  margin-left: -20px;
-  z-index: 0;
-  width: 20px;
-  text-align: left;
+.dedupInformation .dedup-select {
+    font-weight: bold;
+    margin-bottom: 4px;
+    height: 30px;
 }
 
-// fixes for ie & others
-@media(min-width:@screen-md-min) {
-    .sortForm {
-        min-width: 30%;   
-    }
-    .limitForm {
-        min-width: 30%;   
-    }
-}
 // List & grid view
 .view-buttons {
-    margin-right: 10px;   
+    margin-right: 10px;
+    margin-bottom: 10px;
+    @media(max-width:@screen-xs-max) {
+        float: left;
+        margin-right: 5px;
+    }
 }
 .view-buttons, .view-buttons a {
     display: inline-block;
-    color: #464646;
+    color: @gray-dark;
     font-weight: bold;
     
 }
@@ -245,6 +327,34 @@
     line-height: 33px;
     margin-right: 5px;
 }
+
+.swipe-arrow-navigation {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background: @link-color;
+    top: 50%;
+    color: @body-bg;
+    border-radius: 50%;
+    &.arrow-navigation-left {
+        left: 0px; 
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+    &.arrow-navigation-right {
+        right: 0px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px
+    }
+    & .fa-arrow-right, .fa-arrow-left {
+        color: @body-bg;
+        top: 10px;
+        left: 8px;
+        position: absolute;
+        font-size: 30px;
+    }
+}
+
 .btn-default {
   .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
 }
@@ -348,3 +458,4 @@ input[type="button"] {
     width: 100%;
   }
 }
+

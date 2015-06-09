@@ -122,7 +122,8 @@ class QueryGroupTest extends PHPUnit_Framework_TestCase
      * Test setting an invalid operator.
      *
      * @return void
-     * @expectedException VuFindSearch\Exception\InvalidArgumentException
+     *
+     * @expectedException        VuFindSearch\Exception\InvalidArgumentException
      * @expectedExceptionMessage Unknown or invalid boolean operator: fizz
      */
     public function testIllegalOperator()
@@ -141,6 +142,6 @@ class QueryGroupTest extends PHPUnit_Framework_TestCase
         $q1 = new Query('test');
         $q2 = new Query('query');
         $q3 = new Query('multi word query');
-        return new QueryGroup('OR', array($q1, $q2, $q3));
+        return new QueryGroup('OR', [$q1, $q2, $q3]);
     }
 }

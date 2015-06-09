@@ -17,12 +17,17 @@
           'rel' => 'search'
         )
       );
+
+      // IE-specific stylesheet
+      $this->headLink()->appendStylesheet('ie9-and-lower.css', 'screen', 'lte IE 9');
     ?>
     <?=$this->headLink()?>
     <?=$this->headStyle()?>
     <?
       // Set global path for Javascript code:
       $this->headScript()->prependScript("path = '" . rtrim($this->url('home'), '/') . "';");
+      $this->headScript()->prependScript("mozillaPersonaCurrentUser = '" . $this->personaAuth()->getUser() . "';");
+      $this->headScript()->prependScript("mozillaPersonaAutoLogout = '" . $this->personaAuth()->getAutoLogout() . "';");
 
       // Deal with cart stuff:
       if (!isset($this->renderingError)) {
@@ -33,7 +38,11 @@
             'bulk_save_success' => 'bulk_save_success',
             'close' => 'close',
             'loading' => 'Loading',
-            'sms_success' => 'sms_success'
+            'sms_success' => 'sms_success',
+            'show_more' => 'show_more',
+            'show_less' => 'show_less',
+            'number_thousands_separator' => ['number_thousands_separator', null, ','],
+            'feedback_success' => 'Thank you for your feedback'
           )
         );
         if ($cart->isActive()) {
@@ -87,7 +96,7 @@
         <div class="row">
           <div class="col-xs-12">
             <a class="sr-only" href="#content"><?=$this->transEsc('Skip to content') ?></a>
-            <?=$this->render('header.phtml')?>
+            <?=$this->render('navibar.phtml')?>
           </div>
         </div>
       </div>
@@ -101,7 +110,7 @@
           </div>
         </div>
         <? endif; ?>
-        <? if (isset($this->layout()->introduction) && $this->resolver('search//introductiontext.phtml')): ?>
+        <? if (isset($this->layout()->introduction) && $this->resolver('search/introductiontext.phtml')): ?>
         <div class="row">
           <div class="col-xs-12 introduction clearfix">
             <?=$this->render('search/introductiontext.phtml') ?>
@@ -147,17 +156,26 @@
       </div>
     </section>
     <section role="main" class="main template-dir-<?=$this->templateDir?> template-name-<?=$this->templateName?>">
+      <? if ($logoutText = $this->logoutMessage()): ?>
+        <div class="container-fluid alert-info">
+          <div class="logout-msg text-center"><h3><?=$this->transEsc($logoutText) ?></h3></div>
+        </div>
+      <? endif; ?>
       <? if (!empty($this->layout()->finnaMainHeader)): ?>
       <div class="container-fluid finna-main-header">
         <div class="container">
-          <?=$this->layout()->finnaMainHeader?>
+          <div class="row">
+            <?=$this->layout()->finnaMainHeader?>
+          </div>
         </div>
       </div>
       <? endif; ?>
       <? if (!empty($this->layout()->finnaMainTabs)): ?>
       <div class="container-fluid finna-main-tabs">
         <div class="container">
-          <?=$this->layout()->finnaMainTabs?>
+          <div class="row">
+              <?=$this->layout()->finnaMainTabs?>
+          </div>
         </div>
       </div>
       <? endif; ?>
@@ -176,7 +194,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span class="sr-only"><?=$this->transEsc('close') ?></span></button>
             <h4 id="modalTitle" class="modal-title"></h4>
           </div>
           <div class="modal-body"><?=$this->transEsc('Loading') ?>...</div>

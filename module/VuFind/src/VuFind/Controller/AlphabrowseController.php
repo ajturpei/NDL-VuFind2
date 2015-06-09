@@ -56,31 +56,31 @@ class AlphabrowseController extends AbstractBase
         if (isset($config->AlphaBrowse_Types)
             && !empty($config->AlphaBrowse_Types)
         ) {
-            $types = array();
+            $types = [];
             foreach ($config->AlphaBrowse_Types as $key => $value) {
                 $types[$key] = $value;
             }
         } else {
-            $types = array(
+            $types = [
                 'topic'  => 'By Topic',
                 'author' => 'By Author',
                 'title'  => 'By Title',
                 'lcc'    => 'By Call Number'
-            );
+            ];
         }
 
         // Load any extras from config file
-        $extras = array();
+        $extras = [];
         if (isset($config->AlphaBrowse_Extras)) {
             foreach ($config->AlphaBrowse_Extras as $key => $value) {
                 $extras[$key] = $value;
             }
         } else {
-            $extras = array(
+            $extras = [
                 'title' => 'author:format:publishDate',
                 'lcc' => 'title',
                 'dewey' => 'title'
-            );
+            ];
         }
 
         // Load remaining config parameters
@@ -101,6 +101,11 @@ class AlphabrowseController extends AbstractBase
         $source = $this->params()->fromQuery('source', false);
         $from   = $this->params()->fromQuery('from', false);
         $page   = intval($this->params()->fromQuery('page', 0));
+
+        // Special case: highlighting is pointless if there's no user input:
+        if (empty($from)) {
+            $highlighting = false;
+        }
 
         // Set up any extra parameters to pass
         $extraParams = new ParamBag();
@@ -171,7 +176,7 @@ class AlphabrowseController extends AbstractBase
 
         // Pass information about extra columns on to theme
         $view->extras = isset($extras[$source])
-            ? explode(':', $extras[$source]) : array();
+            ? explode(':', $extras[$source]) : [];
 
         return $view;
     }

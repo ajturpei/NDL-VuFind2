@@ -36,6 +36,7 @@ use Zend\ServiceManager\ServiceManager;
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:hierarchy_components Wiki
+ *
  * @codeCoverageIgnore
  */
 class Factory
@@ -62,6 +63,30 @@ class Factory
     public static function getIpRegEx(ServiceManager $sm)
     {
         return new IpRegEx($sm->getServiceLocator()->get('Request'));
+    }
+
+    /**
+     * Factory for ServerParam
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return ServerParam
+     */
+    public static function getServerParam(ServiceManager $sm)
+    {
+        return new ServerParam($sm->getServiceLocator()->get('Request'));
+    }
+
+    /**
+     * Factory for Shibboleth
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Shibboleth
+     */
+    public static function getShibboleth(ServiceManager $sm)
+    {
+        return new Shibboleth($sm->getServiceLocator()->get('Request'));
     }
 
     /**

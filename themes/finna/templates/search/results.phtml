@@ -20,7 +20,8 @@
         'checkboxFilters' => $this->params->getCheckboxFacets(),
         'filterList' => $this->params->getFilters(),
         'hasDefaultsApplied' => $this->params->hasDefaultsApplied(),
-        'selectedShards' => $this->params->getSelectedShards()
+        'selectedShards' => $this->params->getSelectedShards(),
+        'savedSearches' => $this->layout()->savedTabs
       )
   );
 
@@ -42,7 +43,7 @@
           ? $this->overrideSearchHeading : null,
         'startRecord' => $this->results->getStartRecord(),
         'endRecord' => $this->results->getEndRecord(),
-        'recordTotal' => $this->results->getResultTotal(),
+        'recordsFound' => $this->results->getResultTotal() > 0,
         'searchType' => $this->params->getsearchType(),
         'lookfor' => $lookfor
       )
@@ -50,7 +51,7 @@
 
   // Set up Finna Main Tabs:
   //$this->layout()->finnaMainTabs = '...';
-  
+
   // Enable cart if appropriate:
   $this->showCartControls = $this->params->getOptions()->supportsCart() && $this->cart()->isActive();
   // Enable bulk options if appropriate:
@@ -60,7 +61,6 @@
   $this->headScript()->appendFile("check_item_statuses.js");
   $this->headScript()->appendFile("check_save_statuses.js");
 ?>
-<?=$this->search()->renderSpellingSuggestions('<strong>' . $this->transEsc('spell_suggest') . '</strong>:', $this->results, $this); ?>
     <? if (($recordTotal = $this->results->getResultTotal()) > 0): // only display these at very top if we have results ?>
       <? foreach ($this->results->getRecommendations('top') as $current): ?>
         <?=$this->recommend($current)?>
@@ -81,17 +81,17 @@
     </div>
 <div class="row">
   <div class="<?=$this->layoutClass('mainbody')?>">
-    
+
     <? /* End Listing Options */ ?>
 
     <? if ($recordTotal < 1): ?>
-      <p>
         <? if (isset($this->overrideEmptyMessage)): ?>
-          <?=$this->overrideEmptyMessage?>
+          <p><?=$this->overrideEmptyMessage?></p>
+        <? elseif ($lookfor == '' && $this->params->getsearchClassId() == 'Primo'): ?>
+          <h4 class="alert alert-info"><?=$this->transEsc('primo_no_searchword')?></h4>
         <? else: ?>
-          <?=$this->transEsc('nohit_prefix')?> - <strong><?=$this->escapeHtml($lookfor)?></strong> - <?=$this->transEsc('nohit_suffix')?>
+          <p class="alert alert-info"><?=$this->transEsc('nohit_prefix')?> - <strong><?=$this->escapeHtml($lookfor)?></strong> - <?=$this->transEsc('nohit_suffix')?></p>
         <? endif; ?>
-      </p>
       <? if (isset($this->parseError)): ?>
         <p class="alert alert-danger"><?=$this->transEsc('nohit_parse_error')?></p>
       <? endif; ?>
@@ -123,24 +123,28 @@
   <? /* End Narrow Search Options */ ?>
 </div>
 </div>
+<? $pagination = $this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination.phtml', array('results' => $this->results)); if (trim($pagination)): ?>
 <div class="container-fluid pagination-background">
   <div class="container">
-    <div class="col-xs-12 text-center">
-      <?=$this->paginationControl($this->results->getPaginator(), 'Sliding', 'search/pagination.phtml', array('results' => $this->results))?>
-    </div>
+    <div class="row">
+      <div class="col-xs-12 text-center">
+        <?=$pagination ?>
+      </div>
+    </div>        
   </div>
 </div>
+<? endif; ?>
 <div class="container-fluid searchtools-background">
   <div class="container">
     <div class="row">
-      <div class="searchtools hidden-print">
+      <div class="searchtools hidden-print col-xs-12">
         <a href="<?=$this->results->getUrlQuery()->setViewParam('rss')?>"><i class="fa fa-bell"></i> <?=$this->transEsc('Get RSS Feed')?></a>
-        
+
         <a href="<?=$this->url('search-email')?>" class="mailSearch modal-link" id="mailSearch<?=$this->escapeHtmlAttr($this->results->getSearchId())?>" title="<?=$this->transEsc('Email this Search')?>"><i class="fa fa-envelope"></i> <?=$this->transEsc('Email this Search')?></a>
-        
+
         <? if (is_numeric($this->results->getSearchId())): ?>
           <? if ($this->results->isSavedSearch()): ?>
-            <a href="<?=$this->url('myresearch-savesearch')?>?delete=<?=urlencode($this->results->getSearchId())?>"><i class="fa fa-minus-square"></i> <?=$this->transEsc('save_search_remove')?></a>
+            <a href="<?=$this->url('myresearch-savesearch')?>?delete=<?=urlencode($this->results->getSearchId())?>"><i class="fa fa-remove"></i> <?=$this->transEsc('save_search_remove')?></a>
           <? else: ?>
             <a href="<?=$this->url('myresearch-savesearch')?>?save=<?=urlencode($this->results->getSearchId())?>"><i class="fa fa-plus-square"></i> <?=$this->transEsc('save_search')?></a>
           <? endif; ?>
@@ -149,7 +153,7 @@
   </div>
 </div>
 <div class="mobile-navigation visible-xs">
-        <div class="extra-link-1">    
+        <div class="extra-link-1">
         </div>
         <div class="extra-link-2">
              <p class="back-to-top"> <i class="fa fa-handle-close"></i></p>

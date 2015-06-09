@@ -10,12 +10,14 @@
 
 .navbar {
   position: relative;
-  min-height: @navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
+  min-height: @navbar-height; // set navbar height
   margin-bottom: @navbar-margin-bottom;
   border: 1px solid transparent;
   // Prevent floats from breaking the navbar
   &:extend(.clearfix all);
-
+  & .dropdown .dropdown-menu > li > a > div:not(.description) {
+        font-weight: bold;   
+  }
   @media (min-width: @grid-float-breakpoint) {
     border-radius: @navbar-border-radius;
   }
@@ -52,20 +54,23 @@
   color: #fff;
   padding-right: @navbar-padding-horizontal;
   padding-left:  @navbar-padding-horizontal;
-  border-top: 1px solid transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
+  border-top: 1px solid #000;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25);
   &:extend(.clearfix all);
   -webkit-overflow-scrolling: touch;
 
   &.in {
     overflow-y: auto;
+    & .dropdown-menu a {
+        color: @navbar-default-link-color;
+        transition:all 0.2s ease-in-out;
+    }
   }
 
   @media (min-width: @grid-float-breakpoint) {
     width: auto;
     border-top: 0;
     box-shadow: none;
-
     &.collapse {
       display: block !important;
       height: auto !important;
@@ -75,7 +80,12 @@
 
     &.in {
       overflow-y: visible;
+      & .dropdown-menu a {
+        color: @gray;
+        transition: none;
+      }
     }
+    
 
     // Undo the collapse side padding for navbars with containers to ensure
     // alignment of right-aligned contents.
@@ -152,10 +162,9 @@
 
 .navbar-brand {
   float: left;
-  padding: @navbar-padding-vertical @navbar-padding-horizontal @navbar-padding-vertical 0px;
+  // padding: @navbar-padding-vertical @navbar-padding-horizontal @navbar-padding-vertical 0px;
   font-size: @font-size-large;
-  line-height: @line-height-computed;
-  min-width:110px;
+  line-height: @navbar-height;
   .navbar-logo {
     font-size: @navbar-logo-height;
     color: @logo-color;
@@ -187,9 +196,8 @@
   position: relative;
   float: left;
   margin-right: @navbar-padding-horizontal;
-  padding: 17px 10px 10px 15px;
-  color: #fff;
-  .navbar-vertical-align(34px);
+  color: @navbar-toggle-color;
+  padding: (@navbar-height/4) 5px (@navbar-height/4) 0px;
   background-color: transparent;
   background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
   border: 1px solid transparent;
@@ -224,11 +232,11 @@
 
 .navbar-nav {
   margin: (@navbar-padding-vertical / 2) -@navbar-padding-horizontal;
-
   > li > a {
-    padding-top:    10px;
-    padding-bottom: 10px;
-    line-height: @navbar-logo-height;
+    line-height: @navbar-height;
+    color: @navbar-default-link-color;
+    font-size: @navbar-font-size;
+    font-weight: @navbar-font-weight;
   }
 
   @media (max-width: @grid-float-breakpoint-max) {
@@ -241,15 +249,21 @@
       background-color: transparent;
       border: 0;
       box-shadow: none;
+      transition: background-color 0.2s ease-in-out;
       > li > a,
       .dropdown-header {
         padding: 5px 15px 5px 25px;
       }
+      > li {
+        border-bottom: none;   
+      }
       > li > a {
         line-height: @line-height-computed;
+        white-space: normal;
         &:hover,
         &:focus {
           background-image: none;
+          background-color: @nav-link-hover-bg;
         }
       }
     }
@@ -336,7 +350,6 @@
 // Menu position and menu carets
 .navbar-nav > li > .dropdown-menu {
   margin-top: 0;
-  .border-top-radius(0);
 }
 // Menu position and menu caret support for dropups via extra dropup class
 .navbar-fixed-bottom .navbar-nav > li > .dropdown-menu {
@@ -453,6 +466,10 @@
       &:focus {
         background-color: @navbar-default-link-active-bg;
         color: @navbar-default-link-active-color;
+        &:after {
+            font-family: "icomoon";
+            content:'X';
+        }
       }
     }
 
@@ -610,8 +627,10 @@
           }
         }
       }
+      
+      
     }
-  }
+}
 
   .navbar-link {
     color: @navbar-inverse-link-color;
@@ -620,4 +639,18 @@
     }
   }
 
+}
+
+// Specified Finna styles for navbar
+
+.nav.nav-absolute {
+    position: absolute;
+    top: 0px;
+    right: 15px;
+}
+
+@media (max-width: @grid-float-breakpoint-max) {
+    .navbar-nav li.logoutOptions {
+        display: inline-block;   
+    }
 }

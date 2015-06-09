@@ -93,10 +93,10 @@ class InjectSpellingListener
     public function attach(SharedEventManagerInterface $manager)
     {
         $manager->attach(
-            'VuFind\Search', Service::EVENT_PRE, array($this, 'onSearchPre')
+            'VuFind\Search', Service::EVENT_PRE, [$this, 'onSearchPre']
         );
         $manager->attach(
-            'VuFind\Search', Service::EVENT_POST, array($this, 'onSearchPost')
+            'VuFind\Search', Service::EVENT_POST, [$this, 'onSearchPost']
         );
     }
 
@@ -109,6 +109,9 @@ class InjectSpellingListener
      */
     public function onSearchPre(EventInterface $event)
     {
+        if ($event->getParam('context') != 'search') {
+            return $event;
+        }
         $backend = $event->getTarget();
         if ($backend === $this->backend) {
             $params = $event->getParam('params');
@@ -148,8 +151,8 @@ class InjectSpellingListener
      */
     public function onSearchPost(EventInterface $event)
     {
-        // Do nothing if spelling is disabled....
-        if (!$this->active) {
+        // Do nothing if spelling is disabled or context is wrong
+        if (!$this->active || $event->getParam('context') != 'search') {
             return $event;
         }
 

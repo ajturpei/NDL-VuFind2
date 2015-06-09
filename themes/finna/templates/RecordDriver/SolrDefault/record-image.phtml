@@ -12,12 +12,16 @@ $imageData = array('images' => $images, 'type' => $type);
 <?= $this->partial('RecordDriver/SolrDefault/record-image-navi.phtml', $imageData) ?>
 
 <? if ($mediumImage): ?>
-<i class="fa fa-zoom-in magnify"></i>
 <a class="image-popup-trigger" href="<?= $this->recordLink()->getUrl($this->driver) ?>#image">
+<? $formats = $this->driver->tryMethod('getFormats'); ?>
+<? if (count($allImages) <= 1): ?>
+  <div class="iconlabel format-<?=$this->record($this->driver)->getFormatClass(end($formats))?>"></div>
+<? endif; ?>
 <img alt="<?=$this->transEsc('Cover Image')?>" class="recordcover" src="<?=$this->escapeHtmlAttr($mediumImage);?>"/>
+<i class="fa fa-magnify"></i>
 </a>
 <? else: ?>
-<img src="<?=$this->url('cover-unavailable')?>" class="recordcover" alt="<?=$this->transEsc('No Cover Image')?>"/>
+  <img src="<?=$this->url('cover-unavailable')?>" class="recordcover" alt="<?=$this->transEsc('No Cover Image')?>"/>
 <? endif; ?>
 
 </div>

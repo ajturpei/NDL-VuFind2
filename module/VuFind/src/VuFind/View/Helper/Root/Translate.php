@@ -44,14 +44,14 @@ class Translate extends \Zend\View\Helper\AbstractHelper
     /**
      * Translate a string
      *
-     * @param string $str     String to translate
-     * @param array  $tokens  Tokens to inject into the translated string
-     * @param string $default Default value to use if no translation is found (null
-     * for no default).
+     * @param string|object $str     String to translate
+     * @param array         $tokens  Tokens to inject into the translated string
+     * @param string        $default Default value to use if no translation is found
+     * (null for no default).
      *
      * @return string
      */
-    public function __invoke($str, $tokens = array(), $default = null)
+    public function __invoke($str, $tokens = [], $default = null)
     {
         return $this->translate($str, $tokens, $default);
     }

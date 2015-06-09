@@ -357,8 +357,13 @@ class MyResearchController extends AbstractBase
      */
     public function catalogloginAction()
     {
-        // No special action needed -- just display form
-        return $this->createViewModel();
+        // Connect to the ILS and check if multiple target support is available:
+        $targets = null;
+        $catalog = $this->getILS();
+        if ($catalog->checkCapability('getLoginDrivers')) {
+            $targets = $catalog->getLoginDrivers();
+        }
+        return $this->createViewModel(['targets' => $targets]);
     }
 
     /**
@@ -389,7 +394,7 @@ class MyResearchController extends AbstractBase
         $listID = $this->params()->fromPost('listID');
         $newUrl = empty($listID)
             ? $this->url()->fromRoute('myresearch-favorites')
-            : $this->url()->fromRoute('userList', array('id' => $listID));
+            : $this->url()->fromRoute('userList', ['id' => $listID]);
 
         // Fail if we have nothing to delete:
         $ids = is_null($this->params()->fromPost('selectAll'))
@@ -418,10 +423,10 @@ class MyResearchController extends AbstractBase
             $list = $table->getExisting($listID);
         }
         return $this->createViewModel(
-            array(
+            [
                 'list' => $list, 'deleteIDS' => $ids,
                 'records' => $this->getRecordLoader()->loadBatch($ids)
-            )
+            ]
         );
     }
 
@@ -450,16 +455,16 @@ class MyResearchController extends AbstractBase
         }
 
         // Perform delete and send appropriate flash message:
-        if (!is_null($listID)) {
+        if (null !== $listID) {
             // ...Specific List
             $table = $this->getTable('UserList');
             $list = $table->getExisting($listID);
-            $list->removeResourcesById($user, array($id), $source);
+            $list->removeResourcesById($user, [$id], $source);
             $this->flashMessenger()->setNamespace('info')
                 ->addMessage('Item removed from list');
         } else {
             // ...My Favorites
-            $user->removeResourcesById(array($id), $source);
+            $user->removeResourcesById([$id], $source);
             $this->flashMessenger()->setNamespace('info')
                 ->addMessage('Item removed from favorites');
         }
@@ -485,25 +490,25 @@ class MyResearchController extends AbstractBase
         foreach ($lists as $list) {
             $tags = $this->params()->fromPost('tags' . $list);
             $driver->saveToFavorites(
-                array(
+                [
                     'list'  => $list,
                     'mytags'  => $tagParser->parse($tags),
                     'notes' => $this->params()->fromPost('notes' . $list)
-                ),
+                ],
                 $user
             );
         }
         // add to a new list?
         $addToList = $this->params()->fromPost('addToList');
         if ($addToList > -1) {
-            $driver->saveToFavorites(array('list' => $addToList), $user);
+            $driver->saveToFavorites(['list' => $addToList], $user);
         }
         $this->flashMessenger()->setNamespace('info')
             ->addMessage('edit_list_success');
 
         $newUrl = is_null($listID)
             ? $this->url()->fromRoute('myresearch-favorites')
-            : $this->url()->fromRoute('userList', array('id' => $listID));
+            : $this->url()->fromRoute('userList', ['id' => $listID]);
         return $this->redirect()->toUrl($newUrl);
     }
 
@@ -537,20 +542,20 @@ class MyResearchController extends AbstractBase
 
         // Get saved favorites for selected list (or all lists if $listID is null)
         $userResources = $user->getSavedData($id, $listID, $source);
-        $savedData = array();
+        $savedData = [];
         foreach ($userResources as $current) {
-            $savedData[] = array(
+            $savedData[] = [
                 'listId' => $current->list_id,
                 'listTitle' => $current->list_title,
                 'notes' => $current->notes,
                 'tags' => $user->getTagString($id, $current->list_id, $source)
-            );
+            ];
         }
 
         // In order to determine which lists contain the requested item, we may
         // need to do an extra database lookup if the previous lookup was limited
         // to a particular list ID:
-        $containingLists = array();
+        $containingLists = [];
         if (!empty($listID)) {
             $userResources = $user->getSavedData($id, null, $source);
         }
@@ -560,7 +565,7 @@ class MyResearchController extends AbstractBase
 
         // Send non-containing lists to the view for user selection:
         $userLists = $user->getLists();
-        $lists = array();
+        $lists = [];
         foreach ($userLists as $userList) {
             if (!in_array($userList->id, $containingLists)) {
                 $lists[$userList->id] = $userList->title;
@@ -568,9 +573,9 @@ class MyResearchController extends AbstractBase
         }
 
         return $this->createViewModel(
-            array(
+            [
                 'driver' => $driver, 'lists' => $lists, 'savedData' => $savedData
-            )
+            ]
         );
     }
 
@@ -590,11 +595,11 @@ class MyResearchController extends AbstractBase
         if (empty($listID)) {
             $url = $this->url()->fromRoute('myresearch-favorites');
         } else {
-            $url = $this->url()->fromRoute('userList', array('id' => $listID));
+            $url = $this->url()->fromRoute('userList', ['id' => $listID]);
         }
         return $this->confirm(
             'confirm_delete_brief', $url, $url, 'confirm_delete',
-            array('delete' => $id, 'source' => $source)
+            ['delete' => $id, 'source' => $source]
         );
     }
 
@@ -639,7 +644,6 @@ class MyResearchController extends AbstractBase
             $results = $this->getServiceLocator()
                 ->get('VuFind\SearchResultsPluginManager')->get('Favorites');
             $params = $results->getParams();
-            $params->setAuthManager($this->getAuthManager());
 
             // We want to merge together GET, POST and route parameters to
             // initialize our search object:
@@ -647,13 +651,13 @@ class MyResearchController extends AbstractBase
                 new Parameters(
                     $this->getRequest()->getQuery()->toArray()
                     + $this->getRequest()->getPost()->toArray()
-                    + array('id' => $this->params()->fromRoute('id'))
+                    + ['id' => $this->params()->fromRoute('id')]
                 )
             );
 
             $results->performAndProcessSearch();
             return $this->createViewModel(
-                array('params' => $params, 'results' => $results)
+                ['params' => $params, 'results' => $results]
             );
         } catch (ListPermissionException $e) {
             if (!$this->getUser()) {
@@ -695,10 +699,10 @@ class MyResearchController extends AbstractBase
             // Similarly, if the user is in the process of bulk-saving records,
             // send them back to the appropriate place in the cart.
             $bulkIds = $this->params()->fromPost(
-                'ids', $this->params()->fromQuery('ids', array())
+                'ids', $this->params()->fromQuery('ids', [])
             );
             if (!empty($bulkIds)) {
-                $params = array();
+                $params = [];
                 foreach ($bulkIds as $id) {
                     $params[] = urlencode('ids[]') . '=' . urlencode($id);
                 }
@@ -708,7 +712,7 @@ class MyResearchController extends AbstractBase
                     ->toUrl($saveUrl . implode('&', $params));
             }
 
-            return $this->lightboxAwareRedirect('userList', array('id' => $finalId));
+            return $this->lightboxAwareRedirect('userList', ['id' => $finalId]);
         } catch (\Exception $e) {
             switch(get_class($e)) {
             case 'VuFind\Exception\ListPermission':
@@ -749,6 +753,11 @@ class MyResearchController extends AbstractBase
         $newList = ($id == 'NEW');
         $list = $newList ? $table->getNew($user) : $table->getExisting($id);
 
+        // Make sure the user isn't fishing for other people's lists:
+        if (!$newList && !$list->editAllowed($user)) {
+            throw new ListPermissionException('Access denied.');
+        }
+
         // Process form submission:
         if ($this->formWasSubmitted('submit')) {
             if ($redirect = $this->processEditList($user, $list)) {
@@ -757,7 +766,7 @@ class MyResearchController extends AbstractBase
         }
 
         // Send the list to the view:
-        return $this->createViewModel(array('list' => $list, 'newList' => $newList));
+        return $this->createViewModel(['list' => $list, 'newList' => $newList]);
     }
 
     /**
@@ -810,8 +819,8 @@ class MyResearchController extends AbstractBase
         return $this->confirm(
             'confirm_delete_list_brief',
             $this->url()->fromRoute('myresearch-deletelist'),
-            $this->url()->fromRoute('userList', array('id' => $listID)),
-            'confirm_delete_list_text', array('listID' => $listID)
+            $this->url()->fromRoute('userList', ['id' => $listID]),
+            'confirm_delete_list_text', ['listID' => $listID]
         );
     }
 
@@ -852,7 +861,7 @@ class MyResearchController extends AbstractBase
         $cancelStatus = $catalog->checkFunction('cancelHolds', compact('patron'));
         $view = $this->createViewModel();
         $view->cancelResults = $cancelStatus
-            ? $this->holds()->cancelHolds($catalog, $patron) : array();
+            ? $this->holds()->cancelHolds($catalog, $patron) : [];
         // If we need to confirm
         if (!is_array($view->cancelResults)) {
             return $view->cancelResults;
@@ -863,7 +872,7 @@ class MyResearchController extends AbstractBase
 
         // Get held item details:
         $result = $catalog->getMyHolds($patron);
-        $recordList = array();
+        $recordList = [];
         $this->holds()->resetValidation();
         foreach ($result as $current) {
             // Add cancel details if appropriate:
@@ -916,7 +925,7 @@ class MyResearchController extends AbstractBase
             ? $this->storageRetrievalRequests()->cancelStorageRetrievalRequests(
                 $catalog, $patron
             )
-            : array();
+            : [];
         // If we need to confirm
         if (!is_array($view->cancelResults)) {
             return $view->cancelResults;
@@ -927,7 +936,7 @@ class MyResearchController extends AbstractBase
 
         // Get request details:
         $result = $catalog->getMyStorageRetrievalRequests($patron);
-        $recordList = array();
+        $recordList = [];
         $this->storageRetrievalRequests()->resetValidation();
         foreach ($result as $current) {
             // Add cancel details if appropriate:
@@ -981,7 +990,7 @@ class MyResearchController extends AbstractBase
             ? $this->ILLRequests()->cancelILLRequests(
                 $catalog, $patron
             )
-            : array();
+            : [];
         // If we need to confirm
         if (!is_array($view->cancelResults)) {
             return $view->cancelResults;
@@ -992,7 +1001,7 @@ class MyResearchController extends AbstractBase
 
         // Get request details:
         $result = $catalog->getMyILLRequests($patron);
-        $recordList = array();
+        $recordList = [];
         $this->ILLRequests()->resetValidation();
         foreach ($result as $current) {
             // Add cancel details if appropriate:
@@ -1036,14 +1045,14 @@ class MyResearchController extends AbstractBase
             ? $this->renewals()->processRenewals(
                 $this->getRequest()->getPost(), $catalog, $patron
             )
-            : array();
+            : [];
 
         // By default, assume we will not need to display a renewal form:
         $renewForm = false;
 
         // Get checked out item details:
         $result = $catalog->getMyTransactions($patron);
-        $transactions = array();
+        $transactions = [];
         foreach ($result as $current) {
             // Add renewal details if appropriate:
             $current = $this->renewals()->addRenewDetails(
@@ -1061,10 +1070,10 @@ class MyResearchController extends AbstractBase
         }
 
         return $this->createViewModel(
-            array(
+            [
                 'transactions' => $transactions, 'renewForm' => $renewForm,
                 'renewResult' => $renewResult
-            )
+            ]
         );
     }
 
@@ -1085,7 +1094,7 @@ class MyResearchController extends AbstractBase
 
         // Get fine details:
         $result = $catalog->getMyFines($patron);
-        $fines = array();
+        $fines = [];
         foreach ($result as $row) {
             // Attempt to look up and inject title:
             try {
@@ -1104,7 +1113,7 @@ class MyResearchController extends AbstractBase
             $fines[] = $row;
         }
 
-        return $this->createViewModel(array('fines' => $fines));
+        return $this->createViewModel(['fines' => $fines]);
     }
 
     /**
@@ -1194,12 +1203,12 @@ class MyResearchController extends AbstractBase
                     // Custom template for emails (text-only)
                     $message = $renderer->render(
                         'Email/recover-password.phtml',
-                        array(
+                        [
                             'library' => $config->Site->title,
                             'url' => $this->getServerUrl('myresearch-verify')
                                 . '?hash='
                                 . $user->verify_hash . '&auth_method=' . $method
-                        )
+                        ]
                     );
                     $this->getServiceLocator()->get('VuFind\Mailer')->send(
                         $user->email,

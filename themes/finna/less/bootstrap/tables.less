@@ -231,3 +231,30 @@ table {
     }
   }
 }
+
+
+table.content-table {
+    font-size: @content-font-size-base;
+    margin-top: 0;
+    margin-bottom: 2.9em;
+    line-height: 1.4em;
+}
+
+.content-table th, .content-table td {
+    padding: 0.4em 1.5em 0.4em 0;
+    font-weight: normal;
+    border-bottom: 1px solid @gray-lighter;
+}
+.table.table-finna-record {
+  > thead,
+  > tbody,
+  > tfoot {
+    > tr {
+    > th,
+    > td {
+        padding: @table-finna-record-cell-padding;
+      }
+    }
+  }
+  table-layout: initial;
+}

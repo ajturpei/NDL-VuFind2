@@ -104,11 +104,11 @@ class Connector implements \Zend\Log\LoggerAwareInterface
                  "NOT rec.id=$id";
 
         // Query String Parameters
-        $options = array('operation' => 'searchRetrieve',
+        $options = ['operation' => 'searchRetrieve',
                          'query' => $query,
                          'maximumRecords' => $max,
                          'startRecord' => 1,
-                         'recordSchema' => 'marcxml');
+                         'recordSchema' => 'marcxml'];
 
         $this->debug('More Like This Query: ' . print_r($query, true));
 
@@ -126,8 +126,8 @@ class Connector implements \Zend\Log\LoggerAwareInterface
      */
     public function scan($clause, $pos = null, $maxTerms = null)
     {
-        $options = array('operation' => 'scan',
-                         'scanClause' => $clause);
+        $options = ['operation' => 'scan',
+                         'scanClause' => $clause];
         if (!is_null($pos)) {
             $options['responsePosition'] = $pos;
         }
@@ -150,16 +150,16 @@ class Connector implements \Zend\Log\LoggerAwareInterface
      *
      * @return array          An array of query results
      */
-    public function search($query, $start = 1, $limit = null, $sortBy = null,
+    public function sruSearch($query, $start = 1, $limit = null, $sortBy = null,
         $schema = 'marcxml', $process = true
     ) {
         $this->debug('Query: ' . print_r($query, true));
 
         // Query String Parameters
-        $options = array('operation' => 'searchRetrieve',
+        $options = ['operation' => 'searchRetrieve',
                          'query' => $query,
                          'startRecord' => ($start) ? $start : 1,
-                         'recordSchema' => $schema);
+                         'recordSchema' => $schema];
         if (!is_null($limit)) {
             $options['maximumRecords'] = $limit;
         }
@@ -197,7 +197,7 @@ class Connector implements \Zend\Log\LoggerAwareInterface
     protected function call($method = 'GET', $params = null, $process = true)
     {
         if ($params) {
-            $query = array('version=' . $this->sruVersion);
+            $query = ['version=' . $this->sruVersion];
             foreach ($params as $function => $value) {
                 if (is_array($value)) {
                     foreach ($value as $additional) {

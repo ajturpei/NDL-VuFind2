@@ -26,7 +26,8 @@
  * @link     http://www.vufind.org  Main Page
  */
 namespace VuFind\Auth;
-use VuFind\Db\Row\User as UserRow, VuFind\Db\Table\User as UserTable,
+use VuFind\Cookie\CookieManager,
+    VuFind\Db\Row\User as UserRow, VuFind\Db\Table\User as UserTable,
     VuFind\Exception\Auth as AuthException,
     Zend\Config\Config, Zend\Session\SessionManager;
 
@@ -46,7 +47,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
      *
      * @var \VuFind\Auth\AbstractBase[]
      */
-    protected $auth = array();
+    protected $auth = [];
 
     /**
      * Currently selected authentication module
@@ -98,6 +99,13 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     protected $pluginManager;
 
     /**
+     * Cookie Manager
+     *
+     * @var CookieManager
+     */
+    protected $cookieManager;
+
+    /**
      * Cache for current logged in user object
      *
      * @var UserRow
@@ -111,15 +119,18 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
      * @param UserTable      $userTable      User table gateway
      * @param SessionManager $sessionManager Session manager
      * @param PluginManager  $pm             Authentication plugin manager
+     * @param CookieManager  $cookieManager  Cookie manager
      */
     public function __construct(Config $config, UserTable $userTable,
-        SessionManager $sessionManager, PluginManager $pm
+        SessionManager $sessionManager, PluginManager $pm,
+        CookieManager $cookieManager
     ) {
         // Store dependencies:
         $this->config = $config;
         $this->userTable = $userTable;
         $this->sessionManager = $sessionManager;
         $this->pluginManager = $pm;
+        $this->cookieManager = $cookieManager;
 
         // Set up session:
         $this->session = new \Zend\Session\Container('Account');
@@ -128,7 +139,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
         // if no setting passed in):
         $method = isset($config->Authentication->method)
             ? $config->Authentication->method : 'Database';
-        $this->legalAuthOptions = array($method);   // mark it as legal
+        $this->legalAuthOptions = [$method];   // mark it as legal
         $this->setAuthMethod($method);              // load it
     }
 
@@ -237,7 +248,22 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
      */
     public function getSessionInitiator($target)
     {
-        return $this->getAuth()->getSessionInitiator($target);
+        try {
+            return $this->getAuth()->getSessionInitiator($target);
+        } catch (InvalidArgumentException $e) {
+            // If the authentication is in an illegal state but there is an
+            // active user session, we should clear everything out so the user
+            // can try again. This is useful, for example, if a user is logged
+            // in at the same time that an administrator changes the [ChoiceAuth]
+            // settings in config.ini. However, if the user is not logged in,
+            // they are probably attempting something nasty and should be given
+            // an error message.
+            if (!$this->isLoggedIn()) {
+                throw $e;
+            }
+            $this->logout('');
+            return $this->getAuth()->getSessionInitiator($target);
+        }
     }
 
     /**
@@ -251,7 +277,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     public function getAuthClassForTemplateRendering()
     {
         $auth = $this->getAuth();
-        if (is_callable(array($auth, 'getSelectedAuthOption'))) {
+        if (is_callable([$auth, 'getSelectedAuthOption'])) {
             $selected = $auth->getSelectedAuthOption();
             if ($selected) {
                 $auth = $this->getAuth($selected);
@@ -270,12 +296,12 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     public function getSelectableAuthOptions()
     {
         $auth = $this->getAuth();
-        if (is_callable(array($auth, 'getSelectableAuthOptions'))) {
+        if (is_callable([$auth, 'getSelectableAuthOptions'])) {
             if ($methods = $auth->getSelectableAuthOptions()) {
                 return $methods;
             }
         }
-        return array($this->getAuthMethod());
+        return [$this->getAuthMethod()];
     }
 
     /**
@@ -288,8 +314,8 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     public function getLoginTargets()
     {
         $auth = $this->getAuth();
-        return is_callable(array($auth, 'getLoginTargets'))
-            ? $auth->getLoginTargets() : array();
+        return is_callable([$auth, 'getLoginTargets'])
+            ? $auth->getLoginTargets() : [];
     }
 
     /**
@@ -302,7 +328,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     public function getDefaultLoginTarget()
     {
         $auth = $this->getAuth();
-        return is_callable(array($auth, 'getDefaultLoginTarget'))
+        return is_callable([$auth, 'getDefaultLoginTarget'])
             ? $auth->getDefaultLoginTarget() : null;
     }
 
@@ -348,7 +374,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
         // Clear out the cached user object and session entry.
         $this->currentUser = false;
         unset($this->session->userId);
-        setcookie('loggedOut', 1, null, '/');
+        $this->cookieManager->set('loggedOut', 1);
 
         // Destroy the session for good measure, if requested.
         if ($destroy) {
@@ -357,7 +383,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
             // If we don't want to destroy the session, we still need to empty it.
             // There should be a way to do this through Zend\Session, but there
             // apparently isn't (TODO -- do this better):
-            $_SESSION = array();
+            $_SESSION = [];
         }
 
         return $url;
@@ -370,7 +396,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
      */
     public function userHasLoggedOut()
     {
-        return isset($_COOKIE['loggedOut']) && $_COOKIE['loggedOut'];
+        return (bool)$this->cookieManager->get('loggedOut');
     }
 
     /**
@@ -384,7 +410,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
         // load the object from the database:
         if (!$this->currentUser && isset($this->session->userId)) {
             $results = $this->userTable
-                ->select(array('id' => $this->session->userId));
+                ->select(['id' => $this->session->userId]);
             $this->currentUser = count($results) < 1
                 ? false : $results->current();
         }
@@ -398,7 +424,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
      */
     public function getIdentity()
     {
-        return ($user = $this->isLoggedIn()) ?: null;
+        return $this->isLoggedIn() ?: null;
     }
 
     /**
@@ -426,7 +452,7 @@ class Manager implements \ZfcRbac\Identity\IdentityProviderInterface
     {
         $this->currentUser = $user;
         $this->session->userId = $user->id;
-        setcookie('loggedOut', '', time() - 3600, '/'); // clear logged out cookie
+        $this->cookieManager->clear('loggedOut');
     }
 
     /**

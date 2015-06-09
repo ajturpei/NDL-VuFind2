@@ -57,8 +57,8 @@ class SolrQdc extends \VuFind\RecordDriver\SolrDefault
      */
     public function getAbstracts()
     {
-        $abstractValues = array();
-        $abstracts = array();
+        $abstractValues = [];
+        $abstracts = [];
         $abstract = '';
         $lang = '';
         foreach ($this->getSimpleXML()->xpath('/qualifieddc/abstract') as $node) {
@@ -74,23 +74,17 @@ class SolrQdc extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
-     * Get all authors apart from presenters
+     * Return an external URL where a displayable description text
+     * can be retrieved from, if available; false otherwise.
      *
-     * @return array
+     * @return mixed
      */
-    public function getNonPresenterAuthors()
+    public function getDescriptionURL()
     {
-        $authors = array();
-        if ($author = $this->getPrimaryAuthor()) {
-            $authors[] = array('name' => $author);
+        if ($isbn = $this->getCleanISBN()) {
+            return 'http://siilo-kk.lib.helsinki.fi/getText.php?query=' . $isbn;
         }
-        if ($author = $this->getCorporateAuthor()) {
-            $authors[] = array('name' => $author);
-        }
-        foreach ($this->getSecondaryAuthors() as $author) {
-            $authors[] = array('name' => $author);
-        }
-        return $authors;
+        return false;
     }
 
     /**
