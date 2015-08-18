@@ -4,13 +4,11 @@
     <div class="cover-wrapper">
       <? /* Display thumbnail if appropriate: */ ?>
       <? $img = $this->recordImage($this->record($this->driver)) ?>
-      <?= $img->render('record', array('small' => array('w' => 100, 'h' => 100, 'maxh' => 200), 'medium' => array('w' => 300, 'h' => 300, 'maxh' => 400))) ?>
+      <?= $img->render('record', array('small' => array('w' => 50, 'h' => 50), 'medium' => array('w' => 1200, 'h' => 1200))) ?>
       <? /* Display qrcode if appropriate: */ ?>
       <? $QRCode = $this->record($this->driver)->getQRCode("core"); ?>
       <? if($QRCode): ?>
-        <div class="hidden-xs">
-           <div class="visible-print inline-block"><img alt="<?=$this->transEsc('QR Code')?>" class="qrcode" src="<?=$this->escapeHtmlAttr($QRCode);?>"/></div>
-        </div>
+        <div class="visible-print inline-block"><img alt="<?=$this->transEsc('QR Code')?>" class="qrcode" src="<?=$this->escapeHtmlAttr($QRCode);?>"/></div>
       <? endif; ?>
     </div>
 
@@ -23,21 +21,43 @@
 
   <div class="col-sm-10 record-information">
     <h1 property="name" class="record-title"><?=$this->escapeHtml($this->driver->getShortTitle() . ' ' . $this->driver->getSubtitle() . ' ' . $this->driver->getTitleSection())?></h1>
-    <div class="truncate-field">
-      <div class="record-authors">
+    <div class="description">
+      <span id="description_text" data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>">
+        <i class="fa fa-spinner fa-spin"></i>
+      </span>
+    </div>
+
+    <?
+      $openUrl = $this->openUrl($this->driver, 'record');
+      $openUrlActive = $openUrl->isActive();
+      // Account for replace_other_urls setting
+      $urls = $this->record($this->driver)->getLinkDetails($openUrlActive);
+    ?>
+    <? if (!empty($urls) || $openUrlActive): ?>
+    <div class="local-available-online-record">
+      <? foreach ($urls as $current): ?>
+      <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><i class="fa fa-external-link"></i> <?=$this->escapeHtml($current['desc'])?></a><br/>
+      <? endforeach; ?>
+      <? if ($openUrlActive): ?>
+            <?=$openUrl->renderTemplate()?><br/>
+      <? endif; ?>
+    </div>
+    <? endif; ?>
+
+    <div class="record-authors">
+        <? $formats = $this->driver->getFormats(); if (!empty($formats)): ?>
+          <span><?=$this->record($this->driver)->getFormatList()?></span>
+        <? endif; ?>
+
         <? if ($results = $this->driver->getNonPresenterAuthors()): ?>
-        <span property="author">
+        <div class="truncate-field">
+          <span property="author">
           <? foreach($results as $index => $author): ?>
             <?=($index > 0 ? '; ' : '')?><a href="<?=$this->record($this->driver)->getLink('author', $author['name'])?>"><?=$this->escapeHtml($author['name'])?><? if (!empty($author['role'])): ?>, <?=$this->escapeHtml($author['role'])?><? endif; ?></a>
           <? endforeach; ?>
-        </span>
-        <? endif; ?>
-
-        <div class="description">
-          <span id="description_text" data-id="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>">
-            <i class="fa fa-spinner fa-spin"></i>
           </span>
         </div>
+        <? endif; ?>
 
         <? $publications = $this->driver->getPublicationDetails(); if (!empty($publications)): ?>
         <? foreach ($publications as $field): ?>
@@ -48,30 +68,13 @@
             <? $pubName = $field->getName(); if (!empty($pubName)): ?>
               <span property="name"><?=$this->escapeHtml($pubName)?></span>
             <? endif; ?>
-            </span>
             <? $pubDate = $field->getDate(); if (!empty($pubDate)): ?>
               <span property="publicationDate"><?=$this->escapeHtml($pubDate)?></span>
             <? endif; ?>
+            </span>
           <? endforeach; ?>
         <? endif; ?>
-      </div>
     </div>
-
-    <?
-        $openUrl = $this->driver->openURLActive('record') ? $this->driver->getOpenURL() : false;
-        // Account for replace_other_urls setting
-        $urls = ($openUrl && $this->driver->replaceURLsWithOpenURL()) ? array() : $this->record($this->driver)->getLinkDetails();
-      ?>
-    <? if (!empty($urls) || $openUrl): ?>
-    <div class="local-available-online-record">
-      <? foreach ($urls as $current): ?>
-      <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><i class="fa fa-external-link"></i> <?=$this->escapeHtml($current['desc'])?></a><br/>
-      <? endforeach; ?>
-      <? if ($openUrl): ?>
-            <?=$this->openUrl($openUrl)?><br/>
-      <? endif; ?>
-    </div>
-    <? endif; ?>
 
     <? if ($abstracts = $this->driver->getAbstracts()): ?>
       <div class="truncate-field wide">
@@ -100,7 +103,7 @@
     <? endif; ?>
 
     <?/* Display Main Details */?>
-    <table class="table table-finna-record record-details" summary="<?=$this->transEsc('Bibliographic Details')?>">
+    <table class="table table-finna-record record-details">
       <? $journalTitle = $this->driver->getContainerTitle(); if (!empty($journalTitle)): ?>
       <tr>
         <th><?=$this->transEsc('Published in')?>:</th>
@@ -133,12 +136,6 @@
           <? endforeach; ?>
         </td>
       </tr>
-      <? endif; ?>
-
-      <? $formats = $this->driver->getFormats(); if (!empty($formats)): ?>
-        <tr>
-          <td colspan="2"><?=$this->record($this->driver)->getFormatList()?></td>
-        </tr>
       <? endif; ?>
 
       <? $langs = $this->driver->getLanguages(); if (!empty($langs)): ?>

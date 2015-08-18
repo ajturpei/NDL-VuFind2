@@ -59,7 +59,7 @@ class UrlQueryHelper extends \VuFind\Search\UrlQueryHelper
     }
 
     /**
-     * Expose parent method since we need to use from SearchTabs.
+     * Expose parent method since we need to use it from SearchTabs.
      *
      * @param array $a      Array of parameters to turn into a GET string
      * @param bool  $escape Should we escape the string for use in the view?
@@ -72,19 +72,39 @@ class UrlQueryHelper extends \VuFind\Search\UrlQueryHelper
     }
 
     /**
-     * Sets search id in the params and returns resulting query string.
+     * Remove any instance of the facet from the parameters and add a new one.
      *
-     * @param string $class Search class.
-     * @param int    $id    Search id.
+     * @param string $field    Facet field
+     * @param string $value    Facet value
+     * @param string $operator Facet type to add (AND, OR, NOT)
      *
      * @return string
      */
-    public function setSearchId($class, $id)
+    public function replaceFacet($field, $value, $operator = 'AND')
     {
-        $params = $this->getParamArray();
-        $searches = isset($params['search']) ? $params['search'] : array();
-        $res = array();
-        $res[] = "$class:$id";
+        $this->params->removeAllFilters($field);
+        return $this->addFacet($field, $value, $operator);
+    }
+
+    /**
+     * Sets search id in the params.
+     *
+     * @param string  $class  Search class.
+     * @param int     $id     Search id or NULL if the current id for this
+     *                        search class should be removed.
+     * @param boolean $output Output query string?
+     *
+     * @return string
+     */
+    public function setSearchId($class, $id, $output = true)
+    {
+        $params = $this->defaultParams;
+        $searches = isset($params['search']) ? $params['search'] : [];
+
+        $res = [];
+        if ($id !== null) {
+            $res[] = "$class:$id";
+        }
 
         foreach ($searches as $search) {
             list($searchClass, $searchId) = explode(':', $search);
@@ -92,8 +112,28 @@ class UrlQueryHelper extends \VuFind\Search\UrlQueryHelper
                 $res[] = "$searchClass:$searchId";
             }
         }
-        $params['search'] = $res;
+        $this->setDefaultParameter('search', $res);
 
-        return '?' . $this->buildQueryString($params, false);
+        if ($output) {
+            $params = $this->getParamArray();
+            return '?' . $this->buildQueryString($params, false);
+        }
+    }
+
+    /**
+     * Get an array of URL parameters.
+     *
+     * @return array
+     */
+    public function getParamArray()
+    {
+        $params = parent::getParamArray();
+        $filter = $this->params->getSpatialDateRangeFilter();
+        if ($filter && isset($filter['type'])
+        ) {
+            $field = $this->params->getSpatialDateRangeField() . '_type';
+            $params[$field] = $filter['type'];
+        }
+        return $params;
     }
 }

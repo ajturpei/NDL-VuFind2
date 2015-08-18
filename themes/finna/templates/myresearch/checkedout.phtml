@@ -7,21 +7,32 @@
 
     // Set up breadcrumbs:
     $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Checked Out Items') . '</li>';
+
+    $user = $this->auth()->isLoggedIn();
 ?>
 <div class="row">
   <div class="col-md-10 col-lg-9 myresearch-grid-list">
     <?=$this->flashmessages()?>
-    <h2><?=$this->transEsc('Your Checked Out Items')?> (<?=count($this->transactions)?>)</h2>
+    <?=$this->partial('myresearch/borrowing-block.phtml', array('profile' => $this->profile)); ?>
+    <div class="useraccount-header"><?=$this->transEsc('Your Checked Out Items')?> <?=$this->context($this)->renderInContext('librarycards/selectcard.phtml', array('user' => $user))?></div>
+    <? if (isset($this->noSupport)): ?>
+      <? if ($user->getLibraryCards()->count() > 1): ?>
+        <div class="support-notice">
+          <p><?=$this->transEsc("no_ils_support_description") ?></p>
+        </div>
+      <? endif; ?>
+    <? else: ?>
     <? if (!empty($this->transactions)): ?>
       <? if ($this->renewForm): ?>
-      <form name="renewals" action="" method="post" id="renewals">
+      <form name="renewals" method="post" id="renewals">
         <div class="toolbar">
           <input type="submit" class="btn btn-primary" name="renewSelected" value="<?=$this->transEsc("renew_selected")?>" />
           <input type="submit" class="btn btn-primary" name="renewAll" value="<?=$this->transEsc('renew_all')?>" />
+          <span class="myresearch-count"><?=$this->transEsc('total_loaned_items', ['%%count%%' => count($this->transactions)]);?></span>
         </div>
         <? else: ?>
         <div class="toolbar">
-          <p><?=$this->transEsc('cannot renew any checked out items')?></p>
+          <p><?=$this->transEsc('cannot renew any checked out items')?> <span class="myresearch-count no-buttons"><?=$this->transEsc('total_loaned_items', ['%%count%%' => count($this->transactions)]);?></span></p>
         </div>
       <? endif; ?>
       <? $i = 0; foreach ($this->transactions as $resource): ?>
@@ -32,9 +43,11 @@
             <? if (isset($ilsDetails['renewable']) && $ilsDetails['renewable'] && isset($ilsDetails['renew_details'])): ?>
               <? $safeId = preg_replace('/[^a-zA-Z0-9]/', '', $ilsDetails['renew_details']); ?>
               <div class="checkboxFilter">
-                <label class="checkbox">
-                <input type="checkbox" name="renewSelectedIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['renew_details'])?>" id="checkbox_<?=$safeId?>" />
-                </label>
+                <div class="checkbox">
+                  <label>
+                  <input type="checkbox" name="renewSelectedIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['renew_details'])?>" id="checkbox_<?=$safeId?>" />
+                  </label>
+                </div>
               </div>
               <input type="hidden" name="renewAllIDS[]" value="<?=$this->escapeHtmlAttr($ilsDetails['renew_details'])?>" />
             <? else: ?>
@@ -142,6 +155,7 @@
       <? if ($this->renewForm): ?></form><? endif; ?>
     <? else: ?>
       <h4><?=$this->transEsc('You do not have any items checked out')?>.</h4>
+    <? endif; ?>
     <? endif; ?>
   </div>
 </div>

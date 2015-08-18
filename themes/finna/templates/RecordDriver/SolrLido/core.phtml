@@ -1,9 +1,10 @@
+<? $this->headScript()->appendFile("finna-record.js"); ?>
 <div class="row" vocab="http://schema.org/" resource="#record" typeof="<?=$this->driver->getSchemaOrgFormats()?> Product">
   <div class="col-sm-4">
     <div class="cover-wrapper">
       <? /* Display thumbnail if appropriate: */ ?>
       <? $img = $this->recordImage($this->record($this->driver))?>
-      <?= $img->render('record', array('small' => array('w' => 189, 'h' => 300), 'medium' => array('w' => 258, 'maxh' => 100))) ?>
+      <?= $img->render('record', array('small' => array('w' => 50, 'h' => 50), 'medium' => array('w' => 1200, 'h' => 1200))) ?>
       <? /* Display qrcode if appropriate: */ ?>
       <? $access = $this->driver->getAccessRestrictions(); if (!empty($access)): ?>
         <div class="access-rights">
@@ -14,12 +15,10 @@
           <? endforeach; ?>
           </div>
         </div>
-  <? endif; ?>
+      <? endif; ?>
       <? $QRCode = $this->record($this->driver)->getQRCode("core"); ?>
       <? if($QRCode): ?>
-        <div class="hidden-xs">
-          <div class="visible-print inline-block"><img alt="<?=$this->transEsc('QR Code')?>" class="qrcode" src="<?=$this->escapeHtmlAttr($QRCode);?>"/></div>
-        </div>
+        <div class="visible-print inline-block"><img alt="<?=$this->transEsc('QR Code')?>" class="qrcode" src="<?=$this->escapeHtmlAttr($QRCode);?>"/></div>
       <? endif; ?>
     </div>
 
@@ -49,7 +48,7 @@
     </div>
     <? $summary = $this->driver->getSummary(); $summary = isset($summary[0]) ? $this->escapeHtml($summary[0]) : false; ?>
     <? if ($summary): ?>
-      <div class="truncate-field">
+      <div class="truncate-field wide">
         <p class="summary"><?=$summary?></p>
       </div>
     <? endif; ?>
@@ -62,10 +61,11 @@
     <? endif; ?>
 
     <?/* Display Main Details */?>
-    <table class="table table-finna-record record-details" summary="<?=$this->transEsc('Bibliographic Details')?>">
+    <table class="table table-finna-record record-details">
       <? $formats = $this->driver->getFormats(); if (!empty($formats)): ?>
       <tr>
-        <td colspan="2"><?=$this->record($this->driver)->getFormatList()?></td>
+        <th><?=$this->transEsc('Format');?>:</th>
+        <td><?=$this->record($this->driver)->getFormatList()?></td>
       </tr>
       <? endif; ?>
       <? $journalTitle = $this->driver->getContainerTitle(); if (!empty($journalTitle)): ?>
@@ -130,7 +130,7 @@
       </tr>
       <? endif; ?>
 
-      
+
 
       <? if ($results = $this->driver->getInstitutions()): ?>
       <tr>
@@ -277,19 +277,20 @@
       <? endif; ?>
 
       <?
-        $openUrl = $this->driver->openURLActive('record') ? $this->driver->getOpenURL() : false;
+        $openUrl = $this->openUrl($this->driver, 'record');
+        $openUrlActive = $openUrl->isActive();
         // Account for replace_other_urls setting
-        $urls = ($openUrl && $this->driver->replaceURLsWithOpenURL()) ? array() : $this->record($this->driver)->getLinkDetails();
+        $urls = $this->record($this->driver)->getLinkDetails($openUrlActive);
       ?>
-      <? if (!empty($urls) || $openUrl): ?>
+      <? if (!empty($urls) || $openUrlActive): ?>
       <tr>
         <th><?=$this->transEsc('Online Access')?>: </th>
         <td>
           <? foreach ($urls as $current): ?>
             <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>"><?=$this->escapeHtml($current['desc'])?></a><br/>
           <? endforeach; ?>
-          <? if ($openUrl): ?>
-            <?=$this->openUrl($openUrl)?><br/>
+          <? if ($openUrlActive): ?>
+            <?=$openUrl->renderTemplate()?><br/>
           <? endif; ?>
         </td>
       </tr>

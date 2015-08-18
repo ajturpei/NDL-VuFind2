@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2010.
+ * Copyright (C) The National Library 2015.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -22,6 +22,7 @@
  * @category VuFind2
  * @package  RecordDrivers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:record_drivers Wiki
  */
@@ -33,6 +34,7 @@ namespace Finna\RecordDriver;
  * @category VuFind2
  * @package  RecordDrivers
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:record_drivers Wiki
  *
@@ -61,7 +63,7 @@ trait SolrFinna
     public function getAccessRestrictions()
     {
         // Not currently stored in the Solr index
-        return array();
+        return [];
     }
 
     /**
@@ -169,6 +171,51 @@ trait SolrFinna
     }
 
     /**
+     * Get an array of dedup and link data associated with the record.
+     *
+     * @return array
+     */
+    public function getMergedRecordData()
+    {
+        // If local_ids_str_mv is set, we already have all
+        if (isset($this->fields['local_ids_str_mv'])) {
+            return [
+                'records' => $this->createSourceIdArray(
+                    $this->fields['local_ids_str_mv']
+                ),
+                'urls' => isset($this->fields['online_urls_str_mv'])
+                    ? $this->mergeURLArray(
+                        $this->fields['online_urls_str_mv'],
+                        true
+                    ) : []
+            ];
+        }
+
+        // Find the dedup record
+        if (null === $this->searchService) {
+            return [];
+        }
+
+        $safeId = addcslashes($this->getUniqueID(), '"');
+        $query = new \VuFindSearch\Query\Query(
+            'local_ids_str_mv:"' . $safeId . '"'
+        );
+        $records = $this->searchService->search('Solr', $query, 0, 1)->getRecords();
+        if (!isset($records[0])) {
+            return [];
+        }
+        $results = [];
+        $results['records'] = $this->createSourceIdArray($records[0]->getLocalIds());
+        if ($onlineURLs = $records[0]->getOnlineURLs(true)) {
+            $results['urls'] = $this->mergeURLArray(
+                $onlineURLs,
+                true
+            );
+        }
+        return $results;
+    }
+
+    /**
      * Get all authors apart from presenters
      *
      * @return array
@@ -213,7 +260,7 @@ trait SolrFinna
     public function getOriginalLanguages()
     {
         return isset($this->fields['original_lng_str_mv'])
-            ? $this->fields['original_lng_str_mv'] : array();
+            ? $this->fields['original_lng_str_mv'] : [];
     }
 
     /**
@@ -234,7 +281,7 @@ trait SolrFinna
      * @param string $size  Size of thumbnail
      * @param int    $index Image index
      *
-     * @return string|array|bool
+     * @return array|bool
      */
     public function getRecordImage($size = 'small', $index = 0)
     {
@@ -248,10 +295,14 @@ trait SolrFinna
                 }
             }
             if (!is_array($url)) {
-                return array('id' => $this->getUniqueId(), 'url' => $url);
+                return ['id' => $this->getUniqueId(), 'url' => $url];
             }
         }
-        return parent::getThumbnail($size);
+        $params = parent::getThumbnail($size);
+        if ($params && !is_array($params)) {
+            $params = ['url' => $params];
+        }
+        return $params;
     }
 
     /**
@@ -281,6 +332,16 @@ trait SolrFinna
     }
 
     /**
+     * Return SFX Object ID
+     *
+     * @return string.
+     */
+    public function getSfxObjectId()
+    {
+        return '';
+    }
+
+    /**
      * Return record source.
      *
      * @return string.
@@ -291,16 +352,125 @@ trait SolrFinna
     }
 
     /**
-     * Like getFormat() but takes into account __unprocessed_format field.
+     * Return main year.
      *
-     * @return array Formats
+     * @return string|false
      */
-    public function getUnprocessedFormat()
+    public function getYear()
     {
-        if (isset($this->fields['__unprocessed_format'])) {
-            return $this->fields['__unprocessed_format'];
+        return isset($this->fields['main_date_str'])
+            ? $this->fields['main_date_str'] : false;
+    }
+
+    /**
+     * Get a string representing the first date that the record was indexed.
+     *
+     * @return string
+     */
+    public function getFirstIndexed()
+    {
+        return isset($this->fields['first_indexed'])
+            ? $this->fields['first_indexed'] : '';
+    }
+
+    /**
+     * Checks the current record if it's supported for generating OpenURLs.
+     *
+     * @return bool
+     */
+    public function supportsOpenUrl()
+    {
+        // OpenURL is supported only if we have an ISSN, ISBN or SFX Object ID.
+        return  $this->getCleanISSN() || $this->getCleanISBN()
+            || !$this->getSfxObjectId();
+    }
+
+    /**
+     * Get OpenURL parameters for a book section.
+     *
+     * @return array
+     */
+    protected function getBookSectionOpenUrlParams()
+    {
+        $params = $this->getBookOpenUrlParams();
+        $params['rft.volume'] = $this->getContainerVolume();
+        $params['rft.issue'] = $this->getContainerIssue();
+        $params['rft.spage'] = $this->getContainerStartPage();
+        unset($params['rft.title']);
+        $params['rft.btitle'] = $this->getContainerTitle();
+        $params['rft.atitle'] = $this->getTitle();
+
+        return $params;
+    }
+
+    /**
+     * Get OpenURL parameters for a journal.
+     *
+     * @return array
+     */
+    protected function getJournalOpenUrlParams()
+    {
+        $params = parent::getJournalOpenUrlParams();
+        if ($objectId = $this->getSfxObjectId()) {
+            $params['rft.object_id'] = $objectId;
         }
-        return $this->getFormat();
+        return $params;
+    }
+
+    /**
+     * Support method for getOpenURL() -- pick the OpenURL format.
+     *
+     * @return string
+     */
+    protected function getOpenUrlFormat()
+    {
+        // If we have multiple formats, Book, Journal and Article are most
+        // important...
+        $formats = $this->getFormats();
+        if (in_array('1/Book/BookSection/', $formats)
+            || in_array('1/Book/eBookSection/', $formats)
+        ) {
+            return 'BookSection';
+        } else if (in_array('0/Book/', $formats)) {
+            return 'Book';
+        } else if (in_array('1/Journal/Article/', $formats)
+            || in_array('1/Journal/eArticle/', $formats)
+        ) {
+            return 'Article';
+        } else if (in_array('0/Journal/', $formats)) {
+            return 'Journal';
+        } else if (isset($formats[0])) {
+            $format = explode('/', $formats[0]);
+            if (isset($format[1])) {
+                return $format[1];
+            }
+            if ($formats[0] instanceof \VuFind\I18n\TranslatableStringInterface) {
+                return $formats[0]->getDisplayString();
+            }
+        } else if (strlen($this->getCleanISSN()) > 0) {
+            return 'Journal';
+        }
+        return 'Book';
+    }
+
+    /**
+     * Extract sources from record IDs and create an array of sources and IDs
+     *
+     * @param array $ids Record ID's
+     *
+     * @return array Formatted array
+     */
+    protected function createSourceIdArray($ids)
+    {
+        $results = [];
+        foreach ($ids as $id) {
+            list($source) = explode('.', $id);
+            $results[] = [
+                'source' => $source,
+                'id' => $id
+            ];
+        }
+        return $results;
     }
 
     /**

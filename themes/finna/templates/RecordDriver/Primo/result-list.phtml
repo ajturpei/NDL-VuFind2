@@ -1,10 +1,4 @@
-<?
-  $openUrl = $this->driver->getOpenURL();
-  $openUrlActive = $this->driver->openURLActive('results');
-  $openUrlMoreOptions = $this->openUrl($openUrl, true);
-  $urls = $this->record($this->driver)->getLinkDetails();
-?>
-<!-- start of result-list.phtml -->
+<!-- start of Primo result-list.phtml -->
 <div class="<?=$this->driver->supportsAjaxStatus()?'ajaxItem ':''?>">
     <div>
       <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueID())?>" class="hiddenId" />
@@ -25,10 +19,10 @@
           }
         ?>
         </a>
-        
+
       </div>
       <div class="dateyeartype">
-        <?=str_replace('class="', 'class="label label-info ', $this->record($this->driver)->getFormatList()). '<br />'?>
+        <div class="resultItemFormat"><?=str_replace('class="', 'class="label label-info ', $this->record($this->driver)->getFormatList())?></div>
         <? if($this->driver->isCollection()): ?>
           <?=implode('<br>', $this->driver->getSummary()); ?>
         <? else: ?>
@@ -133,12 +127,6 @@
           <p class="summary"><?=$summary;?></p>
         </div>
       <? endif; ?>
-      <? if ($this->userlist()->getMode() !== 'disabled'): ?>
-        <? /* Saved lists */ ?>
-        <div class="savedLists alert alert-info hidden">
-          <strong><?=$this->transEsc("Saved in")?>:</strong>
-        </div>
-      <? endif; ?>
     </div>
     <div class="col-xs-1 col-sm-1 col-sm-push-3 hidden-print">
       <? /* Display qrcode if appropriate: */ ?>
@@ -157,7 +145,7 @@
 
       <? if ($this->userlist()->getMode() !== 'disabled'): ?>
         <? /* Add to favorites */ ?>
-        <a href="<?=$this->recordLink()->getActionUrl($this->driver, 'Save')?>" class="save-record modal-link" id="<?=$this->driver->getUniqueId() ?>" title="<?=$this->transEsc('Add to favorites')?>"><i class="fa fa-heart"></i> <span class="sr-only"><?=$this->transEsc('Add to favorites')?></span></a><br/>      
+        <a href="<?=$this->recordLink()->getActionUrl($this->driver, 'Save')?>" class="save-record modal-link" id="<?=$this->driver->getUniqueId() ?>" title="<?=$this->transEsc('Add to favorites')?>"><i class="fa fa-heart"></i> <span class="sr-only"><?=$this->transEsc('Add to favorites')?></span></a><br/>
       <? endif; ?>
 
       <? /* Hierarchy tree link */ ?>
@@ -165,8 +153,8 @@
         <? foreach ($trees as $hierarchyID => $hierarchyTitle): ?>
           <div class="hierarchyTreeLink">
             <input type="hidden" value="<?=$this->escapeHtmlAttr($hierarchyID)?>" class="hiddenHierarchyId" />
-            <i class="fa fa-sitemap"></i>
             <a class="hierarchyTreeLinkText modal-link" href="<?=$this->recordLink()->getTabUrl($this->driver, 'HierarchyTree')?>?hierarchy=<?=urlencode($hierarchyID)?>#tabnav" title="<?=$this->transEsc('hierarchy_tree')?>">
+              <i class="fa fa-sitemap"></i>
               <?=$this->transEsc('hierarchy_view_context')?><? if (count($trees) > 1): ?>: <?=$this->escapeHtml($hierarchyTitle)?><? endif; ?>
             </a>
           </div>
@@ -175,38 +163,23 @@
     </div>
     <div class="clearfix visible-xs"></div>
     <div class="col-sm-3 col-sm-pull-1">
-      <?
-      $fulltextAvailable = false;
-      foreach ($urls as $url) {
-        if (!$url['citation']) {
-          $fulltextAvailable = true;
-          break;
-        }
-      }
-      ?>
-      <div class="primo-available-online<?= $fulltextAvailable ? ' fulltext-available' : ''?>">
-        <? if ($openUrlActive || !empty($urls)): ?>
-          <div class="heading"><strong><?=$this->transEsc('Electronic')?></strong></div>
-          <? if(!$this->driver->isCollection()):
-            foreach ($urls as $current): ?>
-              <a href="<?=$this->escapeHtmlAttr($this->proxyUrl($current['url']))?>" class="fulltext<?=$current['citation'] ? ' citation' : ''?>" target="_blank"><i class="fa fa-external-link"></i> <?=$current['citation'] ? $this->transEsc('Citation') : $this->transEsc(end($this->driver->getFormats())) ?></a><?=$current['urlShort'] ? ' <span class="host">' . $current['urlShort'] . '</span>' : '' ?>
-          <? endforeach; ?>
-         <? endif; ?>
-        <? endif; ?>
-
-        <? if ($openUrlActive): ?>
-          <?=$this->openUrl($openUrl)?>
-        <? endif; ?>
-
-      <? if (!$openUrlActive && empty($urls) && $this->driver->supportsAjaxStatus()): ?>
-        <span class="status ajax-availability hidden">
-          <span class="label label-default"><?=$this->transEsc('Loading')?>...</span>
-        </span>
-      <? endif; ?>
-      </div>
+      <?=$this->record($this->driver)->getOnlineUrls('results')?>
     </div>
     <div class="col-xs-12">
-      <?= $openUrlMoreOptions ? $openUrlMoreOptions : '' ?>
+      <?
+      $openUrl = $this->openUrl($driver, 'results');
+      $openUrlActive = $openUrl->isActive();
+      if ($openUrlActive) {
+        echo $openUrl->renderMoreOptions();
+      }
+      ?>
+    <? if ($this->userlist()->getMode() !== 'disabled'): ?>
+        <? /* Saved lists */ ?>
+        <div class="savedLists alert alert-info hidden col-md-11">
+          <strong><?=$this->transEsc("Saved in")?>:</strong>
+        </div>
+    <? endif; ?>
     </div>
+
 </div>
 <!-- end of result-list.phtml -->

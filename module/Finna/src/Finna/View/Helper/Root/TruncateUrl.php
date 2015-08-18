@@ -1,6 +1,6 @@
 <?php
 /**
- * Record driver view helper
+ * URL truncater
  *
  * PHP version 5
  *
@@ -28,7 +28,7 @@
 namespace Finna\View\Helper\Root;
 
 /**
- * Record driver view helper
+ * URL truncater
  *
  * @category VuFind2
  * @package  View_Helpers
@@ -57,7 +57,9 @@ class TruncateUrl extends \Zend\View\Helper\AbstractHelper
         }
         // Shorten if necessary
         if (strlen($url) > 40) {
-            $url = preg_replace('#^ (?>((?:.*:/+)?[^/]+/.{8})) .{4,} (.{12}) $#x', '$1...$2', $url);
+            $url = preg_replace(
+                '#^ (?>((?:.*:/+)?[^/]+/.{8})) .{4,} (.{12}) $#x', '$1...$2', $url
+            );
         }
         return $url;
     }

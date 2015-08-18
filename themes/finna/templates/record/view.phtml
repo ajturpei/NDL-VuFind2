@@ -2,6 +2,9 @@
   // Set up standard record scripts:
   $this->headScript()->appendFile("record.js");
   $this->headScript()->appendFile("check_save_statuses.js");
+  if ($this->driver->getResourceSource() == 'Primo') {
+    $this->headScript()->appendFile("finna-bx.js");
+  }
   // Activate Syndetics Plus if necessary:
   if ($this->syndeticsPlus()->isActive()) {
     echo $this->headScript()->appendFile($this->syndeticsPlus()->getScript());
@@ -18,12 +21,12 @@
 
   $this->layout()->title = $this->driver->getShortTitle();
 ?>
-
+<meta name="format-detection" content="telephone=no">
 </div>
 <div class="container-fluid record-view-header">
  <div class="container">
   <div class="row">
-    <div class="col-xs-5">
+    <div class="col-xs-4 col-sm-5 hidden-print">
     <?
       $html = '<span class="btn btn-primary"><i class="fa fa-arrow-left"></i> <i class="fa fa-search"></i></span>';
       $html .= '<span class="back-to-search-text hidden-xs">'.$this->transEsc('Back to search results').'</span>';
@@ -33,11 +36,11 @@
       <div class="back-to-search"><?=$previousSearch?></div>
     <? endif; ?>
     </div>
-    <div class="col-xs-7">
+    <div class="col-xs-8 col-sm-7">
     <? if (isset($this->scrollData) && ($this->scrollData['previousRecord'] || $this->scrollData['nextRecord'])): ?>
       <ul class="pager hidden-print" id="view-pager">
       <? if ($this->scrollData['previousRecord']): ?>
-        <li>
+        <li class="pager-previous-record">
           <a href="<?=$this->recordLink()->getUrl($this->scrollData['previousRecord'])?>#searchForm" title="<?=$this->transEsc('Previous Record')?>"><i class="fa fa-arrow-left"></i></a>
         </li>
         <? else: ?>
@@ -45,7 +48,7 @@
       <? endif; ?>
         <li class="pager-text"><?=$this->localizedNumber($this->scrollData['currentPosition']) . ' / ' . $this->localizedNumber($this->scrollData['resultTotal']) ?></li>
       <? if ($this->scrollData['nextRecord']): ?>
-        <li>
+        <li class="pager-next-record">
           <a href="<?=$this->recordLink()->getUrl($this->scrollData['nextRecord'])?>#searchForm" title="<?=$this->transEsc('Next Record')?>"><i class="fa fa-arrow-right"></i></a>
         </li>
       <? else: ?>
@@ -64,13 +67,14 @@
       <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getUniqueId())?>" class="hiddenId" id="record_id" />
       <input type="hidden" value="<?=$this->escapeHtmlAttr($this->driver->getResourceSource()) ?>" class="hiddenSource" />
       <?=$this->flashmessages()?>
-      <?=$this->record($this->driver)->getCoreMetadata()?>
       <?=$this->record($this->driver)->getToolbar()?>
+      <?=$this->record($this->driver)->getCoreMetadata()?>
+
     </div>
 
     <? if (count($this->tabs) > 0): ?>
       <a name="tabnav"></a>
-      <ul class="recordTabs nav nav-tabs">
+      <ul class="recordTabs nav nav-tabs hidden-print">
         <? foreach ($this->tabs as $tab => $obj): ?>
         <? // add current tab to breadcrumbs if applicable:
           $desc = $obj->getDescription();
@@ -82,9 +86,10 @@
           $tab_classes = array();
           if ($isCurrent) $tab_classes[] = 'active';
           if (!$obj->isVisible()) $tab_classes[] = 'hidden';
+          $comments = $this->driver->getComments();
         ?>
         <li<?=count($tab_classes) > 0 ? ' class="' . implode(' ', $tab_classes) . '"' : ''?>>
-          <a id="<?=strtolower($tab) ?>" href="<?=$this->recordLink()->getTabUrl($this->driver, $tab)?>#tabnav"><i class="fa fa-<?=$this->escapeHtmlAttr($tab)?>"></i> <?=$this->transEsc($desc)?></a>
+          <a id="<?=strtolower($tab) ?>" href="<?=$this->recordLink()->getTabUrl($this->driver, $tab)?>#tabnav"><i class="fa fa-<?=$this->escapeHtmlAttr($tab)?>"></i> <?=$this->transEsc($desc)?> <? if (strtolower($tab) == 'usercomments') : ?>(<?= count($comments) ?>)<? endif; ?></a>
         </li>
         <? endforeach; ?>
       </ul>
@@ -96,15 +101,26 @@
       </div>
     </div>
 
-    <span class="Z3988" title="<?=$this->escapeHtmlAttr($this->driver->getOpenURL())?>"></span>
+    <?=$this->driver->supportsCoinsOpenURL()?'<span class="Z3988" title="'.$this->escapeHtmlAttr($this->driver->getCoinsOpenURL()).'"></span>':''?>
   </div>
 
   <div class="<?=$this->layoutClass('sidebar')?>">
+    <? if ($this->resolver('record/record-organisation-menu.phtml') && $this->driver->getResourceSource() == 'VuFind'): ?>
+      <?=$this->render('record/record-organisation-menu.phtml') ?>
+    <? endif; ?>
     <? foreach ($this->related()->getList($this->driver) as $current): ?>
       <?=$this->related()->render($current)?>
     <? endforeach; ?>
+    <? if ($this->driver->getResourceSource() == 'Primo'): ?>
+      <div id="bx-recommendations" class="bx-recommendations hidden">
+        <h4><?=$this->transEsc('bX Recommendations')?></h4>
+        <ul class="list-group">
+          <li> </li>
+        </ul>
+      </div>
+    <? endif; ?>
   </div>
  </div>
 </div>
+<?=$this->partial('RecordDriver/SolrDefault/toolbar_mobile.phtml') ?>
 <div>
-

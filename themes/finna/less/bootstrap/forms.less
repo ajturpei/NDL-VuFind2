@@ -140,7 +140,6 @@ output {
   &[readonly],
   fieldset[disabled] & {
     cursor: not-allowed;
-    background-color: @input-bg-disabled;
     opacity: 1; // iOS fix for unreadable disabled content
   }
 
@@ -265,7 +264,11 @@ input[type="checkbox"],
  margin-left:0px !important;
 }
 .navbar-form .form-control.search-query {
-    width: @finna-search-input-width; 
+    margin-top: -2px;
+    width: percentage(@finna-search-input-width);
+    @media (max-width: @screen-xs-max) {
+        width: percentage((@finna-search-input-width - 0.06));  
+    }
     border:none;
     box-shadow: none;
     background:transparent;
@@ -280,7 +283,10 @@ input[type="checkbox"],
   background: transparent;
   height: 39px;
   margin-left: 10px;
-  width: @finna-search-input-width;
+  width: percentage(@finna-search-input-width);
+  @media (max-width: @screen-xs-max) {
+        width: percentage((@finna-search-input-width - 0.06));  
+  }
   .tt-hint {}
 }
 // prevent appearance of smaller input field when twitter-typeahead.js is loaded
@@ -474,4 +480,32 @@ input[type="checkbox"],
     top: 0;
     right: (@grid-gutter-width / 2);
   }
+}
+.form-control.date-picker-field {
+    border-bottom-right-radius: 0px;
+    border-top-right-radius: 0px;
+}
+#first_indexedFilter {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    & .date-picker-button {  
+        margin-left: -12px;
+        padding: 6px 10px;
+        border-bottom-left-radius: 0px;
+       border-top-left-radius: 0px;
+    }
+}
+
+.feedback-form {
+    & .form-group {
+        margin-bottom: 20px;   
+    }
+    & .feedback-info, .captcha {
+        padding-top: 10px;
+        border-top: 1px solid @gray-lighter;
+    }
+}
+
+form[name=feedbackRecord] .feedback-info {
+    border: none;
 }

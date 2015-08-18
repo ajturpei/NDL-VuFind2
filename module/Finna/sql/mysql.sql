@@ -10,8 +10,23 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `change_tracker`
+-- Additional columns for search
 --
+ALTER TABLE search ADD COLUMN `finna_search_id` char(32) DEFAULT '';
+ALTER TABLE search ADD COLUMN `finna_schedule` int(1) NOT NULL DEFAULT '0';
+ALTER TABLE search ADD COLUMN `finna_search_object` blob;
+ALTER TABLE search ADD COLUMN `finna_last_executed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00';
+ALTER TABLE search ADD COLUMN `finna_schedule_base_url` varchar(255) NOT NULL DEFAULT '';
+ALTER TABLE search ADD INDEX `finna_search_id` (`finna_search_id`);
+ALTER TABLE search ADD INDEX `finna_schedule` (`finna_schedule`);
+ALTER TABLE search ADD INDEX `finna_schedule_base_url` (`finna_schedule_base_url`);
+--
+-- Additional columns for user
+--
+ALTER TABLE user ADD COLUMN `finna_language` varchar(30) NOT NULL DEFAULT '';
+ALTER TABLE `user` ADD  `finna_due_date_reminder` int(11) NOT NULL DEFAULT '0';
+CREATE INDEX `finna_user_due_date_reminder_key` ON user (`finna_due_date_reminder`);
+
 
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -56,35 +71,6 @@ CREATE TABLE `finna_comments_inappropriate` (
   KEY `user_id` (`user_id`),
   KEY `comment_id` (`comment_id`),
   CONSTRAINT `finna_comments_inappropriate_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `finna_resource` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `resource_id` int(11) DEFAULT NULL,
-  `title_sort` varchar(60) NOT NULL DEFAULT '',
-  `author_sort` varchar(60) NOT NULL DEFAULT '',
-  `date_sort` varchar(60) NOT NULL DEFAULT '',
-  `format_sort` varchar(60) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  KEY `resource_id` (`resource_id`),
-  CONSTRAINT `finna_resource_ibfk_1` FOREIGN KEY (`resource_id`) REFERENCES `resource` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `finna_search` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `search_id` int(11) DEFAULT NULL,
-  `schedule` int(1) NOT NULL DEFAULT '0',
-  `last_executed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `schedule_base_url` varchar(255) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`),
-  KEY `search_id` (`search_id`),
-  CONSTRAINT `finna_search_ibfk_1` FOREIGN KEY (`search_id`) REFERENCES `search` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

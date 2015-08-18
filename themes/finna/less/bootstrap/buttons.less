@@ -80,6 +80,25 @@
     font-size: 1.2em;
     margin-top: 5px;
 }
+.navbar-form {
+    & .clear-button {
+        position: absolute;
+        margin-left: 0px;
+        font-size: 1.5em;
+        padding-top: 5px;
+        background: @body-bg;
+        color: @gray-light;
+        margin-left: -22px;
+        height: 39px;
+        &:before {
+            font-family: 'icomoon';
+            content: "\e01a";      
+        }
+        &:hover {
+            cursor: pointer;   
+        }
+    }
+}
 .nav.searchbox .btn.btn-link {
     color: @finna-searchbox-link-color; 
     font-size: 1em;
@@ -87,17 +106,10 @@
     background: @finna-searchbox-link-background;
     border-radius: @finna-button-radius;
     margin-top: 9px;
-    margin-left: 10px;
     vertical-align: top;
     line-height: 25px;
     padding: 2px 5px 0px;
-    @media(max-width:@screen-xs-max) {
-        float:right;   
-    }
-    @media(min-width:@screen-sm-min) and (max-width:@screen-sm-max) {
-        float:right;
-        margin-right: 17%;
-    }
+    overflow: hidden;
 }
 .searchbox .checkbox {
     display: block;
@@ -113,31 +125,58 @@
     left: 0px;
     width: 206px;
     height: 35px;
-    box-shadow: 0px 15px 20px -12px #000;   
+    box-shadow: 0px 15px 20px -12px #000;
+    z-index: 1;
     @media (max-width: @screen-sm-min) {
         top: 41px;   
     }
 }
-.searchbox .checkbox label input {
+.searchbox, .checkboxFilter {
+    & .checkbox label input {
     display: none;
-}
-.searchbox .checkbox label {
-    margin-left: 10px;
-    line-height: 24px;  
-}
-.searchbox .checkbox label:before{
-    content: "\f096";
-    font-family: 'Fontawesome';
-    font-size: 20px;
-    vertical-align: top;
+    }
+    & .checkbox label {
+        margin-left: 10px;
+        line-height: 24px;  
+    }
+    & .checkbox label:before {
+        content: "\f096";
+        font-family: 'Fontawesome';
+        font-size: 20px;
+        vertical-align: -2px;
+    }
+    & .checkbox.checked label:before {
+        font-family: 'Fontawesome';
+        content: "\f14a"; 
+    }
 }
 
 //== Styling Finna checkboxes
-.checkboxFilter .checkbox {
-    padding: 5px 0px 0px 20px;
+.sidebar .checkboxFilter  {
+    padding: 0px;
+    & .checkbox {
+        padding-left: 12px;
+        margin: 12px 0px;
+    }
+    & label {
+        margin-left: 0px;   
+    }
+    & label:before {
+        margin-right: 5px;
+    }
 }
-.checkboxFilter .checkbox:last-child {
-    padding-bottom: 5px;
+.checkboxFilter.mylist-select-all {
+    padding-left: 0; 
+    padding-top: 2px;
+    & .checkbox {
+        padding-left: 0;
+        & label {
+            margin-left: 0;   
+        }
+    }
+}
+.bulk-action-buttons-col.fixed .checkboxFilter.mylist-select-all {
+    color: @body-bg   
 }
 .checkboxFilter label {
     font-size: 14px;
@@ -159,10 +198,49 @@
     position: absolute;
     margin-left: -1px;
 }
-.searchbox .checkbox.checked label:before, .checkboxFilter label.checkbox input:checked:before  {
-    font-family: 'Fontawesome';
-    content: "\f14a"; 
+.myresearch-row .checkboxFilter {
+    padding-left: 0;
+    & .checkbox {
+        padding-left: 0;
+        margin-top: 0;
+        & label {
+            margin-left: 0;   
+        }
+    }
 }
+
+//== Styling Finna radiobuttons
+.radiobutton {
+    font-size: 14px;
+    font-weight: normal;
+
+    & :last-child {
+        padding-bottom: 5px;
+    }
+    & input {
+        border: none;
+        background: transparent;
+        margin-right: 10px;
+        margin-top: 4px;
+    }
+    & input:before {
+        content: "\e61b";
+        font-family: 'icomoon';
+        font-size: 18px;       
+        margin: -3px 0px 0px -3px;
+        position: absolute;
+        background: @body-bg;
+        border-radius: 50%;
+        color: @gray-light;
+        transition: color .1s linear;
+    }
+    & input:checked:before  {
+        font-family: 'icomoon';
+        content: "\e61a";
+        color: @link-color;
+    }
+}
+
 // Default styling of Finna Jump menus
 
 .jump-menu-style {
@@ -186,7 +264,7 @@
         color: @body-bg;
         display: block;
         font-size: 100%;
-        font-weight: 600;
+        font-weight: 500;
         line-height: 1em;
         margin: 0;
         padding: 0px 20px 0px 8px;
@@ -229,7 +307,7 @@
         border-top-right-radius: 10px;
         border-bottom-right-radius: 10px;
         margin-bottom: 10px;
-        line-height: 32px;
+        height: 33px;
         
         & option:checked {
             background: @btn-primary-bg;
@@ -241,27 +319,35 @@
         border-top-right-radius: 10px;
         border-bottom-right-radius: 10px;
         color: @body-bg;
-        line-height: 32px;
+        line-height: 34px;
     }
     &.prefilter-select {
         color: @gray;
-        font-weight: bold;
         display: inline-block;
         padding-right: 17px;
         position: relative;
         background: transparent;
         height: 39px;
-        width: 25%;
+        width: 21%;
+        @media (max-width: @screen-xs-max) {
+            width: 25%;  
+        }
         height: auto;
+        padding-top: 0px;
+        padding-bottom: 0px;
         & select {
           color: @gray;
           height: 39px;
+          font-weight: 500;
         }
     }   
     &.prefilter-select:before {
         right: 12px;
         background: @body-bg;
         line-height: 39px;
+    }
+    &.disabled {
+        .opacity(0.65);   
     }
 }
 .jump-menu-style select::-ms-expand {
@@ -272,6 +358,11 @@
     pointer-events: none; /* https://developer.mozilla.org/en-US/docs/Web/CSS/pointer-events  */
     z-index: 1; /* this is necessary for overcome the pseudo element */ 
 }
+button.multiselect {
+    height: auto;
+    min-height: 33px;
+    text-align: left;
+}
 .dedupInformation .dedup-select {
     font-weight: bold;
     margin-bottom: 4px;
@@ -280,34 +371,87 @@
 
 // List & grid view
 .view-buttons {
-    margin-right: 10px;
-    margin-bottom: 10px;
-}
-.view-buttons, .view-buttons a {
+    color: @body-bg;
     display: inline-block;
-    color: #464646;
-    font-weight: bold;
-    
-}
-.view-buttons i {
-    font-size: 18px;
-    padding: 8px 9px;
-    vertical-align: middle;
-    background: @link-color;
-    color: #fff;
-    border-radius: @finna-button-radius;   
-}
-.view-buttons a {
-    .opacity(0.6);
-    transition: opacity 0.1s linear;
-    &:hover {
-     .opacity(1);   
+    font-weight: normal;
+    & .dropdown {
+        border-radius: 10px;
+        
+    }
+    & .dropdown > a {
+        background: @link-color;
+        color: @body-bg;
+        border-radius: @finna-button-radius;
+        padding: 7px 10px;
+        display: block;
+        & span {
+            padding-right: 20px;   
+        }
+        &:hover, &:focus {
+            text-decoration: none;
+            background: darken(@link-color, 10%);
+            transition: background 0.2s linear;
+        }
+    }
+    & i {
+        font-size: 18px;
+        vertical-align: middle;
+        color: #fff;
+        margin-top: -3px;
+        margin-right: 3px;
+        border-radius: @finna-button-radius;
+    }
+    & i.fa-arrow-down {
+        font-size: 1em;
+        margin-left: -18px;
+        -webkit-margin-end: -2px;  // fix for unknown border radius bug
+    }
+    & .dropdown-menu > li > a {
+        text-align: left;
+        color: @gray;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        & i {
+            color: @gray;   
+        }
+        & i.fa-available {
+            font-size: 1em;
+            float: right;
+        }
+    }
+    @media(max-width:@screen-xs-max) {
+        float: left;
+        margin-right: 5px;
+        margin-bottom: 10px;
     }
 }
-.view-buttons span {
-    line-height: 33px;
-    margin-right: 5px;
+.swipe-arrow-navigation {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background: @link-color;
+    top: 50%;
+    color: @body-bg;
+    border-radius: 50%;
+    &.arrow-navigation-left {
+        left: 0px; 
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+    &.arrow-navigation-right {
+        right: 0px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px
+    }
+    & .fa-arrow-right, .fa-arrow-left {
+        color: @body-bg;
+        top: 10px;
+        left: 8px;
+        position: absolute;
+        font-size: 30px;
+    }
 }
+
 .btn-default {
   .button-variant(@btn-default-color; @btn-default-bg; @btn-default-border);
 }

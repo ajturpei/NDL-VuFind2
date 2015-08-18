@@ -42,6 +42,37 @@ use Zend\ServiceManager\ServiceManager;
 class Factory extends \VuFind\View\Helper\Root\Factory
 {
     /**
+     * Construct the LayoutClass helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return LayoutClass
+     */
+    public static function getLayoutClass(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('config');
+        $left = !isset($config->Site->sidebarOnLeft)
+            ? false : $config->Site->sidebarOnLeft;
+        $offcanvas = !isset($config->Site->offcanvas)
+            ? false : $config->Site->offcanvas;
+        return new \Finna\View\Helper\Bootstrap3\LayoutClass($left, $offcanvas);
+    }
+
+    /**
+     * Construct the Holdings Details Mode helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return HoldingsDetailsMode
+     */
+    public static function getHoldingsDetailsMode(ServiceManager $sm)
+    {
+        return new HoldingsDetailsMode(
+            $sm->getServiceLocator()->get('VuFind\Config')->get('config')
+        );
+    }
+
+    /**
      * Construct the Record helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -83,6 +114,19 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     }
 
     /**
+     * Construct Primo view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Primo
+     */
+    public static function getPrimo(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('Primo');
+        return new Primo($config);
+    }
+
+    /**
      * Construct record image view helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -106,7 +150,7 @@ class Factory extends \VuFind\View\Helper\Root\Factory
         $locator = $sm->getServiceLocator();
         $config = $locator->get('VuFind\Config')->get('config');
         $config = isset($config->SearchTabs)
-            ? $config->SearchTabs->toArray() : array();
+            ? $config->SearchTabs->toArray() : [];
         return new SearchTabs(
             $locator->get('VuFind\SessionManager'),
             $locator->get('VuFind\DbTablePluginManager'),
@@ -125,13 +169,21 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     public static function getOpenUrl(ServiceManager $sm)
     {
         $config = $sm->getServiceLocator()->get('VuFind\Config')->get('config');
+        $openUrlRules = json_decode(
+            file_get_contents(
+                \VuFind\Config\Locator::getConfigPath('OpenUrlRules.json')
+            ),
+            true
+        );
         return new OpenUrl(
-            $sm->get('context'), isset($config->OpenURL) ? $config->OpenURL : null
+            $sm->get('context'),
+            $openUrlRules,
+            isset($config->OpenURL) ? $config->OpenURL : null
         );
     }
 
     /**
-     * Construct the Total indexed countr view helper.
+     * Construct the Total indexed count view helper.
      *
      * @param ServiceManager $sm Service manager.
      *
@@ -141,5 +193,77 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     {
         $locator = $sm->getServiceLocator();
         return new TotalIndexed($locator);
+    }
+
+    /**
+     * Construct the PersonaAuth view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \Finna\View\Helper\Root\PersonaAuth
+     */
+    public static function getPersonaAuth(ServiceManager $sm)
+    {
+        $locator = $sm->getServiceLocator();
+        return new PersonaAuth($locator);
+    }
+
+    /**
+     * Construct the Logout message view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \Finna\View\Helper\Root\LogoutMessage
+     */
+    public static function getLogoutMessage(ServiceManager $sm)
+    {
+        $authManager = $sm->getServiceLocator()->get('VuFind\AuthManager');
+        $request = $sm->getServiceLocator()->get('Request');
+        return new LogoutMessage($authManager, $request);
+    }
+
+    /**
+     * Construct the Feed component helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Record
+     */
+    public static function getFeed(ServiceManager $sm)
+    {
+        return new Feed(
+            $sm->getServiceLocator()->get('VuFind\Config')->get('rss')
+        );
+    }
+
+    /**
+     * Construct the Organisations list view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \Finna\View\Helper\Root\OrganisationsList
+     */
+    public static function getOrganisationsList(ServiceManager $sm)
+    {
+        $locator = $sm->getServiceLocator();
+        $cache = $locator->get('VuFind\CacheManager')->getCache('object');
+        $facetHelper = $locator->get('VuFind\HierarchicalFacetHelper');
+        $resultsManager = $locator->get('VuFind\SearchResultsPluginManager');
+
+        return new OrganisationsList($cache, $facetHelper, $resultsManager);
+    }
+
+    /**
+     * Construct the ImageSrc helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return ImageSrc
+     */
+    public static function getImageSrc(ServiceManager $sm)
+    {
+        return new ImageSrc(
+            $sm->getServiceLocator()->get('VuFindTheme\ThemeInfo')
+        );
     }
 }

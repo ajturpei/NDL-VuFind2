@@ -63,7 +63,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     {
         $record = $this->getSimpleXML();
         return isset($record->accessrestrict->p)
-            ? $record->accessrestrict->p : array();
+            ? $record->accessrestrict->p : [];
     }
 
     /**
@@ -85,7 +85,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
         $attributes = $record->accessrestrict->attributes();
         if (isset($attributes['type'])) {
             $copyright = (string)$attributes['type'];
-            $data = array();
+            $data = [];
             $data['copyright'] = $copyright;
             if ($link = $this->getRightsLink(strtoupper($copyright), $language)) {
                 $data['link'] = $link;
@@ -102,11 +102,10 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
      * @param string $size Size of requested images
      *
      * @return mixed
-     * @access protected
      */
     public function getAllThumbnails($size = 'large')
     {
-        $urls = array();
+        $urls = [];
         $url = '';
         $role = $size == 'large'
             ? 'image_reference'
@@ -130,7 +129,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getBibliographyNotes()
     {
         $record = $this->getSimpleXML();
-        $bibliography = array();
+        $bibliography = [];
         foreach ($record->xpath('//bibliography') as $node) {
             // Filter out Portti links since they're displayed in links
             if (!preg_match(
@@ -150,7 +149,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getFindingAids()
     {
         $record = $this->getSimpleXML();
-        $findingAids = array();
+        $findingAids = [];
         if (isset($this->record->otherfindaid->p)) {
             foreach ($this->record->otherfindaid->p as $p) {
                 $findingAids[] = (string)$p;
@@ -189,7 +188,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
             return false;
         }
 
-        $rights = array();
+        $rights = [];
 
         if ($type = $this->getAccessRestrictionsType($language)) {
             $rights['copyright'] = $type['copyright'];
@@ -200,7 +199,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
 
         $desc = $this->getAccessRestrictions();
         if ($desc && count($desc)) {
-            $description = array();
+            $description = [];
             foreach ($desc as $p) {
                 $description[] = (string)$p;
             }
@@ -245,7 +244,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     public function getPhysicalLocations()
     {
         $record = $this->getSimpleXML();
-        $locations = array();
+        $locations = [];
         if (isset($record->did->physloc)) {
             foreach ($record->did->physloc as $physloc) {
                 $locations[] = (string)$physloc;
@@ -275,40 +274,37 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
      */
     public function getServiceURLs()
     {
-        $urls = array();
+        $urls = [];
         $source = $this->getDataSource();
         $config = $this->recordConfig->Record;
-        $formats = isset($this->fields['__unprocessed_format'])
-            ? $this->fields['__unprocessed_format']
-            : $this->getFormats();
         if (isset($config->ead_document_order_link_template[$source])
             && !$this->isDigitized()
-            && in_array('1/Document/ArchiveItem/', $formats)
+            && in_array('1/Document/ArchiveItem/', $this->getFormats())
         ) {
-            $urls[] = array(
+            $urls[] = [
                 'url' => $this->replaceURLPlaceholders(
                     $config->ead_document_order_link_template[$source]
                 ),
                 'desc' => 'ead_document_order'
-            );
+            ];
         }
         if (isset($config->ead_usage_permission_request_link_template[$source])
             && $this->getAccessRestrictions()
         ) {
-            $urls[] = array(
+            $urls[] = [
                 'url' => $this->replaceURLPlaceholders(
                     $config->ead_usage_permission_request_link_template[$source]
                 ),
                 'desc' => 'ead_usage_permission_request'
-            );
+            ];
         }
         if (isset($config->ead_external_link_template[$source])) {
-            $urls[] = array(
+            $urls[] = [
                 'url' => $this->replaceURLPlaceholders(
                     $config->ead_external_link_template[$source]
                 ),
                 'desc' => 'ead_external_link_description'
-            );
+            ];
         }
         return $urls;
     }
@@ -334,7 +330,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
         }
 
         // If we got this far, no description was found:
-        return array();
+        return [];
     }
 
     /**
@@ -359,7 +355,7 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
     */
     public function getURLs()
     {
-        $urls = array();
+        $urls = [];
         $url = '';
         $record = $this->getSimpleXML();
         foreach ($record->xpath('//daoloc') as $node) {
@@ -383,10 +379,10 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
                 }
             }
             if (!$this->urlBlacklisted($url, $desc)) {
-                $urls[] = array(
+                $urls[] = [
                     'url' => $url,
                     'desc' => $desc
-                );
+                ];
             }
         }
 
@@ -397,10 +393,10 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
                 (string)$node->p,
                 $matches
             )) {
-                $urls[] = array(
+                $urls[] = [
                     'url' => $matches[2],
                     'desc' => $matches[1]
-                );
+                ];
             }
         }
         return $urls;
@@ -476,16 +472,16 @@ class SolrEad extends \VuFind\RecordDriver\SolrDefault
         $originationId = $this->getOriginationId();
         list(, $nonPrefixedOriginationId) = explode('-', $originationId, 2);
         $url = str_replace(
-            array(
+            [
                 '{id}',
                 '{originationId}',
                 '{nonPrefixedOriginationId}'
-            ),
-            array(
+            ],
+            [
                 urlencode($this->getUniqueID()),
                 urlencode($originationId),
                 urlencode($nonPrefixedOriginationId),
-            ),
+            ],
             $url
         );
         return $url;

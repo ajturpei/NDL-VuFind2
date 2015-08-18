@@ -38,7 +38,6 @@ namespace Finna\View\Helper\Root;
  */
 class RecordImage extends \Zend\View\Helper\AbstractHelper
 {
-
     /**
      * Image parameters
      *
@@ -58,12 +57,14 @@ class RecordImage extends \Zend\View\Helper\AbstractHelper
      *
      * @param \Finna\View\Helper\Root\Record $record Record helper.
      *
-     * @return FInna\View\Helper\Root\Header
+     * @return Finna\View\Helper\Root\Header
      */
     public function __invoke(\Finna\View\Helper\Root\Record $record)
     {
-        $this->params['small'] = $this->params['medium'] = $this->params['large']
-            = array('bg' => 'ffffff');
+        $this->params['small']
+            = $this->params['medium']
+                = $this->params['large']
+                    = [];
         $this->record = $record;
 
         return $this;
@@ -72,22 +73,26 @@ class RecordImage extends \Zend\View\Helper\AbstractHelper
     /**
      * Return URL to large record image.
      *
-     * @param int $index Record image index.
+     * @param int   $index  Record image index.
+     * @param array $params Optional array of image parameters.
+     *                      See RecordImage::render.
      *
      * @return mixed string URL or false if no
      * image with the given index was found.
      */
-    public function getLargeImage($index = 0)
+    public function getLargeImage($index = 0, $params = [])
     {
         $cnt = $this->record->getNumOfRecordImages('large');
         $urlHelper = $this->getView()->plugin('url');
-        $params = $this->record->getRecordImage('large');
-        unset($params['url']);
+        $imageParams = $this->record->getRecordImage('large');
+        unset($imageParams['url']);
 
-        $params['index'] = $cnt > 0 ? $index : 0;
+        $imageParams['index'] = $cnt > 0 ? $index : 0;
+        $imageParams = array_merge($imageParams, $this->params['large']);
+        $imageParams = array_merge($imageParams, $params);
 
         return $urlHelper('cover-show') . '?' .
-            http_build_query(array_merge($params, $this->params['large']));
+            http_build_query($imageParams);
 
         return false;
     }
@@ -100,8 +105,6 @@ class RecordImage extends \Zend\View\Helper\AbstractHelper
      *                       an associative array of parameter => value pairs:
      *                         'w'    Width
      *                         'h'    Height
-     *                         'maxh' Maximum height
-     *                         'bg'   Background color, hex value
      *
      * @return string
      */
@@ -138,11 +141,11 @@ class RecordImage extends \Zend\View\Helper\AbstractHelper
         $view->largeImage = $urlHelper('cover-show') . '?' .
             http_build_query(array_merge($params, $this->params['large']));
 
-        $images = array();
+        $images = [];
         if ($numOfImages > 1) {
-            for ($i=0; $i<$numOfImages; $i++) {
+            for ($i = 0; $i < $numOfImages; $i++) {
                 $params['index'] = $i;
-                $images[] = array(
+                $images[] = [
                     'small' => $urlHelper('cover-show') . '?' .
                         http_build_query(
                             array_merge($params, $this->params['small'])
@@ -157,7 +160,7 @@ class RecordImage extends \Zend\View\Helper\AbstractHelper
                         http_build_query(
                             array_merge($params, $this->params['large'])
                         )
-                );
+                ];
             }
         }
         $view->allImages = $images;

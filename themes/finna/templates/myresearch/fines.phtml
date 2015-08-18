@@ -7,27 +7,39 @@
 
     // Set up breadcrumbs:
     $this->layout()->breadcrumbs = '<li><a href="' . $this->url('myresearch-home') . '">' . $this->transEsc('Your Account') . '</a></li> <li class="active">' . $this->transEsc('Fines') . '</li>';
+
+    $user = $this->auth()->isLoggedIn();
 ?>
 <div class="row">
-  <div class="col-md-10 col-lg-9 myresearch-grid-list">
-    <? $count = $this->fines;?>
-    <h2><?=$this->transEsc('Your Fines')?> (<?=count($count);?>)</h2>
+  <div class="col-md-10 col-lg-9">
+    <? if (!$this->translationEmpty('fines_instructions')): ?><p class="no-content-message"><?=$this->transEsc('fines_instructions')?></p><? endif; ?>
+    <?=$this->flashmessages()?>
+    <?=$this->partial('myresearch/borrowing-block.phtml', array('profile' => $this->profile)); ?>
+    <div class="useraccount-header"><?=$this->transEsc('Your Fines')?>  <?=$this->context($this)->renderInContext('librarycards/selectcard.phtml', array('user' => $user))?></div>
+    <br>
+    <? if (isset($this->noSupport)): ?>
+      <? if ($user->getLibraryCards()->count() > 1): ?>
+        <div class="support-notice">
+          <p><?=$this->transEsc("no_ils_support_description") ?></p>
+        </div>
+      <? endif; ?>
+    <? else: ?>
     <? if (empty($this->fines)): ?>
     <h4><?=$this->transEsc('You do not have any fines')?></h4>
     <? else: ?>
-    <table class="table useraccount-table table-striped" summary="<?=$this->transEsc('Your Fines')?>">
+    <table class="table table-striped useraccount-table">
     <tr class="headers">
-      <th><?=$this->transEsc('Title')?></th>
-      <th><?=$this->transEsc('Checked Out')?></th>
+      <th class="user-account-table-title"><?=$this->transEsc('Title')?></th>
+      <th><?=$this->transEsc('fine_checkout_date')?></th>
       <th><?=$this->transEsc('Due Date')?></th>
-      <th><?=$this->transEsc('Fine')?></th>
+      <th><?=$this->transEsc('fine_description')?></th>
       <th><?=$this->transEsc('Fee')?></th>
       <th class="balance"><?=$this->transEsc('Balance')?></th>
     </tr>
     <? $totalDue = 0; ?>
     <? foreach ($this->fines as $record): ?>
     <tr>
-      <td>
+      <td class="user-account-table-title">
         <? if (empty($record['title'])): ?>
           <?=$this->transEsc('not_applicable')?>
         <? elseif (!is_object($record['driver'])): ?>
@@ -42,13 +54,14 @@
       <td><?=isset($record['amount']) ? $this->safeMoneyFormat($record['amount']/100.00) : ''?></td>
       <td class="balance"><?=isset($record['balance']) ? $this->safeMoneyFormat($record['balance']/100.00) : ''?></td>
     </tr>
-    <tr>
       <? $totalDue += $record['balance']; ?>
     <? endforeach; ?>
-      <th colspan="5" class="total-balance"><?=$this->transEsc('Total Balance Due')?></th>
+    <tr>
+      <th colspan="5" class="total-balance"><?=$this->transEsc('Total Balance Due')?> (<?=count($this->fines);?>)</th>
       <th class="total-balance"><?=$this->safeMoneyFormat($totalDue/100.00) ?></th>
     </tr>
     </table>
+    <? endif; ?>
     <? endif; ?>
   </div>
 </div>

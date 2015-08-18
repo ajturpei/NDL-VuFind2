@@ -58,6 +58,9 @@ defaultModule   = Search
 ; The base VuFind URL will load the "Home" action of this module when the user
 ; is logged in:
 defaultLoggedInModule = Search
+; The route VuFind will send users to following a log out operation. Set to false
+; or omit to attempt to retain the user's current context after log out.
+logOutRoute = home
 ; This tab will show by default when a record is viewed:
 defaultRecordTab= Holdings
 ; Hide the holdings tab if no holdings are available from the ILS
@@ -99,6 +102,11 @@ indexBasedNewItems = true
 [Session]
 type                        = Database
 lifetime                    = 600 ; Session lasts for 10 minutes (without keepalive)
+; Keep-alive interval in seconds. When set to a positive value, the session is kept
+; alive with a JavaScript call as long as a VuFind page is open in the browser.
+; Default is 0 (disabled). When keep-alive is enabled, session lifetime above can be
+; reduced to e.g. 600.
+keepAlive = 60
 ;file_save_path              = /tmp/vufind_sessions
 ;memcache_host               = localhost
 ;memcache_port               = 11211
@@ -159,6 +167,11 @@ loadNoILSOnFailure = true
 ; default is "all"
 holds_mode = "driver"
 
+; List of content types for which holds, title holds, 
+; call slips and UB requests are disallowed.
+; This setting is only used when holds_mode and/or title_level_holds_mode is "driver".
+disable_driver_hold_actions[] = "1/Book/eBook/"
+
 ; Set this to true if you want to allow your ILS driver to override your holds_mode
 ; setting on a record-by-record basis; this may be useful for local customizations,
 ; but in most cases you should leave this setting unchanged.  Overrides are ignored
@@ -187,6 +200,12 @@ renewals_enabled = true
 ; - driver (Use ILS driver to determine which items may be held/recalled; best option
 ;   if available, but not supported by all drivers)
 title_level_holds_mode = "driver"
+
+; Determines how holdings are grouped in the record display.
+; Legal values:
+; - holdings_id (Use holdings record id if available, location name otherwise - Default)
+; - location_name (Use location name)
+holdings_grouping = holdings_id
 
 ; This section allows you to determine how the users will authenticate.
 ; You can use an LDAP directory, the local ILS, the VuFind database (Database),
@@ -220,10 +239,13 @@ encrypt_ils_password = "1"
 ; filled in with a random string value when encrypt_ils_passwords is set to true.
 ils_encryption_key = ""
 
+;Whether Mozilla Persona login is enabled
+;mozillaPersona = true
+;Whether Persona autologout is enabled (default is true)
+mozillaPersonaAutoLogout = false
+
 [ChoiceAuth]
-; TODO: MozillaPersona not yet implemented:
-;choice_order = MozillaPersona,Shibboleth,MultiILS
-choice_order = Shibboleth,MultiILS
+choice_order = MozillaPersona,Shibboleth,MultiILS
 
 ; See the comments in library/VF/Auth/MultiAuth.php for full details
 ; on using multiple authentication methods.  Note that MultiAuth assumes login
@@ -473,6 +495,10 @@ noCoverAvailableImage = images/noCover2.gif
 ; How long book summaries are cached locally in minutes. Default is one day
 summarycachetime = 1440
 
+; How long feed content is cached locally in minutes.
+; Set this to false or comment out to disable caching.
+feedcachetime = 1440
+
 ; You can select from Syndetics, SyndeticsPlus, Amazon Editorial, Amazon, Booksite
 ; and/or the Guardian
 ;   Note: Guardian reviews contain embedded advertisements. If the API key is not
@@ -693,6 +719,7 @@ url             = https://www.myendnoteweb.com/EndNoteWeb.html
 ; the \Zend\Http\Client's setOptions method.
 [Http]
 ;sslcapath = "/etc/ssl/certs"
+sslcafile = "/etc/ssl/certs/ca-bundle.crt"
 
 ; Spelling Suggestions
 ;
@@ -898,6 +925,13 @@ marc_links = "760,762,765,767,770,772,775,776,780,785"
 ; You can use this setting to hide holdings information for particular named locations
 ; as returned by the catalog.
 hide_holdings[] = "World Wide Web"
+
+; You can use this setting to specify how grouped holdings details are displayed 
+; by default. Available options:
+;    collapse     - Collapse all details
+;    expand-first - Expand first group, collapse others (default)
+;    expand-all   - Expand all groups
+;holdings_details = collapse
 
 ; This array controls which Related modules are used to display sidebars on the
 ; record view page.

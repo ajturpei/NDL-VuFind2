@@ -7,12 +7,10 @@
 .badge {
   display: inline-block;
   min-width: 10px;
-  padding: 3px 2px 3px;
+  padding-left: 2px;
   font-size: @badge-font-size;
   font-weight: @badge-font-weight;
   color: @badge-color;
-  line-height: @badge-line-height;
-  vertical-align: baseline;
   white-space: nowrap;
   text-align: center;
   background-color: @badge-bg;
@@ -56,6 +54,9 @@ a.list-group-item.active > .badge,
 }
 
 // Checkbox facet badges
+.sidebar .checkboxFilter span.badge.cb-facet {
+    display: @display-checkbox-facet-amount;
+}
 span.badge.cb-facet {
   float: right;
   margin-right: 10px;

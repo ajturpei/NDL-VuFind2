@@ -1,4 +1,17 @@
 finna.layout = (function() {
+    var initResizeListener = function() {
+        var intervalId = false;
+        $(window).on("resize", function(e) {
+            clearTimeout(intervalId);
+            intervalId = setTimeout(function() {
+                var data = {
+                    w: $(window).width(),
+                    h: $(window).height()
+                };
+                $(window).trigger("resize.screen.finna", data);
+            }, 100);
+        });
+    };
 
     var isTouchDevice = function() {
         return !!('ontouchstart' in window)
@@ -39,7 +52,7 @@ finna.layout = (function() {
       }
 
       var notifyTruncateChange = function(field) {
-          field.find('.truncate-change img').each(function(ind,e) {
+          field.find('.truncate-change span').each(function(ind, e) {
               var visible = $(e).position().top <= field.height();
               $(e).trigger('truncate-change', [visible]);
           });
@@ -47,7 +60,7 @@ finna.layout = (function() {
 
       var truncation = [];
       var rowHeight = [];
-      holder.find(".truncate-field").not('.truncate-done').each(function( index ) {
+      holder.find(".truncate-field").not('.truncate-done').each(function(index) {
         $(this).addClass('truncate-done');
         // check that truncate-field has children, where we can count line-height
         if ($(this).children().length > 0) {
@@ -59,12 +72,17 @@ finna.layout = (function() {
           if (typeof($(this).data('row-height')) !== 'undefined') {
               rowHeight[index] = $(this).data('row-height');
           } else {
+            if ($(this).children().first().is("div")) {
+              rowHeight[index] = parseFloat($(this).children().first().height());
+            }
+            else {
               rowHeight[index] = parseFloat($(this).children().first().css('line-height').replace('px', ''));
+            }
           }
 
           // get the line-height of first element to determine each text line height
-          truncation[index] = rowHeight[index] * rowCount ;
-          // don't truncate, if one line for truncation
+          truncation[index] = rowHeight[index] * rowCount;
+          // truncate only if there's more than one line to hide
           if ($(this).height() > (truncation[index] + rowHeight[index] + 1)) {
             $(this).css('height', truncation[index] - 1 + 'px');
             if ($( this ).hasClass("wide")) { // generate different truncate styles according to class
@@ -98,24 +116,26 @@ finna.layout = (function() {
     };
 
     var initTruncatedRecordImageNavi = function() {
-        var displayTruncatedImage = function(img) {
-            img.attr('src', img.data('src'));
-            img.parent().removeClass('truncate-change');
+        var displayTruncatedImage = function(placeholder) {
+            var img = $('<img/>');
+            img.append($('<i class="fa fa-spinner fa-spin"/>')).one('load', function() {
+                $(this).empty();
+            })
+            img.attr('src', placeholder.data('src'));
+            img.attr('alt', '');
+            placeholder.parent().removeClass('truncate-change');
+            placeholder.replaceWith(img);
         };
 
         // Load truncated record images lazily when parent container is opened
-        $('.recordcovers .truncate-change img').each(function(ind,img) {
+        $('.recordcovers .truncate-change span').each(function() {
             $(this).bind('truncate-change', function(e, visible) {
                 if (visible) {
                     $(this).unbind('truncate-change');
-                    if (typeof($(this).attr('src')) === 'undefined'
-                        && typeof($(this).data('src')) !== 'undefined'
-                    ) {
-                        // Postpone loading until image is scrolled into viewport
-                        $(this).unbind('inview').one('inview', function() {
-                            displayTruncatedImage($(this));
-                        });
-                    }
+                    // Postpone loading until the image placeholder is scrolled into viewport
+                    $(this).unbind('inview').one('inview', function() {
+                        displayTruncatedImage($(this));
+                    });
                 }
             });
         });
@@ -171,20 +191,171 @@ finna.layout = (function() {
       }
     };
     
-    var initNarrowList = function () {
-        $('.narrow-collapse-toggle').click(function(event) {
-            if ((event.target.nodeName) != 'A' && (event.target.nodeName) != 'MARK') {
-              $(this).nextAll('.narrow-collapse-data').first().toggleClass('hidden');
-              $('.fa-arrow-right', this).toggleClass('fa-rotate-90');
+    var initRecordSwipe = function () {
+      if ($('#view-pager').length && isTouchDevice()) {
+        $('section.main').append("<div class='swipe-arrow-navigation arrow-navigation-left'><i class='fa fa-arrow-left'></i></div>");
+        $('section.main').append("<div class='swipe-arrow-navigation arrow-navigation-right'><i class='fa fa-arrow-right'></i></div>");
+        $('.swipe-arrow-navigation').hide();
+        $(".template-dir-record #record").swipe( {
+        allowPageScroll:"vertical",
+        swipeRight:function(event, phase, direction, distance, duration) {
+          if ($('#view-pager .pager-previous-record a').length) {
+            var prevRecordUrl =  $('#view-pager .pager-previous-record a').attr('href');
+            window.location.href = prevRecordUrl;
+          }
+        },
+        swipeLeft:function(event, direction, distance, duration) {
+          if ($('#view-pager .pager-next-record a').length) {
+            var nextRecordUrl = $('#view-pager .pager-next-record a').attr('href');
+            window.location.href = nextRecordUrl;
+          }  
+        },
+        swipeStatus:function(event, phase, direction, distance, duration, fingers) {
+              if ((phase != "cancel") && (phase == "move") && (direction == "right") && (distance > 75) && ($('#view-pager .pager-previous-record a').length)) {
+                $('.arrow-navigation-left').show('fast');
+              }
+              if ((phase != "cancel") && (phase == "move") && (direction == "left") && (distance > 75) && ($('#view-pager .pager-next-record a').length)) {
+                 $('.arrow-navigation-right').show('fast');
+              }
+              if (phase == "cancel") {
+                $('.swipe-arrow-navigation').hide('fast');
+              }
+        },
+        //Default is 75px, set to 0 for demo so any distance triggers swipe
+        threshold: 125,
+        cancelThreshold:20,
+        });   
+      }
+    };
+    
+    var initMultiSelect = function() {
+        $('.multi-select').multiselect({
+            enableCaseInsensitiveFiltering: true,
+            maxHeight: 310,
+            nonSelectedText: vufindString.none_selected,
+            nSelectedText: vufindString.selected,
+            buttonClass: "form-control",
+        });
+    };
+  
+    var initMobileNarrowSearch = function() {
+        var filterAmount = $('.checkboxFilter input[checked]').length+$('.list-group.filters .list-group-item.active').length;
+        if (filterAmount > 0) {
+          $('.mobile-navigation .sidebar-navigation .active-filters').removeClass('hidden');
+          $('.mobile-navigation .sidebar-navigation .active-filters').append(' '+filterAmount);
+        }
+        $('.mobile-navigation .sidebar-navigation, .sidebar h4').click(function() {
+            $('.sidebar').toggleClass('open');
+            $('.mobile-navigation .sidebar-navigation i').toggleClass('fa-arrow-up');
+            $('body').toggleClass('prevent-scroll'); 
+        });
+        $('.mobile-navigation .sidebar-navigation .active-filters').click(function() {
+            $('.sidebar').scrollTop(0);
+        });  
+    };
+    
+    var initCheckboxClicks = function() {
+      $('.checkboxFilter:not(.mylist-select-all) .checkbox input').click(function() {
+        $(this).closest('.checkbox').toggleClass('checked');
+        var nonChecked = true;
+        $('.myresearch-row .checkboxFilter .checkbox').each(function() {
+            if ($(this).hasClass('checked')) {
+              $('.mylist-functions button, .mylist-functions select').removeAttr("disabled");
+              $('.mylist-functions .jump-menu-style').removeClass('disabled');
+              nonChecked = false;
+            }
+        });
+        if (nonChecked == true) {
+          $('.mylist-functions button, .mylist-functions select').attr("disabled", true);
+          $('.mylist-functions .jump-menu-style').addClass('disabled');
+        }
+      });
+
+        var myListSelectAll = $(".checkboxFilter.mylist-select-all");
+        var myListJumpMenu = $(".mylist-functions .jump-menu-style");
+        var myListFunctions = $(".mylist-functions button, .mylist-functions select");
+        myListSelectAll.find(".checkbox .checkbox-select-all").click(function() {            
+            var checkboxes = $(".myresearch-row .checkboxFilter .checkbox, .checkboxFilter.mylist-select-all .checkbox");
+            if ($(this).closest(".checkbox").hasClass("checked")) {
+                var isEverythingChecked = !$(".myresearch-row .checkboxFilter .checkbox").not(".checked").length;
+                checkboxes.toggleClass("checked", !isEverythingChecked);
+                myListJumpMenu.toggleClass("disabled", isEverythingChecked);
+                myListFunctions.attr("disabled", isEverythingChecked);
+            } else {
+                checkboxes.toggleClass("checked", true);
+                myListJumpMenu.toggleClass("disabled", false);                
+                myListFunctions.attr("disabled", false);
             }
         });
     };
+
+    var initScrollLinks = function() {
+      $('.library-link').click(function() {
+        $('html, body').animate({
+          scrollTop: $('.recordProvidedBy').offset().top
+        }, 500);
+      });
+      var scroll = $(window).scrollTop();
+      var modalContent = 0;
+      $(window).scroll(function (event) {
+        scroll = $(window).scrollTop();
+        if (scroll > 2000) {
+           $('.template-dir-record .back-to-up').removeClass('hidden');
+        }
+        else {
+          $('.template-dir-record .back-to-up').addClass('hidden');
+        }
+      });
+      
+      $( "#modal" ).on('shown.bs.modal', function (e) {
+        $('#hierarchyTree').scroll(function () {
+          modalContent = $('#hierarchyTree').scrollTop();
+          if (modalContent > 1500) {
+            $('#modal .back-to-up').removeClass('hidden');
+          }
+          else {
+            $('#modal .back-to-up').addClass('hidden');
+          }
+        });
+        $('.back-to-up').click(function() {
+            $('#hierarchyTree, #modal').animate({scrollTop: 0 }, 200);
+        });
+      });
+      
+      $('.template-dir-record .back-to-up').click(function() {
+        $('html, body').animate({scrollTop: $('#hierarchyTreeHolder').offset().top-70}, 200);
+      }); 
+    };
+    
+    var initSearchboxFunctions = function() {
+      if ($('.navbar-form .checkbox')[0]) {
+        $('.tt-dropdown-menu').addClass('checkbox-active');
+      }
+      if ($('#searchForm_lookfor').val() != "" ) {
+        $('.clear-button').removeClass('hidden');
+      }
+      $('#searchForm_lookfor').on('input', function() {
+        if ($('#searchForm_lookfor').val() != "" ) {
+          $('.clear-button').removeClass('hidden');
+        }
+        else {
+          $('.clear-button').addClass('hidden');
+        }
+      });
+      
+      $('.clear-button').click(function() {
+        $('#searchForm_lookfor').val("");
+        $('.clear-button').addClass('hidden');
+        $('#searchForm_lookfor').focus();
+      });
+    }
 
     var my = {
         isTouchDevice: isTouchDevice,
         initTruncate: initTruncate,
         init: function() {
-            $('select.jumpMenu').unbind('change').change(function(){ $(this).closest('form').submit(); });
+            $('select.jumpMenu').unbind('change').change(function() { $(this).closest('form').submit(); });
+            $('select.jumpMenuUrl').unbind('change').change(function(e) { window.location.href = $(e.target).val(); });
 
             initAnchorNavigationLinks();
             initFixFooter();
@@ -194,7 +365,13 @@ finna.layout = (function() {
             initTruncatedRecordImageNavi();
             initTruncate();
             initContentNavigation();
-            initNarrowList();
+            initRecordSwipe();
+            initMultiSelect();
+            initMobileNarrowSearch();
+            initCheckboxClicks();
+            initResizeListener();
+            initScrollLinks();
+            initSearchboxFunctions();
         },
     };
 

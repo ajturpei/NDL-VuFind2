@@ -4,7 +4,7 @@
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2014.
+ * Copyright (C) The National Library of Finland 2015.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -21,8 +21,8 @@
  *
  * @category VuFind2
  * @package  Service
- * @author   Demian Katz <demian.katz@villanova.edu>
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
  */
@@ -34,12 +34,12 @@ use Zend\ServiceManager\ServiceManager;
  *
  * @category VuFind2
  * @package  Service
- * @author   Demian Katz <demian.katz@villanova.edu>
  * @author   Samuli Sillanpää <samuli.sillanpaa@helsinki.fi>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/vufind2:developer_manual Wiki
  */
-class Factory
+class Factory extends \VuFind\Service\Factory
 {
     /**
      * Construct the cache manager.
@@ -55,4 +55,54 @@ class Factory
             $sm->get('VuFind\Config')->get('searches')
         );
     }
+
+    /**
+     * Construct the ILS connection.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \Finna\ILS\Connection
+     */
+    public static function getILSConnection(ServiceManager $sm)
+    {
+        $catalog = new \Finna\ILS\Connection(
+            $sm->get('VuFind\Config')->get('config')->Catalog,
+            $sm->get('VuFind\ILSDriverPluginManager'),
+            $sm->get('VuFind\Config')
+        );
+        return $catalog->setHoldConfig($sm->get('VuFind\ILSHoldSettings'));
+    }
+
+    /**
+     * Generic plugin manager factory (support method).
+     *
+     * @param ServiceManager $sm Service manager.
+     * @param string         $ns VuFind namespace containing plugin manager
+     *
+     * @return object
+     */
+    public static function getGenericPluginManager(ServiceManager $sm, $ns)
+    {
+        $className = 'Finna\\' . $ns . '\PluginManager';
+        $configKey = strtolower(str_replace('\\', '_', $ns));
+        $config = $sm->get('Config');
+        return new $className(
+            new \Zend\ServiceManager\Config(
+                $config['vufind']['plugin_managers'][$configKey]
+            )
+        );
+    }
+
+    /**
+     * Construct the Search\Results Plugin Manager.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return \VuFind\Search\Results\PluginManager
+     */
+    public static function getSearchResultsPluginManager(ServiceManager $sm)
+    {
+        return static::getGenericPluginManager($sm, 'Search\Results');
+    }
+
 }

@@ -1,21 +1,108 @@
 // Custom styles for user account functions
 
-.main.template-dir-myresearch, .main.template-dir-search.template-name-history, .main.template-dir-librarycards {
+.main.template-dir-myresearch, .main.template-dir-search.template-name-history, .main.template-dir-librarycards {   
     h1 {
         display: inline-block;
     }
     .finna-main-header .form-inline {
         margin-left: 20px;
     }
+    & .useraccount-header {
+        font-weight: bold;
+        font-size:@font-size-h2;   
+    }
+    & #delete-account {
+        margin-bottom: 20px;   
+    }
+    & .myresearch-profile-list {
+        padding: 0px 6px 20px;
+    }
+    & .myresearch-profile-header {
+        font-size: @font-size-h3;
+        font-weight: bold;
+        padding: 7px 10px;
+        margin: 0px;
+        background: @gray;
+        background: linear-gradient( @gray-light, darken(@gray-light,8%));
+        color: @body-bg;
+    }
+    & .library-profile {
+        margin-bottom: 40px;
+        padding-left: 0;
+        padding-right: 0;
+        padding-bottom: 0;
+        border: 1px solid @gray-lighter;
+        box-shadow: 0px 15px 30px -25px @gray;
+        div {
+            padding: 8px;
+            &.profile-title {
+                line-height: 1.5;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+            &.profile-text-value {
+                line-height: 1.7;
+            }
+            &.profile-xs {
+                padding: 0;
+            }
+            &.profile-long {
+                padding-bottom: 0;
+            }
+            &.profile-after-long {
+                padding-top: 16px;
+            }
+            &.library-profile-after-long {
+                padding-top: 0;
+            }
+            &.profile-info {
+                padding-top: 3px;
+            }
+            &.messaging-last {
+                margin-bottom: 20px;
+            }
+        }
+    }
+    & .myresearch-profile-middle-header {
+        font-size: @font-size-h2;
+        font-weight: bold;   
+    }
+    & select#library_card {
+        display: inline-block;   
+    }
     & .useraccount-table {
         margin-bottom: 40px;
+        border: 1px solid @gray-lighter;
+        border-top: none;
+        box-shadow: 0px 15px 30px -35px @gray;
+        & .headers {
+            background: @gray;
+            background: linear-gradient( @gray-light, darken(@gray-light,8%));
+            color: @body-bg;
+        }
         & .headers th {
             background: none;
+            border: none;
+            border-right: 1px solid #fff;
+            &:last-child {
+                border-right: none;   
+            }
+        }
+        & td {
+            border-right: 1px solid @body-bg;
+            vertical-align: middle;
+            &:last-child {
+                border-right: none;   
+            }
+        }
+        & .user-account-table-title {
+            width: 25%;   
         }
         & .total-balance {
             background: none;
-            border-top: 1px solid @gray-light;
+            border-top: 2px solid @gray-lighter;
             text-align: right;
+            line-height: 2em;
         }
         & .balance {
             text-align: right;   
@@ -33,9 +120,31 @@
         & .history-results {
             width: 15%;   
         }
+        & .actions {
+            width: 15%;   
+        }
+        & td.history-search-index, td.history-schedule .disable {
+            color: @gray-light;
+            font-size: .9em;
+        }
+        
     } 
     .myresearch-grid-list {
-        margin-bottom: 20px;   
+        margin-bottom: 20px;
+        > h2 {
+            margin-top: 0;
+            border-bottom: none;
+            padding: 10px;
+            padding-bottom: 0px;
+            margin-bottom: 0px;
+            
+        }
+        > h4 {
+            margin-left: 10px;   
+        }
+        & .myresearch-row:last-child {
+          box-shadow: 0 15px 30px -35px @gray;       
+        }
     }
     .checkboxFilter.mylist-select-all {
         float: left;
@@ -51,15 +160,52 @@
         color: @gray-light;  
     }
     .bulk-action-buttons-row {
-        margin: 0;   
+        margin: 0;
+        min-height: 60px; // prevent fixed element bounce effect
+        @media(max-width:@screen-xs-max) {
+           .row();    
+        }
     }
     .bulk-action-buttons-col {
         padding: 10px 0;
-        border-top: 3px solid @gray-lighter;
-        border-bottom: 3px solid @gray-lighter;
+        border-right: 10px solid #ffffff;
         & input.btn {
-              margin-right: 3px;   
+              margin-right: 3px;
         }
+        & .mylist-functions {
+            & i#add-to-list {
+                position: absolute;
+                top: 8px;
+            }
+            & select#add-to-list {
+                max-width: 140px;
+            }
+            & select, button {
+                margin-bottom: 4px;   
+            }
+        }
+        &.fixed {
+            background-color: @gray-lighter;
+            position: fixed;
+            top: 0px;
+            padding: 10px 0 2px 10px;
+            z-index: 11;
+            background: rgba(77,77,77,0.95);
+            box-shadow: 0px 19px 15px -13px grey;
+            & .checkbox span {
+                color: #ffffff;
+            }
+        }
+    }
+    &.template-name-mylist .bulk-action-buttons-col {
+        padding: 15px;
+        padding-bottom: 0px;
+        border-right: none;
+        border-bottom: 1px solid @gray-lighter;
+    }
+    .row.record-container.myresearch-row:last-child {
+        margin-bottom: 20px;
+        box-shadow: 0px 15px 30px -25px @gray;
     }
     .finna-main-header {
         background: @myresearch-header-background;
@@ -69,12 +215,12 @@
         }
     }
     .finna-main-tabs {
-         background: @myresearch-header-background;
+         background: darken(@myresearch-header-background, 12%);
     }
     & .list-title {
          margin-bottom: 0px;   
     }
-    & .list-title, .list-description {
+    & .list-title, .list-description, .resource-note, .add-new-list {
              border: 1px solid transparent;
              display: inline-block;
              padding: 5px;
@@ -90,20 +236,60 @@
             color: @gray-light;   
         }
     }
+    & .list-title.no-edit {
+        border: 0;
+        &:hover {
+            border: 0;
+        }
+    }
+
+    & .resource-note {
+        margin-left: -5px;
+    }
+
     & .mylist-bar {
-        margin-top: 20px;  
+        margin-top: 20px;
     }
     .mylist-nav {
+        & li > a {
+            word-wrap: break-word;   
+        }
         & li > a:not(.add-new-list) {
-            background: @gray;
+            background: @gray-light;
             color: #fff;
             margin-bottom: 5px;
         }
+        & li > a.active {
+            background: @gray;
+            & .favorite-list-name {
+                max-width: 85%;
+            }
+            & .remove-favorite-list {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        & .add-new-list {
+            display: block;
+        }
+        & .add-new-list .name {
+            width: 100%;
+        }
+        & .add-new-list .icon {
+            cursor: pointer;
+            position: absolute;
+            top: 0.7em;
+            right: 0.7em;
+        }
     }
     .toolbar {
-        margin: 10px 0px;
+        margin: 0px;
+        margin-top: 5px;
         padding-bottom: 10px;
         border-bottom: 1px solid @gray-lighter;
+        padding: 15px 0px;
         .status-text {
             float: right;
             line-height: 38px;   
@@ -111,7 +297,14 @@
     }
     .myresearch-row {
         padding: 10px 0px;
-        border-bottom: 1px solid @gray-lighter;
+        margin: 0px;
+        word-wrap: break-word;
+        @media(max-width:@screen-xs-max) {
+           .row();    
+        }
+        &:nth-child(odd) {
+            background: @table-bg-accent;   
+        }
         & h3 {
             margin: 0;
             font-size: 1.3em;
@@ -121,7 +314,7 @@
             color: @gray-light;
         }
     }
-    & .myresearch-cancel > li {
+    & .useraccount-cancel > li {
         border-bottom: none;
         &:not(.disabled) {
             float: left;
@@ -170,22 +363,34 @@
         & li {
             float:left;
             margin:0;
+            @media(max-width: @screen-md-max) {
+                max-width: 160px;  
+            }
+            @media(max-width: @screen-sm-max) {
+                    max-width: 95px;
+            }
+            &:first-child {
+                border-left: 2px solid @myresearch-header-background;  
+            }
             .list-group-item {
                 padding: 10px;
                 margin:0;
-                margin-right: 3px;
-                background: @link-color;
-                color: @body-bg;
-                font-weight: bold;
-                @media(max-width:@screen-md-max) {
+                border-right: 2px solid @myresearch-header-background;
+                background: darken(@myresearch-header-background, 12%);
+                color: @gray-dark;
+                font-weight: normal;
+                transition: background 0.1s linear; 
+                &:hover {
+                    background: darken(@myresearch-header-background, 16%);   
+                }
+                @media(max-width: @screen-md-max) {
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
-                    max-width: 160px;
                 }
-                @media(max-width:@screen-sm-max) {
-                    max-width: 100px;
-                    font-size: 0.85em;
+                @media(max-width: @screen-sm-max) {
+                    font-size: 0.9em;
+                    padding: 10px 8px;
                 }
                 &.active {
                     background: @body-bg;
@@ -194,4 +399,86 @@
             }
         }
     }
+    .myresearch-count {
+        float: right;
+        line-height: 40px;
+        font-weight: bold;
+        &.no-buttons {
+            line-height: inherit;   
+        }
+    }
+    & .no-padding-table {
+        
+        & th, td {
+            padding: 8px 0px;
+            vertical-align: middle;
+        }
+        & th {
+            width: 25%;   
+        }
+        & td {
+            width: 75%;   
+        }
+    }
+
+    & p.no-content-message {
+        padding: 0 8px;
+    }
+    & p.borrowing-block {
+        padding: 0 8px;
+        font-weight: bold;
+    }
+    .support-notice {
+        margin: 0px;
+        margin-top: 5px;
+        padding: 10px 15px;
+    }
 }
+
+.main.template-dir-myresearch.template-name-mylist {
+    & i.fa.fa-pen {
+        margin-left: 10px;
+    }
+    & .mylist-nav .list-visibility {
+        padding: 10px;
+        & .list-url {
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        & .list-visibility-hidden {
+            margin-left: 10px;
+            margin-bottom: 5px;
+            @media (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
+                margin-left: 0;
+                display: block;
+            }
+        }
+    }
+
+    & .delete-list li {
+        border-bottom: none;
+        &:not(.disabled) {
+            float: left;
+            width: 45%;
+            padding: 10px;
+            text-align: center;
+            & a {
+                border-radius: @border-radius-base;
+                background: @link-color;
+                color: @body-bg;
+            }
+        }
+    }
+}
+.main.template-dir-myresearch.template-name-unsubscribe {
+    & .unsubscribe {
+        margin-bottom: 20px;
+    }
+}
+.template-dir-list.template-name-list {
+    & .finna-main-header {
+        background: @myresearch-header-background;   
+    }
+}
+

@@ -4,7 +4,11 @@
 
     & ul.nav-tabs {
         border-bottom: none;
-        margin: 0;
+        margin: 0 0 0 15px;
+        
+            @media(max-width: @screen-xs-max) {
+            margin-left: 0;
+            }
 
         > li {
             color: #fff;
@@ -20,6 +24,13 @@
                 font-weight: bold;
                 color: #fff;
                 transition: none;
+                @media(max-width: @screen-xs-max) {
+                    max-width: 100px;
+                    padding: 8px 10px;
+                    font-size: .9em;
+                    display: inline-flex;
+                    line-height: 1.3em;
+                }
             }
 
             &.active {
@@ -34,4 +45,24 @@
 }
 .main.template-name-advanced .finna-main-tabs {
     padding-top: 25px;
+}
+
+#record-tabs {
+    margin-bottom: 20px;
+    & #commentList {
+      margin-bottom: 20px;  
+    }
+    & .comment-wrapper {
+        background: @brand-third;
+        padding: 10px;
+        padding-top: 5px;
+        margin-bottom: 10px;
+        & .name {
+            padding-bottom: 4px;
+            border-bottom: 2px solid @body-bg;
+        }
+        & .comment-text {
+            padding-top: 5px;   
+        }
+    }
 }
