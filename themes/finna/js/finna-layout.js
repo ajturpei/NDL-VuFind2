@@ -489,6 +489,23 @@ finna.layout = (function() {
             }
         });
     }
+    
+    var initBuildingFilter = function() {
+      $('#building_filter').keyup(function () {
+        var valThis = this.value.toLowerCase();
+        $('#facet_building>ul>li>a>.main').each(function () {
+            console.log($(this).text());
+            var text  = $(this).text(),
+                text  = text.toLowerCase();
+            if(text.indexOf(valThis) != -1) {
+              $(this).parent().parent().show();
+            }
+            else {
+              $(this).parent().parent().hide();
+            }
+        });
+      });
+    }
 
     var my = {
         isPageRefreshNeeded: isPageRefreshNeeded,
@@ -520,6 +537,7 @@ finna.layout = (function() {
             initCondensedList();
             checkSaveStatuses();
             initAuthorizationNotification();
+            initBuildingFilter();
         }
     };
 

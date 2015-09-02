@@ -155,6 +155,9 @@
          ?>
       </div>
       <div id="side-collapse-<?=$this->escapeHtmlAttr($title) ?>" class="collapse<? if(!in_array($title, $collapsedFacets)): ?> in<? endif ?>">
+        <? if ($this->escapeHtmlAttr($title) === 'building'): ?>
+        <div class="building-filter"><input class="form-control" id="building_filter" placeholder="<?=$this->escapeHtmlAttr('Find Organisation')?>..."></input></div>
+        <? endif; ?>
         <? if (isset($newItemsFacets[$title])): ?>
           <?
             $newItemValues = [
