@@ -63,7 +63,8 @@ return array(
         'vendor/jquery.cookie-1.4.1.min.js',
         'vendor/slick.min.js',
         'vendor/jquery.touchSwipe.min.js',
-        'vendor/bootstrap-multiselect.min.js'
+        'vendor/bootstrap-multiselect.min.js',
+        'vendor/jquery.hc-sticky.min.js'
     ),
     'less' => array(
         'active' => false

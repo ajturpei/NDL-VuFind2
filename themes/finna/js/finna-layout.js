@@ -529,6 +529,28 @@ finna.layout = (function() {
             });
         });
     };
+    var initStickySidebar = function() {
+        if ($(window).width() > 767) {
+            $('.template-dir-search .sidebar, .template-dir-primo .sidebar').hcSticky({
+                    top: 20,
+                    bottomEnd: 20,
+                    offResolutions: [-767],
+            });
+        }
+        $(window).on("resize.screen.finna", function(e, data) {
+            if ($(window).width() < 768) {
+                $('.template-dir-search .sidebar, .template-dir-primo .sidebar').attr('style', '');
+            }
+            if ($(window).width() > 767 && !$('.wrapper-sticky')[0]) {
+                $('.template-dir-search .sidebar, .template-dir-primo .sidebar').hcSticky({
+                    top: 20,
+                    bottomEnd: 20,
+                    offResolutions: [-767],
+                });
+            }
+        });
+        
+    };
 
     var my = {
         isPageRefreshNeeded: isPageRefreshNeeded,
@@ -563,6 +585,7 @@ finna.layout = (function() {
             initAuthorizationNotification();
             initTouchDeviceGallery();
             initImageCheck();
+            initStickySidebar();
         }
     };
 
