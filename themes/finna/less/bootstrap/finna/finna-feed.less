@@ -31,9 +31,8 @@
     & .carousel-header {
         background: @carousel-header-background;
         display: inline-block;
-        padding: 10px;
+        padding: @carousel-header-padding;
         color: @carousel-header-color;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     }
     & .carousel-slide-header p {
         position: absolute;
@@ -45,8 +44,9 @@
         font-size: 14px;
         font-weight: 900;
         margin: 0;
+        margin-bottom: 0;
         letter-spacing: 0.2px;
-        text-shadow: 1px 1px 1px black;
+        text-shadow: @carousel-slide-header-text-shadow;
         word-break: break-word;
         word-wrap: break-word;
 
@@ -229,8 +229,11 @@
         font-weight: normal;
         letter-spacing: 0.3px;
     }
-    & .feet-header {
-        color: @list-feed-header-color;   
+    & .feed-header {
+        display: inline-block;
+        color: @list-feed-header-color;
+        padding: @list-feed-header-padding;
+        background: @list-feed-header-background;
     }
     & .more-link {
         margin-top: 15px;

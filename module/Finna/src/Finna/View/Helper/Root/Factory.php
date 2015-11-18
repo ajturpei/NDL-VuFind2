@@ -42,6 +42,19 @@ use Zend\ServiceManager\ServiceManager;
 class Factory extends \VuFind\View\Helper\Root\Factory
 {
     /**
+     * Construct Browse view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return MetaLib
+     */
+    public static function getBrowse(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('browse');
+        return new Browse($config);
+    }
+
+    /**
      * Construct the LayoutClass helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -87,6 +100,18 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     }
 
     /**
+     * Construct the RecordLink helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return RecordLink
+     */
+    public static function getRecordLink(ServiceManager $sm)
+    {
+        return new RecordLink($sm->getServiceLocator()->get('VuFind\RecordRouter'));
+    }
+
+    /**
      * Construct the Navibar view helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -99,6 +124,19 @@ class Factory extends \VuFind\View\Helper\Root\Factory
         $menuConfig = $locator->get('VuFind\Config')->get('navibar');
 
         return new Navibar($menuConfig);
+    }
+
+    /**
+     * Construct combined results view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Combined
+     */
+    public static function getCombined(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('combined');
+        return new Combined($config);
     }
 
     /**
@@ -159,6 +197,31 @@ class Factory extends \VuFind\View\Helper\Root\Factory
             $sm->get('url')
         );
     }
+    /**
+     * Construct Headtitle helper
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return HeadTitle
+     */
+    public static function getHeadTitle(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('config');
+        return new HeadTitle($config);
+    }
+
+    /**
+     * Construct MetaLib view helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return MetaLib
+     */
+    public static function getMetaLib(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('MetaLib');
+        return new MetaLib($config);
+    }
 
     /**
      * Construct the SearchTabs helper.
@@ -200,6 +263,23 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     }
 
     /**
+     * Construct the ProxyUrl helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return ProxyUrl
+     */
+    public static function getProxyUrl(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config');
+        return new ProxyUrl(
+            $sm->getServiceLocator()->get('VuFind\IpAddressUtils'),
+            $config->get('permissions'),
+            $config->get('config')
+        );
+    }
+
+    /**
      * Construct the Total indexed count view helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -223,6 +303,24 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     {
         $locator = $sm->getServiceLocator();
         return new PersonaAuth($locator);
+    }
+
+    /**
+     * Construct the Piwik helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return Piwik
+     */
+    public static function getPiwik(ServiceManager $sm)
+    {
+        $config = $sm->getServiceLocator()->get('VuFind\Config')->get('config');
+        $url = isset($config->Piwik->url) ? $config->Piwik->url : false;
+        $siteId = isset($config->Piwik->site_id) ? $config->Piwik->site_id : 1;
+        $customVars = isset($config->Piwik->custom_variables)
+            ? $config->Piwik->custom_variables
+            : false;
+        return new Piwik($url, $siteId, $customVars);
     }
 
     /**
@@ -285,6 +383,20 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     }
 
     /**
+     * Construct the ScriptSrc helper.
+     *
+     * @param ServiceManager $sm Service manager.
+     *
+     * @return ImageSrc
+     */
+    public static function getScriptSrc(ServiceManager $sm)
+    {
+        return new ScriptSrc(
+            $sm->getServiceLocator()->get('VuFindTheme\ThemeInfo')
+        );
+    }
+
+    /**
      * Construct the SearchBox helper.
      *
      * @param ServiceManager $sm Service manager.
@@ -294,10 +406,12 @@ class Factory extends \VuFind\View\Helper\Root\Factory
     public static function getSearchBox(ServiceManager $sm)
     {
         $config = $sm->getServiceLocator()->get('VuFind\Config');
-        return new SearchBox(
+        $searchbox = new SearchBox(
             $sm->getServiceLocator()->get('VuFind\SearchOptionsPluginManager'),
             $config->get('searchbox')->toArray()
         );
+        $searchbox->setTabConfig($config->get('config'));
+        return $searchbox;
     }
 
     /**

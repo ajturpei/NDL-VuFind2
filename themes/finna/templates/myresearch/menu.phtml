@@ -1,5 +1,14 @@
+<!-- START of: finna - myresearch/menu.phtml -->
 <?
-  $this->layout()->finnaMainHeader = '<div class="col-xs-12"><h1><i class="fa fa-user"></i> ' . $this->transEsc('Your Account') . '</h1></div>';
+    $this->layout()->finnaMainHeader = '<div class="col-xs-12"><h1><i class="fa fa-user"></i> ' . $this->transEsc('Your Account') . '</h1>';
+    if (!$this->translationEmpty('tooltip_myaccount_html')) {
+        $this->layout()->finnaMainHeader .= '<span class="tooltip-myaccount" data-toggle="tooltip" data-placement="auto" data-html="true" data-original-title="' . $this->transesc("tooltip_myaccount_html") . '"><i class="fa fa-info-big"></i></span>';
+    }
+    if ($this->auth()->getManager()->isLoggedIn()) {
+        $logoutClass = $this->personaAuth()->getUser() === null ? '' : ' persona-logout';
+        $this->layout()->finnaMainHeader .= '<a class="btn btn-primary pull-right modal-link' . $logoutClass . '" href="' . $this->url('myresearch-logout') . '" title="'.$this->transEsc('Log Out') . '"><i class="fa fa-sign-out"></i> ' . $this->transEsc('Log Out') . '</a>';
+    }
+    $this->layout()->finnaMainHeader .= '</div>';
 ?>
 
 <div class="col-xs-12">
@@ -104,6 +113,4 @@
     </a></li>
   </ul>
 </div>
-
-
-
+<!-- END of: finna - myresearch/menu.phtml -->

@@ -4,25 +4,33 @@ return array(
     'helpers' => array(
         'factories' => array(
             'authorizationNote' => 'Finna\View\Helper\Root\Factory::getAuthorizationNote',
+            'browse' => 'Finna\View\Helper\Root\Factory::getBrowse',
+            'combined' => 'Finna\View\Helper\Root\Factory::getCombined',
             'content' => 'Finna\View\Helper\Root\Factory::getContent',
             'feed' => 'Finna\View\Helper\Root\Factory::getFeed',
             'header' => 'Finna\View\Helper\Root\Factory::getHeader',
+            'headTitle' => 'Finna\View\Helper\Root\Factory::getHeadTitle',
             'holdingsDetailsMode' => 'Finna\View\Helper\Root\Factory::getHoldingsDetailsMode',
             'imageSrc' => 'Finna\View\Helper\Root\Factory::getImageSrc',
             'indexedTotal' => 'Finna\View\Helper\Root\Factory::getTotalIndexed',
             'layoutclass' => 'Finna\View\Helper\Root\Factory::getLayoutClass',
             'logoutMessage' => 'Finna\View\Helper\Root\Factory::getLogoutMessage',
+            'metalib' => 'Finna\View\Helper\Root\Factory::getMetaLib',
             'navibar' => 'Finna\View\Helper\Root\Factory::getNavibar',
             'openUrl' => 'Finna\View\Helper\Root\Factory::getOpenUrl',
             'organisationsList'
                 => 'Finna\View\Helper\Root\Factory::getOrganisationsList',
             'personaAuth' => 'Finna\View\Helper\Root\Factory::getPersonaAuth',
+            'piwik' => 'Finna\View\Helper\Root\Factory::getPiwik',
             'primo' => 'Finna\View\Helper\Root\Factory::getPrimo',
             'record' => 'Finna\View\Helper\Root\Factory::getRecord',
             'recordImage' => 'Finna\View\Helper\Root\Factory::getRecordImage',
+            'recordLink' => 'Finna\View\Helper\Root\Factory::getRecordLink',
+            'scriptSrc' => 'Finna\View\Helper\Root\Factory::getScriptSrc',
             'searchbox' => 'Finna\View\Helper\Root\Factory::getSearchBox',
             'searchTabs' => 'Finna\View\Helper\Root\Factory::getSearchTabs',
             'searchTabsRecommendations' => 'Finna\View\Helper\Root\Factory::getSearchTabsRecommendations',
+            'proxyurl' => 'Finna\View\Helper\Root\Factory::getProxyUrl',
         ),
         'invokables' => array(
             'checkboxFacetCounts' =>
@@ -40,6 +48,7 @@ return array(
         'dataTables.bootstrap.custom.css',
         'vendor/slick.css',
         'vendor/bootstrap-multiselect.css',
+        'vendor/bootstrap-datepicker3.min.css',
         'finna.css'
     ),
     'js' => array(
@@ -49,7 +58,6 @@ return array(
         'finna-adv-search.js',
         'finna-daterange-vis.js',
         'finna-feed.js',
-        'finna-item-status.js',
         'finna-layout.js',
         'finna-openurl.js',
         'finna-persona.js',
@@ -67,4 +75,5 @@ return array(
     'less' => array(
         'active' => false
     ),
+    'favicon' => 'favicon.ico',
 );

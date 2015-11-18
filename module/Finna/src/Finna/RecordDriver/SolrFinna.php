@@ -42,6 +42,8 @@ namespace Finna\RecordDriver;
  */
 trait SolrFinna
 {
+    use FinnaRecord;
+
     /**
      * Return an associative array of image URLs associated with this record
      * (key = URL, value = description), if available; false otherwise.
@@ -77,6 +79,19 @@ trait SolrFinna
     public function getAccessRestrictionsType()
     {
         return false;
+    }
+
+    /**
+     * Get record rating.
+     *
+     * @return array Keys 'average' and 'count'
+     */
+    public function getAverageRating()
+    {
+        $table = $this->getDbTable('Comments');
+        return $table->getAverageRatingForResource(
+            $this->getUniqueId(), $this->getResourceSource()
+        );
     }
 
     /**
@@ -124,6 +139,17 @@ trait SolrFinna
     }
 
     /**
+     * Return geographic locations (coordinates)
+     *
+     * @return array
+     */
+    public function getGeoLocations()
+    {
+        return isset($this->fields['location_geo'])
+            ? $this->fields['location_geo'] : [];
+    }
+
+    /**
      * Get the hierarchy_parent_id(s) associated with this item (empty if none).
      *
      * @return array
@@ -148,13 +174,15 @@ trait SolrFinna
     /**
      * Return image rights.
      *
+     * @param string $language Language
+     *
      * @return mixed array with keys:
      *   'copyright'  Copyright (e.g. 'CC BY 4.0') (optional)
      *   'description Human readable description (array)
      *   'link'       Link to copyright info
      *   or false if the record contains no images
      */
-    public function getImageRights()
+    public function getImageRights($language)
     {
         return false;
     }
@@ -200,7 +228,9 @@ trait SolrFinna
         $query = new \VuFindSearch\Query\Query(
             'local_ids_str_mv:"' . $safeId . '"'
         );
-        $records = $this->searchService->search('Solr', $query, 0, 1)->getRecords();
+        $params = new \VuFindSearch\ParamBag(['hl' => 'false']);
+        $records = $this->searchService->search('Solr', $query, 0, 1, $params)
+            ->getRecords();
         if (!isset($records[0])) {
             return [];
         }
@@ -348,7 +378,8 @@ trait SolrFinna
      */
     public function getSource()
     {
-        return isset($this->fields['source']) ? $this->fields['source'] : false;
+        return isset($this->fields['source_str_mv'])
+            ? $this->fields['source_str_mv'] : false;
     }
 
     /**
@@ -371,6 +402,17 @@ trait SolrFinna
     {
         return isset($this->fields['first_indexed'])
             ? $this->fields['first_indexed'] : '';
+    }
+
+    /**
+     * Is rating allowed.
+     *
+     * @return boolean
+     */
+    public function ratingAllowed()
+    {
+        $sector = substr($this->fields['sector_str_mv'][0], 2, 3);
+        return $sector == 'lib';
     }
 
     /**

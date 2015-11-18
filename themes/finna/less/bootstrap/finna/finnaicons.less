@@ -11,6 +11,16 @@
     font-weight: normal;
     font-style: normal;
 }
+@font-face {
+    font-family: 'Fontawesome';
+    src:url('../../../themes/finna/css/fonts/fontawesome-webfont.eot?adcatf');
+    src:url('../../../themes/finna/css/fonts/fontawesome-webfont.eot?#iefixadcatf') format('embedded-opentype'),
+    url('../../../themes/finna/css/fonts/fontawesome-webfont.woff?adcatf') format('woff'),
+    url('../../../themes/finna/css/fonts/fontawesome-webfont.ttf?adcatf') format('truetype'),
+    url('../../../themes/finna/css/fonts/fontawesome-webfont.svg?adcatf#Fontawesome') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
 
 [class^="fa-"], [class*=" fa-"], .iconlabel:before, .slick-prev, .slick-next, .slick-dots li, .openUrlEmbed:before  {
     font-family: 'icomoon';
@@ -51,6 +61,9 @@ table .iconlabel {
   font-size: 1em;
 }
 .image-popup-trigger {
+        &:hover {
+            text-decoration: none;   
+        }
         & img {
             box-shadow: 0px 0px 0px 4px @gray-lighter inset;
             position: relative;
@@ -60,12 +73,14 @@ table .iconlabel {
         & .iconlabel {
             width: 100%;
             color: @body-bg;
+            display: none;
+
             &:before {
                 padding-right: 3px;
                 position: absolute;
                 top: 26%;
                 left: 36%;
-                font-size: 3em;
+                font-size: 39px;
                 color: @gray-lighter;
                 z-index: 0;
                 @media (min-width:@screen-md-min) and (max-width:@screen-md-max) {
@@ -73,7 +88,7 @@ table .iconlabel {
                     left: 35%;
                 }
                 @media (max-width:@screen-sm-max) {
-                    font-size: 2em;
+                    font-size: 26px;
                 }
             }
         }
@@ -106,9 +121,30 @@ table .iconlabel {
         }
     }
 }
+.image-popup-trigger.no-image {
+    @media (max-width:@screen-xs-max) {
+        display: none;   
+    }
+    & .fa-magnify {
+        display: none;   
+    }
+    & .iconlabel {
+        display: block;   
+    }
+    &.disable {
+        cursor: default;
+    }
+}
+.grid-image .image-popup-trigger.no-image {
+    @media (max-width:@screen-xs-max) {
+        display: block;   
+    }
+    & .fa-magnify {
+        display: none;   
+    }  
+}
 .fa-spinner {
   margin-left: 5px;
-  vertical-align: middle;
 }
 .fa-spinner:before {
   font-family:'Fontawesome';
@@ -165,8 +201,8 @@ table .iconlabel {
     display: inline-block;
     width: 250px;
     height: 63px;
-    background: url('../images/finnafi-logo.png'); // fallback if no svg support
-    background: url('../images/finnafi-logo.svg');
+    background: url('../../finna/images/finnafi-logo.png'); // fallback if no svg support
+    background: url('../../finna/images/finnafi-logo.svg');
     background-repeat: no-repeat;
     background-size: 100%;
     @media (max-width: @screen-xs-max) {
@@ -184,11 +220,19 @@ table .iconlabel {
 	content: "\e61b";
 }
 .fa-external-link:before, .openUrlEmbed:before {
-    font-size: 1.3em;
-    vertical-align: middle;
+    font-size: 1.18em;
 }
 .fa-www-link:before, .iconlabel.format-electronic:before, .fa-external-link:before, .openUrlEmbed:before {
-    content: "\e615";
+    font-family: 'FontAwesome';
+    content: "\F138";
+}
+.fa-link:before {
+    font-family: 'FontAwesome';
+    content: "\f0c1";
+}
+.fa-unlink:before {
+    font-family: 'FontAwesome';
+    content: "\F127";
 }
 .fa-handle-left:before, .slick-prev:before {
     content: "\e60a";
@@ -293,10 +337,13 @@ table .iconlabel {
 .fa-uniE03B:before {
     content: "\e03b";
 }
-.fa-expand:before {
+.fa-expand:before, .fa-magnify:before {
     content: "\e03a";
 }
-.fa-search-adv:before, .fa-magnify:before {
+.fa-condense:before {
+    content: "\e61d";  
+}
+.fa-search-adv:before {
     content: "\e600";
 }
 .fa-pinterest:before {
@@ -307,6 +354,9 @@ table .iconlabel {
 }
 .fa-facebook:before {
     content: "\e036";
+}
+.fa-facebook-button:before {
+    content: "\e61e";   
 }
 .fa-bell:before {
     content: "\e035";
@@ -344,7 +394,7 @@ table .iconlabel {
 .fa-ratefull:before {
     content: "\e02b";
 }
-.icon-uniE02A:before {
+.fa-CollectionList:before {
     content: "\e02a";
 }
 .fa-arrow-left:before {
@@ -377,7 +427,7 @@ table .iconlabel {
 .fa-send-feedback:before {
     content: "\e020";
 }
-.fa-envelope:before {
+.fa-envelope:before, .iconlabel.format-1otherletter:before {
     content: "\e01f";
 }
 .fa-user-document:before {
@@ -385,6 +435,9 @@ table .iconlabel {
 }
 .fa-UserComments:before {
     content: "\e01d";
+}
+.fa-Map:before {
+	  content: "\e002";
 }
 .fa-search-small:before {
     content: "\e01c";
@@ -428,6 +481,13 @@ table .iconlabel {
 .fa-user:before {
     content: "\e00e";
 }
+.fa-star:before {
+    content: "\e02b";
+}
+.fa-star-empty:before {
+    content: "\e60f";
+}
+
 .iconlabel.format-1bookebook:before, .iconlabel.format-1bookebooksection:before, .iconlabel.format-1otherelectronic:before {
     content: "\e617";
 }
@@ -443,7 +503,7 @@ table .iconlabel {
 .iconlabel.format-1placebuilding:before, .iconlabel.format-1placeplace:before, .iconlabel.format-1placearchaeologicalsite:before {
     content: "\e60e";
 }
-.iconlabel.format-1otherother:before, .iconlabel.format-1otherkit:before, .iconlabel.format-1othermanuscript:before, .iconlabel.format-1othertext:before {
+.iconlabel.format-1otherother:before, .iconlabel.format-1othercollection:before, .iconlabel.format-1othersubunit:before, .iconlabel.format-1otherkit:before, .iconlabel.format-1othermanuscript:before, .iconlabel.format-1othertext:before {
     content: "\e00d";
 }
 .iconlabel.format-manuscript:before, .iconlabel.format-1thesisother:before, .iconlabel.format-1thesisgradu:before, .iconlabel.format-1thesisthesis:before, .iconlabel.format-1thesislaudatur:before, .iconlabel.format-1thesismasters:before, .iconlabel.format-1thesisbachelorspolytechnic:before, .iconlabel.format-1thesisbachelors:before, .iconlabel.format-1thesismasterspolytechnic:before, .iconlabel.yamk:before, .iconlabel.format-1thesislicentiate:before, .iconlabel.format-1otherresearchdata:before {
@@ -461,7 +521,7 @@ table .iconlabel {
 .iconlabel.format-1imagephoto:before, .iconlabel.format-1imageimage:before, .iconlabel.format-1imagephotograph:before, .iconlabel.format-1imageslide:before, .iconlabel.format-1imagedrawing:before, .iconlabel.format-1imagetransparency:before {
     content: "\e008";
 }
-.icon-smallpress:before {
+.iconlabel-smallpress:before, .iconlabel.format-1otherprint:before {
     content: "\e007";
 }
 .fa.fa-TOC:before, .iconlabel.format-1document:before, .iconlabel.format-1documentarchive:before, .iconlabel.format-1documentarchivematerial:before, .iconlabel.format-1documentarchiveitem:before, .iconlabel.format-1documentarchivefonds:before, .iconlabel.format-1documentarchiveseries:before, .iconlabel.format-1documentarchivecollection:before, .iconlabel.format-1documentdigitizedarchiveitem:before {
@@ -473,7 +533,7 @@ table .iconlabel {
 .iconlabel.format-0database:before {
     content: "\e004";
 }
-.iconlabel.esine:before, .iconlabel.format-1physicalobjectother:before, .iconlabel.format-1physicalobjectculturehistoricalobject:before {
+.iconlabel.esine:before, .iconlabel.format-1physicalobjectother:before, .iconlabel.format-1physicalobjectculturehistoricalobject:before, .iconlabel.format-0physicalobject:before {
     content: "\e003";
 }
 .iconlabel.format-1mapmap:before, .iconlabel.format-1mapatlas:before, .iconlabel.karttapallo:before {
@@ -556,25 +616,33 @@ table .iconlabel {
 /* Image gallery popup icons */
 .fa-magnify {
     position: absolute;
-    font-size: 1em;
+    font-size: .9em;
     opacity: 0;
     transition: opacity 0.2s linear;
     color: @body-bg;
     right: 20px;
-    top: 6px;
+    top: 8px;
     z-index: 2;
     &:before {
-        padding: 1px 3px 3px;
+        padding: 3px 3px;
         background: rgba(1,1,1, 0.1);
-        font-size: 1.5em;
+        font-size: 1.4em;
     }
     @media (max-width: @screen-sm-max) {
         .opacity(0.3);
     }
 }
+.template-dir-record .recordcover-holder {
+    @media (max-width: @screen-xs-max) {
+        & .fa-magnify {
+            right: auto;
+            margin-left: -26px;
+        }
+    }
+}
 .grid .fa-magnify {
     right: 14px;
-    top: 5px;
+    top: 7px;
 }
 .recordcover-holder:hover .fa-magnify {
     opacity: 1;
@@ -621,9 +689,16 @@ table .iconlabel {
 .sidebar .list-group-item .main.applied i.fa.fa-check-square-o {
     margin-right:3px;
 }
-.searchbox .btn-link .fa-search-adv {
-    font-size: 1.55em;
-    margin-right: 5px;
+.searchbox .btn-link {
+    & .fa-search-adv {
+        font-size: 1.55em;
+        margin-right: 5px;
+        vertical-align: -3px;
+    }
+    & .fa-search {
+        vertical-align: -2px;
+        font-size: 1.1em;
+    }
 }
 .spelling-suggestions .fa-plus-small {
     vertical-align: -2px;
@@ -670,3 +745,16 @@ i.bigger {
     from {transform:rotate(0deg);}
     to {transform:rotate(360deg);}
 }
+
+// tooltip icons
+[class^="tooltip-"] {
+    &:hover {
+        cursor: pointer;   
+    }
+    &> i {   
+        font-size: 16px;
+        margin-left: 5px;
+        vertical-align: -2px;
+    }
+}
+

@@ -24,6 +24,7 @@
  * @category VuFind2
  * @package  Search
  * @author   David Maus <maus@hab.de>
+ * @author   Ere Maijala <ere.maijala@helsinki.fi>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org   Main Site
  */
@@ -32,9 +33,13 @@ namespace Finna\Search\Factory;
 use Finna\Search\Solr\DeduplicationListener;
 use Finna\Search\Solr\SolrExtensionsListener;
 
-use VuFindSearch\Backend\BackendInterface;
+use FinnaSearch\Backend\Solr\LuceneSyntaxHelper;
+use FinnaSearch\Backend\Solr\QueryBuilder;
 
+use VuFindSearch\Backend\BackendInterface;
 use VuFindSearch\Backend\Solr\Backend;
+use VuFindSearch\Backend\Solr\Connector;
+use VuFindSearch\Backend\Solr\Response\Json\RecordCollectionFactory;
 
 /**
  * Abstract factory for SOLR backends.
@@ -49,6 +54,25 @@ use VuFindSearch\Backend\Solr\Backend;
 class SolrDefaultBackendFactory
     extends \VuFind\Search\Factory\SolrDefaultBackendFactory
 {
+    /**
+     * Create the SOLR backend.
+     *
+     * @param Connector $connector Connector
+     *
+     * @return Backend
+     */
+    protected function createBackend(Connector $connector)
+    {
+        $backend = parent::createBackend($connector);
+        $manager = $this->serviceLocator->get('VuFind\RecordDriverPluginManager');
+        $factory = new RecordCollectionFactory(
+            [$manager, 'getSolrRecord'],
+            'FinnaSearch\Backend\Solr\Response\Json\RecordCollection'
+        );
+        $backend->setRecordCollectionFactory($factory);
+        return $backend;
+    }
+
     /**
      * Create listeners.
      *
@@ -69,6 +93,38 @@ class SolrDefaultBackendFactory
             $this->searchConfig
         );
         $solrExtensions->attach($events);
+    }
+
+    /**
+     * Create the query builder.
+     *
+     * @return QueryBuilder
+     */
+    protected function createQueryBuilder()
+    {
+        $specs   = $this->loadSpecs();
+        $config = $this->config->get('config');
+        $defaultDismax = isset($config->Index->default_dismax_handler)
+            ? $config->Index->default_dismax_handler : 'dismax';
+        $builder = new QueryBuilder($specs, $defaultDismax);
+
+        // Configure builder:
+        $search = $this->config->get($this->searchConfig);
+        $caseSensitiveBooleans
+            = isset($search->General->case_sensitive_bools)
+            ? $search->General->case_sensitive_bools : true;
+        $caseSensitiveRanges
+            = isset($search->General->case_sensitive_ranges)
+            ? $search->General->case_sensitive_ranges : true;
+        $unicodeNormalizationForm
+            = isset($search->General->unicode_normalization_form)
+            ? $search->General->unicode_normalization_form : 'NFKC';
+        $helper = new LuceneSyntaxHelper(
+            $caseSensitiveBooleans, $caseSensitiveRanges, $unicodeNormalizationForm
+        );
+        $builder->setLuceneHelper($helper);
+
+        return $builder;
     }
 
     /**

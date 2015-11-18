@@ -242,6 +242,17 @@ finna.layout = (function() {
             nSelectedText: vufindString.selected,
             buttonClass: "form-control",
         });
+        // use click events only if there is a multi-select element
+        if ($('.multi-select').length) {
+          $('.multiselect.dropdown-toggle').click(function(e) {
+              $(this).siblings('.multiselect-container').toggleClass('show');
+          });
+          $('html').on('click', function(e) {
+              if (!$(e.target).hasClass('multiselect') && !$(e.target).parent().hasClass('multiselect')) {
+                  $('.multiselect-container.show').removeClass('show');
+              }
+          });
+        }
     };
 
     var initMobileNarrowSearch = function() {
@@ -250,9 +261,11 @@ finna.layout = (function() {
           $('.mobile-navigation .sidebar-navigation .active-filters').removeClass('hidden');
           $('.mobile-navigation .sidebar-navigation .active-filters').append(' '+filterAmount);
         }
-        $('.mobile-navigation .sidebar-navigation, .sidebar h4').click(function() {
-            $('.sidebar').toggleClass('open');
-            $('.mobile-navigation .sidebar-navigation i').toggleClass('fa-arrow-up');
+        $('.mobile-navigation .sidebar-navigation, .sidebar h4').click(function(e) {
+            if ($(e.target).attr('class') != 'fa fa-info-big') {
+              $('.sidebar').toggleClass('open');
+            }
+            $('.mobile-navigation .sidebar-navigation i').toggleClass('fa-arrow-down');
             $('body').toggleClass('prevent-scroll');
         });
         $('.mobile-navigation .sidebar-navigation .active-filters').click(function() {
@@ -327,57 +340,65 @@ finna.layout = (function() {
             $('#hierarchyTree, #modal').animate({scrollTop: 0 }, 200);
         });
       });
-
-      $('.template-dir-record .back-to-up').click(function() {
-        $('html, body').animate({scrollTop: $('#hierarchyTreeHolder').offset().top-70}, 200);
-      });
     };
 
     var initSearchboxFunctions = function() {
       if ($('.navbar-form .checkbox')[0]) {
         $('.tt-dropdown-menu').addClass('checkbox-active');
       }
-      if ($('#searchForm_lookfor').val() != "" ) {
-        $('.clear-button').removeClass('hidden');
-      }
-      $('#searchForm_lookfor').on('input', function() {
-        if ($('#searchForm_lookfor').val() != "" ) {
-          $('.clear-button').removeClass('hidden');
-        }
-        else {
-          $('.clear-button').addClass('hidden');
+      $('.searchForm_lookfor').on('input', function() {
+        var form = $(this).closest('.searchForm');
+        if ($(this).val() != '' ) {
+          form.find('.clear-button').removeClass('hidden');
+        } else {
+          form.find('.clear-button').addClass('hidden');
         }
       });
 
       $('.clear-button').click(function() {
-        $('#searchForm_lookfor').val("");
-        $('.autocomplete').typeahead('val', '');
-        $('.clear-button').addClass('hidden');
-        $('#searchForm_lookfor').focus();
+        var form = $(this).closest('.searchForm');
+        form.find('.searchForm_lookfor').val('');
+        form.find('.autocomplete').typeahead('val', '');
+        form.find('.clear-button').addClass('hidden');
+        form.find('.searchForm_lookfor').focus();
       });
       $('.autocomplete').on('typeahead:selected', function () {
         $('.navbar-form').submit();
       });
+
+      $('.select-type').click(function() {
+        $('input[name=type]:hidden').val($(this).children().val());
+        $('.type-dropdown .dropdown-toggle span').text($(this).text());
+      });
+
     };
 
-
-
     var initToolTips = function () {
-      $('[data-toggle="tooltip"]').tooltip();
-      // prevent link opening if tooltip is placed inside link element for touch devices
-      if (isTouchDevice()) {
-        $('[data-toggle="tooltip"] > i').click(function(event) {
-          event.preventDefault();
-        });
-      }
+      $('[data-toggle="tooltip"]').tooltip({trigger:'click', viewport: '.container'});
+      // prevent link opening if tooltip is placed inside link element
+      $('[data-toggle="tooltip"] > i').click(function(event) {
+        event.preventDefault();
+      });
+      // close tooltip if user clicks anything else than tooltip button
+      $('html').on('click', function(e) {
+        if (typeof $(e.target).parent().data('original-title') == 'undefined' && typeof $(e.target).data('original-title') == 'undefined') {
+          $('[data-toggle="tooltip"]').tooltip('hide');
+        }
+      });
     };
 
     var initCondensedList = function () {
         $('.condensed-collapse-toggle').click(function(event) {
             if ((event.target.nodeName) != 'A' && (event.target.nodeName) != 'MARK') {
-              $(this).nextAll('.condensed-collapse-data').first().slideToggle(120, 'linear');
-              $('.fa-arrow-right', this).toggleClass('fa-arrow-down');
-              $(this).parent().parent().toggleClass('open');
+                $(this).nextAll('.condensed-collapse-data').first().slideToggle(120, 'linear');
+                $('.fa-arrow-right', this).toggleClass('fa-arrow-down');
+                var holder = $(this).parent().parent();
+                holder.toggleClass('open');
+                if (holder.hasClass('open') && !holder.hasClass('opened')) {
+                    holder.addClass('opened');
+                    finna.itemStatus.initItemStatuses(holder);
+                    finna.itemStatus.initDedupRecordSelection(holder);
+                }
             }
         });
     };
@@ -388,7 +409,14 @@ finna.layout = (function() {
         }
         holder.find('.save-record').click(function() {
             var parts = this.href.split('/');
-            return finna.layout.lightbox.get(parts[parts.length-3],'Save',{id:$(this).attr('id')});
+            var id = $(this).attr('id');
+            if (!id) {
+                id = $(this).data('id');
+            }
+            if (!id) {
+                return;
+            }
+            return finna.layout.lightbox.get(parts[parts.length-3],'Save',{id:id});
         });
     };
 
@@ -489,22 +517,65 @@ finna.layout = (function() {
             }
         });
     }
-    
-    var initBuildingFilter = function() {
-      $('#building_filter').keyup(function () {
-        var valThis = this.value.toLowerCase();
-        $('#facet_building>ul>li>a>.main').each(function () {
-            console.log($(this).text());
-            var text  = $(this).text(),
-                text  = text.toLowerCase();
-            if(text.indexOf(valThis) != -1) {
-              $(this).parent().parent().show();
-            }
-            else {
-              $(this).parent().parent().hide();
-            }
+
+    var initTouchDeviceGallery = function () {
+        if ($('.result-view-grid')[0] != null && isTouchDevice()) {
+            $('.result-view-grid').addClass('touch-device');
+        }
+    }
+    var initImageCheck = function() {
+        $(".image-popup-trigger img").each(function() {
+            $(this).one("load",function() {
+                if (this.naturalWidth && this.naturalWidth == 10 && this.naturalHeight == 10) {
+                    $(this).parent().addClass('no-image');
+                    $('.rating-stars').addClass('hidden-xs');
+                }
+            }).each(function() {
+                if (this.complete) {
+                    $(this).load();
+                }
+            });
         });
-      });
+    };
+
+    var initHierarchicalFacet = function(treeNode, inSidebar) {
+        treeNode.bind('ready.jstree', function() {
+            var tree = $(this);
+            // if hierarchical facet contains 2 or less top level items, it is opened by default
+            if (tree.find('ul > li').length <= 2) {
+                tree.find('ul > li.jstree-node.jstree-closed > i.jstree-ocl').each(function() {
+                    tree.jstree('open_node', this, null, false);
+                });
+            }
+            // open facet if it has children and it is selected
+            $(tree.find('.jstree-node.active.jstree-closed')).each(function() {
+                tree.jstree('open_node', this, null, false);
+            });
+        });
+        initFacetTree(treeNode, inSidebar);
+    };
+
+    var initJumpMenus = function(holder) {
+        if (typeof(holder) == "undefined") {
+            holder = $("body");
+        }
+        holder.find('select.jumpMenu').unbind('change').change(function() { $(this).closest('form').submit(); });
+        holder.find('select.jumpMenuUrl').unbind('change').change(function(e) { window.location.href = $(e.target).val(); });
+    }
+
+    var initSecondaryLoginField = function(labels, topClass) {
+        $('#login_target').change(function() {
+            var target = $('#login_target').val();
+            var field = $('#login_' + (topClass ? topClass + '_' : '') + 'secondary_username');
+            if (labels[target] === '') {
+                field.val('');
+                field.closest('.form-group').hide();
+            } else {
+                var group = field.closest('.form-group');
+                group.find('label').text(labels[target] + ':');
+                group.show();
+            }
+        }).change();
     }
 
     var my = {
@@ -517,10 +588,12 @@ finna.layout = (function() {
         initSaveRecordLinks: initSaveRecordLinks,
         initLightbox: initLightbox,
         updateLoginName: updateLoginName,
+        initHierarchicalFacet: initHierarchicalFacet,
+        initJumpMenus: initJumpMenus,
+        initMobileNarrowSearch: initMobileNarrowSearch,
+        initSecondaryLoginField: initSecondaryLoginField,
         init: function() {
-            $('select.jumpMenu').unbind('change').change(function() { $(this).closest('form').submit(); });
-            $('select.jumpMenuUrl').unbind('change').change(function(e) { window.location.href = $(e.target).val(); });
-
+            initJumpMenus();
             initAnchorNavigationLinks();
             initFixFooter();
             initHideDetails();
@@ -531,13 +604,15 @@ finna.layout = (function() {
             initMultiSelect();
             initMobileNarrowSearch();
             initCheckboxClicks();
+            initToolTips();
             initResizeListener();
             initScrollLinks();
             initSearchboxFunctions();
             initCondensedList();
             checkSaveStatuses();
             initAuthorizationNotification();
-            initBuildingFilter();
+            initTouchDeviceGallery();
+            initImageCheck();
         }
     };
 

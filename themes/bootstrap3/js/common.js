@@ -247,24 +247,21 @@ function ajaxLogin(form) {
       if (response.status == 'OK') {
         var salt = response.data;
 
-        // get the user entered password
-        var password = form.password.value;
-
-        // base-64 encode the password (to allow support for Unicode)
-        // and then encrypt the password with the salt
-        password = rc4Encrypt(salt, btoa(unescape(encodeURIComponent(password))));
-
-        // hex encode the encrypted password
-        password = hexEncode(password);
-
-        var params = {password:password};
-
-        // get any other form values
+        // extract form values
+        var params = {};
         for (var i = 0; i < form.length; i++) {
+          // special handling for password
           if (form.elements[i].name == 'password') {
-            continue;
+            // base-64 encode the password (to allow support for Unicode)
+            // and then encrypt the password with the salt
+            var password = rc4Encrypt(
+                salt, btoa(unescape(encodeURIComponent(form.elements[i].value)))
+            );
+            // hex encode the encrypted password
+            params[form.elements[i].name] = hexEncode(password);
+          } else {
+            params[form.elements[i].name] = form.elements[i].value;
           }
-          params[form.elements[i].name] = form.elements[i].value;
         }
 
         // login via ajax
@@ -367,7 +364,7 @@ $(document).ready(function() {
               q:query,
               method:'getACSuggestions',
               searcher:searcher['searcher'],
-              type:searcher['type'] ? searcher['type'] : $('#searchForm_type').val()
+              type:searcher['type'] ? searcher['type'] : $(element).closest('.searchForm').find('.searchForm_type').val()
             },
             dataType:'json',
             success: function(json) {
@@ -386,9 +383,10 @@ $(document).ready(function() {
       }
     );
   });
-  $('#searchForm_type').change(function() {
-    var query = $('#searchForm_lookfor').val();
-    $('#searchForm_lookfor').focus().typeahead('val', '').typeahead('val', query);
+  $('.searchForm_type').change(function() {
+    var $lookfor = $(this).closest('.searchForm').find('.searchForm_lookfor[name]');
+    var query = $lookfor.val();
+    $lookfor.focus().typeahead('val', '').typeahead('val', query);
   });
 
   // Checkbox select all

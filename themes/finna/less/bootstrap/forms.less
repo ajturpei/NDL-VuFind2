@@ -255,50 +255,51 @@ input[type="checkbox"],
 .input-lg {
   .input-size(@input-height-large; @padding-large-vertical; @padding-large-horizontal; @font-size-large; @line-height-large; @border-radius-large);
 }
-.searchHomeContent {
-   
-}
+
 .navbar-form {
- box-shadow: 0px 0px 2px rgba(100,100,100,0.5) !important;
- margin-right:0px !important;
- margin-left:0px !important;
-}
-.navbar-form .form-control.search-query {
-    margin-top: -2px;
-    width: percentage(@finna-search-input-width);
-    @media (max-width: @screen-xs-max) {
-        width: percentage((@finna-search-input-width - 0.06));  
+    box-shadow: 0px 0px 2px rgba(100,100,100,0.5) !important;
+    margin-right:0px !important;
+    margin-left:0px !important;
+    & .form-control.search-query {
+        margin-top: -2px;
+        width: percentage(@finna-search-input-width);
+        @media (max-width: @screen-xs-max) {
+            width: percentage((@finna-search-input-width - 0.06));  
+        }
+        border:none;
+        box-shadow: none;
+        background:transparent;
+        display:inline-block !important;
+        font-size: @font-size-large;
+        color: @gray;
+        margin-left: 10px;
+        height: 39px;
     }
-    border:none;
-    box-shadow: none;
-    background:transparent;
-    display:inline-block !important;
-    font-size: @font-size-large;
-    color: @gray;
-    margin-left: 10px;
-    height: 39px;
+    /* --- Autocomplete and form adjust accordingly --- */
+    .twitter-typeahead {
+      background: transparent;
+      height: 39px;
+      margin-left: 10px;
+      width: percentage(@finna-search-input-width);
+      @media (max-width: @screen-xs-max) {
+            width: percentage((@finna-search-input-width - 0.06));  
+      }
+      .tt-hint {}
+    }
+    &.input-field-only .form-control.search-query, &.input-field-only .twitter-typeahead {
+        width: 85%;
+        @media (max-width: @screen-xs-max) {
+            width: 80%;
+        }
+    }
 }
-/* --- Autocomplete and form adjust accordingly --- */
-.twitter-typeahead {
-  background: transparent;
-  height: 39px;
-  margin-left: 10px;
-  width: percentage(@finna-search-input-width);
-  @media (max-width: @screen-xs-max) {
-        width: percentage((@finna-search-input-width - 0.06));  
-  }
-  .tt-hint {}
-}
+
 // prevent appearance of smaller input field when twitter-typeahead.js is loaded
 
 .navbar-form .twitter-typeahead .form-control.search-query {
     margin-top: 0px;
     margin-left: 0px; // Reset margin if we wrap this element inside typeahead
     width: 100%;   
-}
-
-.search-controls .form-control {
-    display:inline-block;
 }
 .search-controls .pagination {
     margin-top: 0px;   
@@ -481,13 +482,27 @@ input[type="checkbox"],
     right: (@grid-gutter-width / 2);
   }
 }
+#side-collapse-first_indexed {
+    & > a {
+        display: inline-block;
+        min-width: 51%;
+    }
+}
 .form-control.date-picker-field {
     border-bottom-right-radius: 0px;
     border-top-right-radius: 0px;
+    cursor: pointer;
 }
+
 #first_indexedFilter {
     margin-top: 10px;
     margin-bottom: 10px;
+    & label {
+        
+        @media (min-width:@screen-sm-min) and (max-width: @screen-sm-max) {
+            display: block; 
+        }
+    }
     & .date-picker-button {  
         margin-left: -12px;
         padding: 6px 10px;
@@ -495,10 +510,26 @@ input[type="checkbox"],
        border-top-left-radius: 0px;
     }
 }
+.datepicker {
+    & .datepicker-switch {
+        color: @link-color;
+        font-size: 1.1em;
+    }
+    & .prev,& .next {
+        font-size: 1.1em;
+    }
+}
 
 .feedback-form {
     & .form-group {
-        margin-bottom: 20px;   
+        margin-bottom: 20px;
+        & label {
+            clear: both;
+            display: block;
+        }
+        & textarea, & input {
+            max-width: 100%;   
+        }
     }
     & .feedback-info, .captcha {
         padding-top: 10px;
@@ -508,4 +539,10 @@ input[type="checkbox"],
 
 form[name=feedbackRecord] .feedback-info {
     border: none;
+}
+.form-horizontal[name=emailRecord] {
+    & input[type=email] {
+        min-width: 200px;
+        max-width: 100%;
+    }
 }

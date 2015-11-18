@@ -74,6 +74,20 @@ class SolrQdc extends \VuFind\RecordDriver\SolrDefault
     }
 
     /**
+     * Return an associative array of image URLs associated with this record
+     * (key = URL, value = description).
+     *
+     * @param string $size Size of requested images
+     *
+     * @return array
+     */
+    public function getAllThumbnails($size = 'large')
+    {
+        return !empty($this->fields['thumbnail'])
+            ? [$this->fields['thumbnail'] => $this->fields['thumbnail']] : [];
+    }
+
+    /**
      * Return an external URL where a displayable description text
      * can be retrieved from, if available; false otherwise.
      *
@@ -85,6 +99,33 @@ class SolrQdc extends \VuFind\RecordDriver\SolrDefault
             return 'http://siilo-kk.lib.helsinki.fi/getText.php?query=' . $isbn;
         }
         return false;
+    }
+
+    /**
+     * Return full record as filtered XML for public APIs.
+     *
+     * @return string
+     */
+    public function getFilteredXML()
+    {
+        $record = clone($this->getSimpleXML());
+        while ($record->abstract) {
+            unset($record->abstract[0]);
+        }
+        return $record->asXML();
+    }
+
+    /**
+     * Get the original record as a SimpleXML object
+     *
+     * @return SimpleXMLElement The record as SimpleXML
+     */
+    protected function getSimpleXML()
+    {
+        if ($this->simpleXML === null) {
+            $this->simpleXML = new \SimpleXMLElement($this->fields['fullrecord']);
+        }
+        return $this->simpleXML;
     }
 
     /**
@@ -102,18 +143,5 @@ class SolrQdc extends \VuFind\RecordDriver\SolrDefault
     {
         parent::setRawData($data);
         $this->simpleXML = null;
-    }
-
-    /**
-     * Get the original record as a SimpleXML object
-     *
-     * @return SimpleXMLElement The record as SimpleXML
-     */
-    protected function getSimpleXML()
-    {
-        if ($this->simpleXML !== null) {
-            return $this->simpleXML;
-        }
-        return simplexml_load_string($this->fields['fullrecord']);
     }
 }
