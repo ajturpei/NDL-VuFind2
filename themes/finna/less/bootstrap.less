@@ -1197,6 +1197,18 @@ ul.jstree-container-ul > li.jstree-node, .list-group.facet .list-group-item:not(
         padding: 10px 15px;
     }
 }
+.building-filter {
+    padding: 5px 0px 5px 15px;
+    @media (max-width:@screen-xs-max) {
+        padding-left: 30px;   
+    }
+    & input {
+        width: 190px;   
+        @media (min-width: @screen-sm-min) and (max-width:@screen-sm-max) {
+            width: 135px;   
+        }
+    }
+}
 /* --- Hierarchy tree --- */
 /* jsTree arrows */
 .hierarchy-tree {
@@ -1337,14 +1349,6 @@ ul.jstree-container-ul > li.jstree-node, .list-group.facet .list-group-item:not(
         width: 95%;
         margin: 20px 0px;
     } 
-}
-.building-filter {
-    margin: 0px 15px 5px 15px;
-    padding-top: 5px;
-    & input {
-        width: 150px;
-        max-width: 100%;
-    }
 }
 
 //== CONTENT PAGES
