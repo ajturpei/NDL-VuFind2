@@ -20,17 +20,6 @@
 <? $results = $this->recommend->getResults(); ?>
 <? if ($results->getResultTotal() > 0): ?>
   <h4><i class="fa fa-arrow-down visible-xs pull-left"></i> <?=$this->transEsc(isset($this->overrideSideFacetCaption) ? $this->overrideSideFacetCaption : 'Narrow Search')?><? if (!$this->translationEmpty('tooltip_facet_html')): ?><span class="tooltip-facet pull-right" data-toggle="tooltip" data-placement="auto" data-html="true" data-original-title="<?=$this->transesc('tooltip_facet_html')?>"><i class="fa fa-info-big"></i></span><? endif; ?></h4>
-  <? $currentFilters = $this->results->getParams()->getFilters(); if (empty($currentFilters)): ?>
-    <? $previousSearch = $this->search()->getPreviousSearch($this->results); ?>
-    <? if ($previousSearch !== false): ?>
-      <div class="list-group filters">
-      <? if ($filters = $previousSearch->getParams()->getFilters()): ?>
-        <? $newSearch = $this->search()->getSearchWithPreviousFilters($this->results, $previousSearch); ?>
-        <a class="list-group-item" href="<?=$this->url($newSearch->getOptions()->getSearchAction()) . '?' . $newSearch->getUrlQuery()->getParams() ?>"><?=$this->transEsc('Apply previous filters') ?></a>
-      <? endif; ?>
-      </div>
-    <? endif; ?>
-  <? endif; ?>
 <? endif; ?>
 <? $checkboxFilters = $results->getParams()->getCheckboxFacets(); if (count($checkboxFilters) > 0): ?>
 <?
@@ -58,6 +47,19 @@
   }
 ?>
   <div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>"><?=$html ?></div>
+<? endif; ?>
+<? if ($results->getResultTotal() > 0): ?>
+  <? $currentFilters = $this->results->getParams()->getFilters(); if (empty($currentFilters)): ?>
+    <? $previousSearch = $this->search()->getPreviousSearch($this->results); ?>
+    <? if ($previousSearch !== false): ?>
+      <? if ($filters = $previousSearch->getParams()->getFilters()): ?>
+      <div class="list-group filters previous-filters">
+        <? $newSearch = $this->search()->getSearchWithPreviousFilters($this->results, $previousSearch); ?>
+        <a class="list-group-item" href="<?=$this->url($newSearch->getOptions()->getSearchAction()) . '?' . $newSearch->getUrlQuery()->getParams() ?>"><?=$this->transEsc('Apply previous filters') ?></a>
+      </div>
+      <? endif; ?>
+    <? endif; ?>
+  <? endif; ?>
 <? endif; ?>
 <? $extraFilters = isset($this->extraSideFacetFilters) ? $this->extraSideFacetFilters : array(); ?>
 <? $collapsedFacets = $this->recommend->getCollapsedFacets() ?>
