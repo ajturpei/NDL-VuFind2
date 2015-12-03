@@ -160,10 +160,23 @@
         margin: 12px 0px;
     }
     & label {
-        margin-left: 0px;   
+        margin-left: 0px; 
+        font-size: 1.15em;
     }
     & label:before {
         margin-right: 5px;
+    }
+    a.checkbox-link {
+        color: @gray;
+        display: block;
+        margin-left: 21px;
+        margin-top: -10px;
+        &:hover {
+            text-decoration: none;   
+        }
+        & label {
+            font-size: 1.1em;   
+        }
     }
 }
 .checkboxFilter.mylist-select-all {
@@ -605,3 +618,9 @@ input[type="button"] {
   }
 }
 
+[class*="facet-"]:after {
+    content: attr(data-facet);
+    margin-left: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}

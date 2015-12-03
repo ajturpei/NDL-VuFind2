@@ -1,4 +1,25 @@
 <!-- START of: finna - Recommend/SideFacets.phtml -->
+<? if ($this->layout()->templateDir == 'search' && $this->layout()->templateName == 'results'): ?>
+  <?$lookfor = $params->getQuery()->getString();?>
+  <?
+    $urlText = $this->results->getUrlQuery()->getParams();
+    $words = array('=online_boolean','filter%5B%5D=%7Eformat%3A%220%2FImage%2F%22', 'filter%5B%5D=%7Eformat%3A%220%2FPhysicalObject%2F%22', 'filter%5B%5D=%7Eformat%3A%220%2FWorkOfArt%2F%22', 'filter%5B%5D=%7Eformat%3A%220%2FMap%2F%22', 'filter%5B%5D=%7Eformat%3A%220%2FPlace%2F%22', 'filter%5B%5D=%7Eformat%3A%221%2FOther%2FLetter%2F%22', 'filter%5B%5D=%7Eformat%3A%221%2FOther%2FPrint%2F%22');
+    $matches = false;
+    $online_boolean = false;
+    foreach( $words as $word ) {
+      if ( strpos( $urlText, $word ) !== false ) {
+        $matches = true;
+        if ($word == '=online_boolean') {
+            $online_boolean = true;
+        }
+      }
+      else {
+        $matches = false;
+        break;
+      }
+    }
+  ?>
+<? endif;?>
 <?
   $this->headScript()->appendFile('vendor/bootstrap-datepicker.min.js');
   $datePickerLang = 'en';
@@ -46,7 +67,7 @@
       onclick="document.location.href=\''. ($current['selected'] ? $results->getUrlQuery()->removeFilter($current['filter']) : $results->getUrlQuery()->addFilter($current['filter'])).'\';" />'.$this->transEsc($current['desc']).'</label></div>';
   }
 ?>
-  <div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>"><?=$html ?></div>
+  <div class="checkboxFilter<?if($shown == 0):?> hidden<? endif; ?>"><?=$html ?><? if ($matches && $this->layout()->templateDir == 'search' && $this->layout()->templateName == 'results'): ?><a href='Results?lookfor=<?=$lookfor;?>&view=list' class="checkbox-link"><div class="checkbox checked"><label>Vain kuvat</label></div></a><? elseif ($this->layout()->templateDir == 'search' && $this->layout()->templateName == 'results') :?><a class="checkbox-link" href='Results?lookfor=<?=$lookfor;?>&type=AllFields&filter%5B%5D=online_boolean%3A%221%22&filter%5B%5D=%7Eformat%3A"0%2FImage%2F"&filter%5B%5D=%7Eformat%3A"0%2FPhysicalObject%2F"&filter%5B%5D=%7Eformat%3A"0%2FWorkOfArt%2F"&filter%5B%5D=%7Eformat%3A"0%2FMap%2F"&filter%5B%5D=%7Eformat%3A"0%2FPlace%2F"&filter%5B%5D=%7Eformat%3A%221%2FOther%2FLetter%2F%22&filter%5B%5D=%7Eformat%3A"1%2FOther%2FPrint%2F"&dfApplied=1&limit=50&view=grid'><div class="checkbox"> <label>Vain kuvat</label></div></a><?endif;?></div>
 <? endif; ?>
 <? if ($results->getResultTotal() > 0): ?>
   <? $currentFilters = $this->results->getParams()->getFilters(); if (empty($currentFilters)): ?>
