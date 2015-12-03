@@ -1,13 +1,24 @@
 <!-- START of: national - search/home/home-left.phtml -->
 <div class="introduction">
-  <h2>Tietoa tarvitseville ja elämyksiä etsiville</h2>
-  <? $cnt = $this->indexedTotal()->getTotalIndexedCount(); ?>
-    <? if ($cnt > 0): ?>
-        <p>Finna.fi:stä löydät <?=$this->translate('currently_indexed_html', ['%%total%%' => $this->localizedNumber($cnt)]); ?><br>
-        <a href="<?=$this->url('content-page', ['page' => 'Organisations'])?>">Kenen aineistoja on finna.fi:ssä?</a></p>
-    <? endif; ?>
-  <p>Finnassa voit katsella verkossa saatavilla olevia sisältöjä, uusia lainoja, tilata aineistoja, ja paljon muuta.<br>
-  <a href="<?=$this->url('content-page', ['page' => 'About'])?>">Mikä Finna on?</a>
-  </p>
+ <? $cnt = $this->indexedTotal()->getTotalIndexedCount(); ?>
+ <? if ($cnt > 0): ?>
+  <h2>Hae <?=$cnt ;?> aineistotiedosta</h2>
+ <? endif; ?>
+  <label class="radiobutton" for="set_0">
+    <input id="set_0" name="pre-filter" type="radio" value="images" checked="checked">Katsele kuvia
+  </label>
+  <br>
+  <label class="radiobutton" for="set_1">
+      <input id="set_1" name="pre-filter" type="radio" value="online">Lue e-artikkeleita, -kirjoja ja -opinnäytteitä
+  </label>
+  <br>
+  <label class="radiobutton" for="set_2">
+      <input id="set_2" name="pre-filter" type="radio" value="books">Hae ja varaa kirjoja sekä muita lainattavia aineistoja
+  </label>
+  <br>
+  <label class="radiobutton" for="set_3">
+      <input id="set_3" name="pre-filter" type="radio" value="archives">Hae arkistoaineistoja
+  </label>
+  <br><button class="btn btn-primary do-search"><i class="fa fa-search"></i> Hae Finnasta</button>
 </div>
 <!-- END of: national - search/home/home-left.phtml -->
