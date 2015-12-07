@@ -297,29 +297,167 @@ function setupBacklinks() {
     });
 }
 
+function updateQueryStringParameter(uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf('?') !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+        return uri.replace(re, '$1' + key + "=" + value + '$2');
+    }
+    else {
+        return uri + separator + key + "=" + value;
+    }
+}
+
 function setupAutocomplete() {
   // Search autocomplete
   $('.autocomplete').each(function(i, op) {
     $(op).autocomplete({
-      maxResults: 10,
+      maxResults: 20,
       loadingString: VuFind.translate('loading')+'...',
       handler: function(query, cb) {
+        var preserveFilters = $(".searchFormKeepFilters").is(":checked");
+        var fields = {AllFields: "title", author: "authors"};
         var searcher = extractClassParams(op);
+        var searchType = searcher['type'] ? searcher['type'] : $(op).closest('.searchForm').find('.searchForm_type').val();
         $.fn.autocomplete.ajax({
-          url: VuFind.getPath() + '/AJAX/JSON',
+          url: VuFind.getPath() + '/SearchAPI/Search',
           data: {
-            q:query,
+            lookfor:query,
             method:'getACSuggestions',
             searcher:searcher['searcher'],
-            type:searcher['type'] ? searcher['type'] : $(op).closest('.searchForm').find('.searchForm_type').val()
+            type: searchType,
+            field: ["title", "authors", "subjects"],
+            limit: 5,
+            facet: preserveFilters ? [] : ["online_boolean", "format"],
+            filter: preserveFilters ? $.deparam(document.location.href).filter : []
           },
           dataType:'json',
           success: function(json) {
-            if (json.status == 'OK' && json.data.length > 0) {
+            if (json.status == 'OK' && json.resultCount > 0) {
               var datums = [];
-              for (var i=0;i<json.data.length;i++) {
-                datums.push(json.data[i]);
+              var parser = document.createElement('a');
+              var location = decodeURI(document.location.href);
+              if (!preserveFilters) {
+                  location = location.replace(/filter\[\]=.*(\&)?/g, "");
+              } else {
+                  location = updateQueryStringParameter(location, "dfApplied", "1");                               
               }
+              
+              parser.href = location;
+              href = parser.search;
+
+              var base = VuFind.getPath() + "/Search/Results";
+              var suggestionTitles = [];
+              
+              suggestions = $(json.records).map(function(ind, obj) {
+                  field = null;
+                  switch (searchType) {
+                  case "Author":
+                      if (!("authors" in obj)) {
+                          return null;
+                          break;
+                      }
+                      if ("main" in obj.authors && obj.authors.main != "") {
+                          field = obj.authors.main;
+                      } else if ("secondary" in obj.authors) {
+                          field = obj.authors.secondary[0];
+                      }
+                      break;
+                  
+                  case "Subject":
+                      if (!("subjects" in obj)) { 
+                          return null;
+                          break;
+                      }
+                      if (!obj.subjects.length) {
+                          return null;
+                          break;
+                      }
+                      field = obj.subjects[0];
+                      
+                      break;
+                      
+                  default:
+                      field = obj.title;
+                      break;
+                  }
+                  if ($.inArray(field, suggestionTitles) !== -1) {
+                      return null;
+                  }
+
+                  suggestionTitles.push(field);
+                  suggestionHref = base + updateQueryStringParameter(href, "lookfor", field);
+                  suggestionHref = updateQueryStringParameter(suggestionHref, "type", searchType);
+                  
+                  return  {
+                      val: field,
+                      href: suggestionHref,
+                      css: ["query"],
+                      group: "suggestions"
+                  };
+              });
+              datums = datums.concat(suggestions.toArray());
+
+              var lookfor = decodeURI($(".searchForm_lookfor").val());
+
+              // Pictures
+              picHref = base + "?lookfor=" + lookfor;
+              picHref += '&filter[]=online_boolean:"1"&filter[]=~format:"0/Image/"&filter[]=~format:"0/PhysicalObject/"&filter[]=~format:"0/WorkOfArt/"&filter[]=~format:"0/Map/"&filter[]=~format:"0/Place/"&filter[]=~format:"1/Other/Letter/"&filter[]=~format:"1/Other/Print/"';
+              picHref += '&type=AllFields&limit=50&view=grid';
+              datums.push({
+                  val: "",
+                  href: picHref,
+                  css: ["query query-pictures"],
+                  group: "facets"
+              });
+              
+              // Facets
+              var facets = [];
+              if ("facets" in json) {                  
+                  $.each(json.facets, function(facet, items) {
+                      $.each(items.slice(0,3), function(ind, obj) {
+                          if (obj.count == 0) {
+                              return false;
+                          }
+                          facetHref = decodeURI(obj.href);
+                          facetHref = facetHref.substr(1).replace(/%3A/g, ':').replace(/%2F/g, '/').replace(/&amp;/g, '&');
+                          facets.push({
+                              val: obj.displayText + ' (' + obj.count + ')',
+                              href: base + "?" + facetHref,
+                              css: ["facet", "facet-" + facet, "facet-" + facet + "-" + obj.value],
+                              group: "facets"                              
+                          });
+                      });                      
+                  });
+              }
+              datums = datums.concat(facets);
+
+              // Exact
+              var exact = lookfor;
+              var exactHref = parser.search;
+              if (lookfor.substr(0,1) !== '"' && lookfor.substr(-1) !== '"') {
+                  exact = '"' + lookfor + '"';
+              }                
+              datums.push({
+                  val: exact,
+                  href: base + updateQueryStringParameter(exactHref, "lookfor", exact),
+                  css: ["query query-exact"],
+                  group: "operators"
+              });
+
+              // Search types
+              var typeHref = parser.search;
+              $.each(["Title", "Author", "Subject"], function(ind, type) {
+                  typeHref = updateQueryStringParameter(typeHref, "type", type);
+                  typeHref = updateQueryStringParameter(typeHref, "lookfor", lookfor);                  
+                  datums.push({
+                      val: lookfor,
+                      href: base + typeHref,
+                      css: ["query query-" + type],
+                      group: "operators"
+                  });
+              });
+
               cb(datums);
             } else {
               cb([]);
