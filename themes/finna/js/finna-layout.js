@@ -554,7 +554,7 @@ finna.layout = (function() {
 
             // show filter if 20+ organisations
             if (tree.parent().parent().attr('id') == 'side-panel-building' && tree.find('ul.jstree-container-ul > li').length > 19) {
-              $(this).prepend('<div class="building-filter"><input class="form-control" id="building_filter" placeholder="'+vufindString.find_organisation+'..."></input></div>');
+              $(this).prepend('<div class="building-filter"><input class="form-control" id="building_filter" placeholder="Hae organisaatiota..."></input></div>');
               initBuildingFilter();
             }
         });
