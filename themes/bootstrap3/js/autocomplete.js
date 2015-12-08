@@ -19,7 +19,7 @@
       if (item.hasClass("query")) {
           input.val(item.attr("data-value"));
       }
-        
+
       hide();
       if (typeof options.onselection !== 'undefined') {
         options.onselection(item, input, eventType);
@@ -29,10 +29,10 @@
     function createList(data, input) {
       var length = Math.min(options.maxResults, data.length);
       input.data('length', length);
-      
+
       var group = null;
       var groupContainer = null;
-        
+
       var op = $('<div/>');
       for (var i=0, len=Math.min(options.maxResults, data.length); i<len; i++) {
           if (typeof data[i] === 'string') {
@@ -49,7 +49,7 @@
 
           var item;
           if (typeof data[i].href === "undefined") {
-              item = 
+              item =
                   //op.append(
                   $('<div/>')
                       .attr('data-value', data[i].val)
@@ -85,13 +85,13 @@
           });
           if (typeof data[i].description !== 'undefined') {
               item.append($('<small/>').text(data[i].description));
-          }          
+          }
       }
-        
+
       op.append(groupContainer);
 
       $.fn.autocomplete.element.html(op);
-        
+
       $.fn.autocomplete.element.find('.item').mousedown(function() {
           populate($(this), input, {mouse: true});
       });
@@ -133,13 +133,13 @@
     }
 
     function align(input, element) {
-      var offset = input[0].getBoundingClientRect();
+      var offset = $('.searchForm').offset();
       element.css({
         position: 'absolute',
-        top: offset.top + offset.height,
+        top: offset.top + $('.searchForm input').outerHeight(),
         left: offset.left,
-        maxWidth: offset.width * 2,
-        minWidth: offset.width,
+        maxWidth: $('.searchForm').width(),
+        minWidth: $('.searchForm').width() / 2,
         zIndex: 50
       });
     }
