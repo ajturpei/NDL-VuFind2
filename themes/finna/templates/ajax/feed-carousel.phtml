@@ -20,7 +20,7 @@
       <? if (isset($item['text']) || $clickableLink): ?>
       <div class="carousel-text">
         <? if (isset($item['title'])): ?>
-        <p class="carousel-hover-title"><?= $item['title']; ?></p>
+        <p class="carousel-hover-title"><?= $this->truncate($item['title'], 70); ?></p>
         <? endif; ?>
         <p><?= $item['text']; ?>
         <? if ($clickableLink): ?><a <?= $this->linkTarget ? ' target="' . $this->escapeHtmlAttr($this->linkTarget) . '"' : '' ?> href="<?= $this->escapeHtmlAttr($item['link']); ?>" class="carousel-link"><?=$this->transEsc($this->linkText ? $this->linkText : 'To the record')?></a><? endif; ?>
