@@ -622,7 +622,7 @@ finna.layout = (function() {
         return;
       }
       document.addEventListener('VuFind.lightbox.login', function(e) {
-        if (!e.detail.formUrl.match(/catalogLogin/)) {
+        if (!e.detail.formUrl.match(/catalogLogin/) && !e.detail.formUrl.match(/\Save/) && !e.detail.formUrl.match(/%2[fF]Save/)) {
           window.location.href = VuFind.path + '/MyResearch/Home';
           e.preventDefault();
         }
