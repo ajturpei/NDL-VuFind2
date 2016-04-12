@@ -631,8 +631,8 @@ finna.layout = (function() {
 
     var initLoadMasonry = function() {
       var ie = detectIe();
-      // do not execute on ie9 or lower as they are not supported by masonry
-      if (ie > 9 || ie == null) {
+      // do not execute on ie8 or lower as they are not supported by masonry
+      if (ie > 8 || ie == null) {
         var $grid = $('.result-view-grid .masonry-wrapper').imagesLoaded( function() {
           // init Masonry after all images have loaded
           $grid.masonry({
