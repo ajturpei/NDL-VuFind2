@@ -378,7 +378,7 @@ class Feed implements \Zend\Log\LoggerAwareInterface
                             foreach ($properties as $prop) {
                                 list($field, $val) = explode(':', $prop);
                                 if (stristr($field, 'width') === false
-                                    && stristr($field, 'height') === false
+                                    && stristr($field, 'height') === false && stristr($field, 'margin') === false
                                 ) {
                                     $styleProperties[] = $prop;
                                 }

@@ -21,9 +21,13 @@ finna.contentFeed = (function() {
                 if (!modal) {
                     $('.content-header').text(title);
                     document.title = title + ' | ' + document.title;
-                    $('.content-navigation-menu').html(response.data.navigation);
+                    $('.article-navigation-wrapper').html(response.data.navigation);
+                    $('.article-navigation-header').show();
                 }
-                container.find('.date').text(response.data.item.contentDate);
+                if (typeof response.data.item.contentDate != 'undefined') {
+                  container.find('.date span').text(response.data.item.contentDate);
+                  container.find('.date').css('display', 'inline-block');
+                }
             }
         })
         .fail(function(response, textStatus, err) {

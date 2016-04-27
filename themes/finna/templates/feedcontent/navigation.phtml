@@ -1,4 +1,7 @@
 <? $cnt = 0; ?>
+<ul class="article-links">
 <? foreach ($this->items as $item): ?>
-<a href="<?=$this->baseUrl . $cnt++?>"><h2><?=$item?></h2></a>
+  <li><?=$cnt != $currentPageId ? '<a href="'.$this->baseUrl.$cnt.'">'.$item.'</a>' : $item ;?></li>
+  <? $cnt++;?>
 <?endforeach;?>
+</ul>
