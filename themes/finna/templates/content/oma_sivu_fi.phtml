@@ -258,7 +258,8 @@
                                       google.maps.event.addListener(marker, 'mouseover', function() {
                                         console.log(marker.index);
                                         console.log(window.location.hash.substr(1));
-                                        if (window.location.hash.substr(1) != marker.index) {
+                                        // disable hovers on touchdevices as they cause odd behaviour
+                                        if (window.location.hash.substr(1) != marker.index && !finna.layout.isTouchDevice()) {
                                           var point = fromLatLngToPoint(marker.getPosition(), map);
                                           $('#marker-tooltip').html(marker.tooltipContent).css({
                                                 'left': point.x,
