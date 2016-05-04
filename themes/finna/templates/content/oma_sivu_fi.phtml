@@ -1,0 +1,631 @@
+<? $this->headTitle('Kirjastot'); $this->content()->setHeading('Kirjastot'); ?>
+<div class="organisation-page-information-wrapper">
+  <div class="row office-search">
+      <div class="col-sm-6 col-md-5">
+          <form class="form-inline searchbox-office office-search-notifications">
+              <input id="office-search" type="text" placeholder="" />
+              <button class="btn btn-primary btn-office-search"><i class="fa fa-arrow-down"></i></button>
+              <div class="notification"><?=$this->transEsc('not_on_map');?></div>
+              <!--<button class="btn btn-primary office-button"><i class="fa fa-search"></i></button> -->
+          </form>
+          <div class="autocomplete-container"></div>
+      </div>
+      <div class="col-sm-6 col-md-7 text-right">
+          <div class="map-control-buttons">
+            <span class="expand-map">Suurenna kartta</span>
+            <span class="contract-map" style="display: none">Pienennä kartta</span>
+          </div>
+      </div>
+  </div>
+  <div class="row office map">
+      <div class="col-xs-12">
+          <script src='https://maps.googleapis.com/maps/api/js?v=3.exp'></script>
+              <div id='gmap_canvas' style='height:320px;width:auto;'><i class="fa fa-spinner fa-spin" style="position:absolute;top: 48%; left: 48%; text-align: center;"></i></div>
+              <div id="marker-tooltip"></div>
+              <div id="legend"></div>
+              <style>#gmap_canvas img{max-height:none!important;max-width:none!important;background:none!important}</style>
+          <script type='text/javascript'>
+              var arrMarkers = [];
+
+              function initOfficeSearch() {
+                  $('#office-search').autocomplete({
+                      source: function (request, response) {
+                        var url;
+                        if (request.term != '') {
+                          url = "https://api.kirjastot.fi/v3/organisation?refs=consortium&consortium=2115&lang=fi&name="+request.term+"&limit=1000&sort=name&format=jsonp&callback=?";
+                        }
+                        else {
+                          url = "https://api.kirjastot.fi/v3/organisation?refs=consortium&consortium=2115&lang=fi&limit=1000&sort=name&format=jsonp&callback=?";
+                        }
+                          $.getJSON(url, function (data) {
+                              response($.map(data.items, function (obj, ind) {
+                                  console.log(obj);
+                                   //console.log(id);
+                                   console.log(obj.name);
+                                  return {
+                                      label: obj.name,
+                                      value: obj.id
+                                  };
+                              }));
+
+                          });
+                      },
+                      select: function(event, ui) {
+                          $('#office-search').val(ui.item.label);
+                          window.location.hash = ui.item.value;
+                          return false; // Prevent the widget from inserting the value.
+                      },
+                      focus: function (event, ui) {
+                          if ($(window).width() < 768) {
+                            $('html, body').animate({
+                                scrollTop: $('#office-search').offset().top - 5
+                            }, 100);
+                          }
+                          return false; // Prevent the default focus behavior.
+                      },
+                      open: function(event, ui) {
+                          $('#office-search').off('menufocus hover mouseover mouseenter');
+                      },
+                      minLength: 0,
+                      delay: 100,
+                      appendTo: ".autocomplete-container",
+                      autoFocus: true,
+                  });
+                  // show list of
+                  $("#office-search").on('click',function() {
+                    $('#office-search').autocomplete("search",$(this).val());
+                  });
+                  $(".ui-autocomplete li").on('touchstart',function() {
+                    $('#office-search').autocomplete("search",$(this).val());
+                  });
+                  $('.btn-office-search').on ('click',function() {
+                    $('#office-search').autocomplete("search",'');
+                    $('#office-search').focus();
+                    return false;
+                  });
+              }
+              function fromLatLngToPoint(latLng, map) {
+                  var topRight = map.getProjection().fromLatLngToPoint(map.getBounds().getNorthEast());
+                  var bottomLeft = map.getProjection().fromLatLngToPoint(map.getBounds().getSouthWest());
+                  var scale = Math.pow(2, map.getZoom());
+                  var worldPoint = map.getProjection().fromLatLngToPoint(latLng);
+                  return new google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale);
+              }
+              var previousId;
+              function FindInfo() {
+                if (window.location.hash != '') {
+                  // matchFound is for closing an infowindow if office has no coordinates and marker
+                  matchFound = false;
+                  $.each(arrMarkers, function(ind, obj) {
+                    if (obj.index == window.location.hash.substr(1)) {
+                      console.log(obj);
+                      if (obj.position != null) {
+                        google.maps.event.trigger(obj, 'click');
+                        previousId = obj.index;
+                        matchFound = true;
+                      }
+                      $('#office-search').val('');
+                    }
+
+                  });
+                  // close infowindow if we have it opened and office has no marker
+                  if (!matchFound && previousId != null) {
+                    $.each(arrMarkers, function(ind, obj) {
+                      if (obj.index == previousId ) {
+                        google.maps.event.trigger(obj, 'infoWindowClose');
+                      }
+                    });
+                  }
+                }
+              }
+              // insert own location button & functionality to api
+              function addYourLocationButton(map, marker) {
+                var controlDiv = document.createElement('div');
+
+                var firstChild = document.createElement('button');
+                firstChild.style.backgroundColor = '#fff';
+                firstChild.style.border = 'none';
+                firstChild.style.outline = 'none';
+                firstChild.style.width = '28px';
+                firstChild.style.height = '28px';
+                firstChild.style.borderRadius = '2px';
+                firstChild.style.boxShadow = '0 1px 4px rgba(0,0,0,0.3)';
+                firstChild.style.cursor = 'pointer';
+                firstChild.style.marginRight = '10px';
+                firstChild.style.padding = '0px';
+                firstChild.title = 'Your Location';
+                controlDiv.appendChild(firstChild);
+
+                var secondChild = document.createElement('div');
+                secondChild.style.margin = '5px';
+                secondChild.style.width = '18px';
+                secondChild.style.height = '18px';
+                secondChild.style.backgroundImage = 'url(<?=$this->url("home")?>themes/finna/images/mylocation-sprite-1x.png)';
+                secondChild.style.backgroundSize = '180px 18px';
+                secondChild.style.backgroundPosition = '0px 0px';
+                secondChild.style.backgroundRepeat = 'no-repeat';
+                secondChild.id = 'you_location_img';
+                firstChild.appendChild(secondChild);
+
+                google.maps.event.addListener(map, 'dragend', function() {
+                  $('#you_location_img').css('background-position', '0px 0px');
+                });
+
+                firstChild.addEventListener('click', function() {
+                  var imgX = '0';
+                  var animationInterval = setInterval(function(){
+                    if(imgX == '-18') imgX = '0';
+                    else imgX = '-18';
+                    $('#you_location_img').css('background-position', imgX+'px 0px');
+                  }, 500);
+                  if(navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                      var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                      marker.setPosition(latlng);
+                      map.setCenter(latlng);
+                      map.setZoom(13);
+                      clearInterval(animationInterval);
+                      $('#you_location_img').css('background-position', '-144px 0px');
+                    });
+                  }
+                  else{
+                    clearInterval(animationInterval);
+                    $('#you_location_img').css('background-position', '0px 0px');
+                  }
+                });
+                controlDiv.index = 1;
+                map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(controlDiv);
+              }
+
+              function init_map() {
+                var dt = new Date();
+                var time = dt.getHours()+''+ (dt.getMinutes()<10?'0':'') + dt.getMinutes();
+                console.log(time);
+                var openIcon = '<?=$this->url("home")?>themes/finna/images/map-marker-green.png';
+                var closedIcon = '<?=$this->url("home")?>themes/finna/images/map-marker-red.png';
+                var unknownIcon = '<?=$this->url("home")?>themes/finna/images/map-marker-black.png';
+                var myOptions = {
+                    zoom:8,
+                    center: new google.maps.LatLng(60.45460519999999,22.283795599999962),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                };
+                  map = new google.maps.Map(document.getElementById('gmap_canvas'), myOptions);
+
+                  var url = "https://api.kirjastot.fi/v3/organisation?refs=consortium&consortium=2115&lang=fi&with=schedules&limit=1000&today&period.start=today&format=jsonp&callback=?"
+                  // add your location marker if user clicks own location button
+                  var myMarker = new google.maps.Marker({
+                      map: map,
+                      icon: '<?=$this->url("home")?>themes/finna/images/own-location.png',
+                    });
+                  addYourLocationButton(map, myMarker);
+
+                  $.getJSON(url, function(data) {
+                        console.log("data: %o", data);
+                        $("#office-search").attr("placeholder", "Hae palvelupistettä (yhteensä: "+data.total+")");
+                        var info = new google.maps.InfoWindow();
+                        $.each(data.items, function(ind, obj) {
+                        var infoWindowContent = '<h5>'+obj.name+'</h5>';
+                            // create map markers only if we know the address and coordinates
+                            if (obj.address != null && obj.address.coordinates != null) {
+                              infoWindowContent += '<strong style="color:#727272">'+obj.address.street;
+                              if (obj.address.zipcode != null) {
+                                 infoWindowContent += ', '+obj.address.zipcode;
+                              }
+                              infoWindowContent += '</strong>';
+                              console.log(obj.address.coordinates.lat + "," + obj.address.coordinates.lon);
+                              if (obj.schedules[0] && obj.schedules[0].opens != null && obj.schedules[0].closes != null) {
+                                var openingTime = obj.schedules[0].opens;
+                                openingTimeX = parseInt(openingTime.replace(':', ''));
+                                var closingTime = obj.schedules[0].closes;
+                                closingTimeX = parseInt(closingTime.replace(':', ''));
+                                console.log ('opens:'+openingTimeX+' and closes:'+closingTimeX+ ' ' + obj.name);
+                                if (time >= openingTimeX && time <= closingTimeX) {
+                                    infoWindowContent += '<p>' + openingTime + ' - ' + closingTime + '<span style="color:green;font-weight:bold;text-align:right"> Auki</span><p>';
+                                    var currentOpening = openIcon;
+                                }
+                                else {
+                                    infoWindowContent += '<p>' + openingTime + ' - ' + closingTime + '<span style="color:red;font-weight:bold;margin-left: 10px;display:inline-block;"> Kiinni</span><p>';
+                                    var currentOpening = closedIcon;
+                                }
+                              }
+                              else if (obj.schedules[0] != null && obj.schedules[0].closed != true) {
+                                var currentOpening = unknownIcon;
+                                infoWindowContent += '<p>Ei aukioloaikatietoja<p>';
+                              }
+                              else {
+                                if (openingTime != null && closingTime != null) {
+                                  infoWindowContent += '<p>' + openingTime + ' - ' + closingTime + '<span style="color:red;font-weight:bold;margin-left: 10px;display:inline-block;"> Kiinni</span><p>';
+                                }
+                                else {
+                                  infoWindowContent += '<span style="color:red;font-weight:bold;display:block;">Kiinni tänään</span><p>';
+                                }
+                                var currentOpening = closedIcon;
+
+                              }
+                              // Create marker and tooltip + eventlisteners for clicks hovers and close fucntionality
+                              var marker = new google.maps.Marker({index: obj.id, tooltipTitle: obj.name, content: infoWindowContent, icon: currentOpening, map: map,position: new google.maps.LatLng(obj.address.coordinates.lat,obj.address.coordinates.lon), clickable: true});
+                              marker.tooltipContent = marker.tooltipTitle;
+                                     google.maps.event.addListener(marker, 'click', function() {
+                                        window.location.hash = obj.id;
+                                        info.setContent(marker.content);
+                                        info.open(map, marker);
+                                        console.log("ma: %o", marker);
+                                        console.log(marker)
+                                        map.setZoom(13);
+                                        map.panTo(marker.position);
+                                        $('#marker-tooltip').hide();
+                                      });
+                                      google.maps.event.addListener(marker, 'mouseover', function() {
+                                        console.log(marker.index);
+                                        console.log(window.location.hash.substr(1));
+                                        if (window.location.hash.substr(1) != marker.index) {
+                                          var point = fromLatLngToPoint(marker.getPosition(), map);
+                                          $('#marker-tooltip').html(marker.tooltipContent).css({
+                                                'left': point.x,
+                                                'top': point.y-65,
+                                                'position': 'absolute',
+                                                'color': '#464646',
+                                                'background': '#fff',
+                                                'padding': '5px',
+                                                'border': '1px solid lightgray',
+                                                'opacity': '0.9',
+
+                                            }).show();
+                                          $('#marker-tooltip').css({'margin-left': -$('#marker-tooltip').outerWidth()/2+10});
+                                          console.log($('#marker-tooltip').width());
+                                        }
+                                      });
+                                      google.maps.event.addListener(marker, 'mouseout', function () {
+                                          $('#marker-tooltip').hide();
+                                      });
+                                      google.maps.event.addListener(marker, 'infoWindowClose', function () {
+                                        info.close(map, marker);
+                                        map.setZoom(11);
+                                      });
+                                     // push markers to array so we can use them when we find an organisation
+                                     arrMarkers.push(marker);
+                            }
+                        });
+                        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById('legend'));
+                        var legend = document.getElementById('legend');
+
+                        var name = 'Auki nyt';
+                        var name2 = 'Kiinni nyt';
+                        var name3 = 'Ei tietoja';
+                        var div = document.createElement('div');
+                        div.innerHTML += '<div><img src="' + openIcon + '"> ' + name + '</div>';
+                        div.innerHTML += '<div><img src="' + closedIcon + '"> ' + name2 + '</div>';
+                        div.innerHTML += '<div><img src="' + unknownIcon + '"> ' + name3 + '</div>'
+                        legend.appendChild(div);
+
+                        // hide spinner when markers are loaded and find information
+                        $('#gmap_canvas .fa-spinner').hide();
+                        $('#legend').show();
+
+                        // If we have location activated, open infowindow after markers are created
+                        FindInfo();
+                  });
+                  window.onhashchange = function() {
+                      LoadServiceData();
+                      FindInfo();
+                      // blur so that mobile keyboard is closed
+                      $('#office-search').blur();
+                  }
+
+              }
+              google.maps.event.addDomListener(window, 'load', init_map);
+              initOfficeSearch();
+              LoadServiceData();
+
+              $('.expand-map').click (function() {
+                $('#gmap_canvas').animate({'height': '600px'}, 350, 'swing', function() {
+                  google.maps.event.trigger(map, "resize");
+                });
+                $(this).hide();
+                $('.contract-map').show();
+
+              });
+              $('.contract-map').click (function() {
+                $('#gmap_canvas').animate({'height': '320px'}, 350, 'swing', function() {
+                  google.maps.event.trigger(map, "resize");
+                });
+                $(this).hide();
+                $('.expand-map').show();
+              });
+              function LoadServiceData() {
+
+              idNumber = parseInt(window.location.hash.replace('#',''));
+              var serviceUrl = "https://api.kirjastot.fi/v3/organisation?refs=consortium&consortium=2115&id="+idNumber+"&lang=fi&with=schedules,services,links,extra,pictures,mail_address,phone_numbers&limit=10&today&period.start=today&format=jsonp&callback=?"
+              console.log(serviceUrl);
+                var dt = new Date();
+                var time = dt.getHours()+''+ (dt.getMinutes()<10?'0':'') + dt.getMinutes();
+
+               $.getJSON(serviceUrl, function(data) {
+                        console.log("data: %o", data);
+
+                        $.each(data.items, function(ind, obj) {
+                            if (obj.address.coordinates == null) {
+                              $('.office-search-notifications .notification').show().delay(2000).fadeOut(500);
+                            }
+                            else {
+                              $('.office-search-notifications .notification').hide();
+                            }
+                            $('.office-quick-information .service-title').text(obj.name);
+
+                            // mobile library show links
+                            if (obj.branch_type == "mobile") {
+                              if (obj.links[0]) {
+                                $('.library-mobile-links').empty();
+                                $.each(obj.links, function (ind, obj) {
+                                  $('.library-mobile-links').html('<h3><a href="'+obj.url+'" target="_blank">'+obj.name+'</h3>');
+                                });
+                                $('.library-mobile-links').show();
+                              }
+                            }
+                            else {
+                              $('.library-mobile-links').hide();
+                            }
+
+                            var address = obj.address.street+', '+obj.address.zipcode+' '+obj.address.city;
+                            $('.office-links.address').html(address);
+
+                            var encodedStreet = encodeURIComponent(obj.address.street);
+                            var routeUrl = 'http://www.matka.fi/fi/?keya=&keyb='+encodedStreet+','+obj.address.city;
+                            $('.office-links.route').attr('href', routeUrl).show();
+
+                            if (obj.extra.description != null) {
+                              $('.office-quick-information .office-description').html(obj.extra.description).show();
+                            }
+                            else {
+                              $('.office-quick-information .office-description').hide();
+                            }
+                            if (obj.email) {
+                              $('.office-links.email').html('<i class="fa fa-envelope"></i> '+obj.email.replace('@','(at)'));
+                              $('.office-links.email').show();
+                            }
+                            else {
+                              $('.office-links.email').hide();
+                            }
+                            if (obj.services[0]) {
+                              $('.finna-panel.services .service-list').empty();
+                              var service;
+                              $.each(obj.services, function(ind, obj) {
+                                service = '<strong>'+obj.name+'</strong>';
+                                if (obj.short_description) {
+                                  service += '<br>'+obj.short_description;
+                                }
+                                $('.finna-panel.services .service-list').append('<li>'+service+'</li>');
+                                $('.finna-panel.services').show();
+                              });
+                            }
+                            else {
+                              $('.finna-panel.services').hide();
+                            }
+                            if (obj.pictures[0]) {
+                                $('.finna-panel.introduction .panel-collapse').html('<img src="'+obj.pictures[0].files.medium+'">');
+                            }
+                            if (obj.extra.building.building_name != null) {
+                              $('.finna-panel.introduction .panel-collapse').append('<p>'+obj.extra.building.building_name+'</p><p>Rakennettu: '+obj.extra.building.construction_year+'</p>');
+                            }
+                            if (obj.extra.description != null) {
+                               $('.finna-panel.introduction .panel-collapse').append('<p class="office-description">'+obj.extra.description+'</p>').show();
+                            }
+                            if (obj.links[0] != null) {
+                              if (obj.links[0].name == 'Facebook') {
+                                $('.social-button').html('<a href="'+obj.links[0].url+'" target="_blank"><i class="fa fa-facebook"></i></a>');
+                                $('.social-button .fa-facebook').show();
+                              }
+                              else {
+                                $('.social-button .fa-facebook').hide();
+                              }
+                            }
+                            if (obj.homepage != null) {
+                              $('.office-website').html('<a href="'+obj.homepage+'" target="_blank"><i class="fa fa-home"></i> Palvelupisteen kotisivu</a>');
+                            }
+                            else {
+                              $('.office-website').empty();
+                            }
+
+                            // contact-details
+                            if (obj.email != null) {
+                              $('.finna-panel.contact-details .panel-collapse .email-contact p').html('<i class="fa fa-envelope"></i> <a href="mailto:'+obj.email+'" itemprop="email">'+obj.email.replace('@', '(at)')+'</a>');
+                              $('.finna-panel.contact-details .panel-collapse .email-contact').show();
+                            }
+                            else {
+                              $('.finna-panel.contact-details .panel-collapse .email-contact').hide();
+                            }
+                            // address-details
+                            if (obj.mail_address != null) {
+                              $('.finna-panel.contact-details .panel-collapse .address-contact p').html(obj.mail_address.street+', '+obj.mail_address.zipcode+ ' '+obj.mail_address.area);
+                              $('.finna-panel.contact-details .panel-collapse .address-contact').show();
+                            }
+                            else {
+                              $('.finna-panel.contact-details .panel-collapse .email-contact').hide();
+                            }
+
+
+                            // phone-numbers
+                            if (obj.phone_numbers[0]) {
+                              $('.finna-panel.contact-details .panel-collapse .phone-numbers p').empty();
+                              $.each(obj.phone_numbers, function(ind, obj) {
+                                $('.finna-panel.contact-details .panel-collapse .phone-numbers p').append('<i class="fa fa-phone-square"></i> <a href="tel:'+obj.number+'" itemprop="telephone">'+obj.number+'</a> / '+obj.name+'<br>');
+                              });
+                            }
+                            else {
+                               $('.finna-panel.contact-details .panel-collapse .phone-numbers').hide();
+                            }
+
+                            // feed urls
+                            $('.rss-container').hide();
+                            if (obj.extra.data[0]) {
+                              $.each(obj.extra.data, function(ind, obj) {
+                                if (obj.id == 'uutiset') {
+                                  $('.news-feed-container .news-feed').html(obj.value);
+                                  $('.news-feed-container').show();
+                                }
+                                if (obj.id == 'tapahtumat') {
+                                  $('.event-feed-container .event-feed').html(obj.value);
+                                  $('.event-feed-container').show();
+                                }
+                              });
+                            }
+
+                            if (obj.schedules[0]) {
+                              if (obj.schedules[0].closed != true) {
+                                $('.time-open').html('<i class="fa fa-clock-o"></i> Auki tänään ' + obj.schedules[0].opens + ' - '+ obj.schedules[0].closes);
+
+                              var openHour = obj.schedules[0].opens;
+                              openHour = parseInt(openHour.replace(':', ''));
+                              var closeHour = obj.schedules[0].closes;
+                              closeHour = parseInt(closeHour.replace(':', ''));
+                              console.log(openHour, closeHour, time);
+                                if (time >= openHour && time <= closeHour) {
+                                  $('.open-or-closed').html('<span class="library-is-open">Auki</span>');
+                                }
+                                else {
+                                  $('.open-or-closed').html('<span class="library-is-closed">Kiinni</span>');
+                                }
+                              }
+                              else {
+                                $('.open-or-closed').html('<span class="library-is-closed">Kiinni</span>');
+                                $('.time-open').html('');
+                              }
+                            }
+                            //if
+                            //<a href=""><i class="fa fa-pinterest"></i></a>
+                            //<a href=""><i class="fa fa-twitter"></i></a>
+
+                        });
+                        if (window.location.hash != '') {
+                          $('.office-information').show();
+                          $('.office-information .help-text').hide();
+                        }
+                        else {
+                          $('.office-information .help-text').show();
+                        }
+              });
+            }
+          </script>
+      </div>
+  </div>
+  <div class="row office-quick-information">
+      <div class="col-xs-12 col-sm-7">
+          <h2 class="service-title"></h2>
+          <p><span class="office-links address"></span> <a href="" class="office-links route" style="display: none;"><i class="fa fa-bus"></i> Reittiohjeet</a> <a href="" class="office-links reserve-computer hidden"><i class="fa fa-desktop"></i> Varaa tietokone</a> <span class="office-links office-website"><span></p>
+          <p><span class="office-links email"></p>
+      </div>
+      <div class="col-xs-12 col-sm-4">
+          <h2 class="open-or-closed"></h2>
+          <p class="time-open"></p>
+      </div>
+      <div class="col-xs-12 col-sm-1"><div class="social-button"></div></div>
+      <div class="col-xs-12"><p class="office-description"></p></div>
+  </div>
+
+  <div class="row office-information" style="display:none">
+
+      <div class="col-sm-4 opening-times-widget col-sm-push-4">
+          <div class="finna-panel opening-times-library-information">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse2">Aukioloajat</a>
+              </h4>
+              <div id="collapse2" class="panel-collapse collapse in">
+                  <table class="opening-times-week">
+                      <tbody>
+                        <tr class="week"><td colspan="3" class="text-center"><span class="week-text">Viikko 26</span><i class="fa fa-arrow-right next-week"></i></td></tr>
+                        <tr><td>22.3. </td><td> Ma</td><td class="time">09:00 - 20:00</td></tr>
+                        <tr class="open-times-today"><td>23.3.</td><td>Ti<span class="staff">Henkilökunta</span></td><td class="time">09:00 - 20:00<span class="staff">10:00 - 19:00</span></td></tr>
+                          <tr><td>24.3. </td><td> Ke</td><td class="time">09:00 - 20:00</td></tr>
+                          <tr><td>25.3. </td><td> To</td><td class="time">09:00 - 18:00</td></tr>
+                          <tr><td>26.3. </td><td> Pe</td><td class="time">kiinni</td></tr>
+                          <tr><td>27.3. </td><td> La</td><td class="time">kiinni</td></tr>
+                          <tr><td>28.3. </td><td> Su</td><td class="time">kiinni</td></tr>
+                      </tbody>
+                  </table>
+                  <div class="opening-times-details"><p>Lasten- ja nuortenosasto aukeaa arkisin vasta klo 10.</p></div>
+                  <div class="library-mobile-links"></div>
+              </div>
+          </div>
+
+
+          <div class="finna-panel services">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse6">Palvelut</a>
+              </h4>
+              <div id="collapse6" class="panel-collapse collapse in">
+                <ul class="service-list">
+                </ul>
+              </div>
+          </div>
+
+          <div class="finna-panel magazine-journal hidden">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse3" class="collapsed">Lehtisalien aukioloajat</a>
+              </h4>
+              <div id="collapse3" class="panel-collapse collapse">
+              </div>
+          </div>
+
+          <div class="finna-panel accessibility hidden">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse5" class="collapsed">Esteettömyys</a>
+              </h4>
+              <div id="collapse5" class="panel-collapse collapse">
+               ei vielä toimi
+              </div>
+          </div>
+
+
+
+      </div>
+      <div class="col-sm-4 col-sm-pull-4">
+          <div class="finna-panel introduction">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse1">Esittely</a>
+              </h4>
+              <div id="collapse1" class="panel-collapse collapse in">
+
+              </div>
+          </div>
+
+          <div class="finna-panel contact-details">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse4">Yhteystiedot</a>
+              </h4>
+              <div id="collapse4" class="panel-collapse collapse in">
+                <div class="email-contact">
+                  <strong>Sähköposti</strong>
+                  <p></p>
+                </div>
+                <div class="address-contact">
+                  <strong>Postiosoite</strong>
+                  <p></p>
+                </div>
+                <div class="phone-numbers">
+                  <strong>Puhelinnumerot</strong>
+                  <p></p>
+                </div>
+            </div>
+          </div>
+
+      </div>
+      <div class="col-sm-4">
+          <div class="finna-panel news-feed-container rss-container">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse7">Uutiset</a>
+              </h4>
+              <div id="collapse7" class="panel-collapse collapse in">
+                  <?=$this->feed('office-news');?><span class="news-feed"></span>
+              </div>
+          </div>
+          <div class="finna-panel event-feed-container rss-container">
+              <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse8">Tapahtumat</a>
+              </h4>
+              <div id="collapse8" class="panel-collapse collapse in">
+                  <?=$this->feed('office-event');?><span class="event-feed"></span>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
