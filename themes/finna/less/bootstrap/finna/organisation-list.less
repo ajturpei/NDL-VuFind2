@@ -52,18 +52,25 @@
                 max-width: 400px;
             }
         }
-        & .schedules {
+        &.schedules {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed @gray-light;
             & .no-schedules {
                 margin: 10px;
                 font-size: 1.1em;
                 font-weight: bold;
+            }
+            & .mobile-schedules.info-element {
+                font-size: 1.2em;
+                font-weight: bold;
+                margin-top: 10px;
             }
         }
         & .opening-times-week {
             font-size: 1.1em;
             width: 100%;
             max-width: 400px;
-            margin-bottom: 20px;
             & td {
                 padding: 2px 5px;
                 vertical-align: top;
@@ -111,6 +118,7 @@
     }
     & .schedules-info {
         margin-bottom: 10px;
+        padding-bottom: 5px;
     }
     & .btn {
         background: @link-color;
