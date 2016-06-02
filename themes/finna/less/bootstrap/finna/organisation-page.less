@@ -33,17 +33,16 @@
 }
 .map-control-buttons {
     margin-top: 25px;
-    font-size: 1.2em;
     & span {
-         color: @link-color;
-         &:hover {
-             cursor: pointer;    
-         }
+        color: @link-color;
+        &:hover {
+            cursor: pointer;    
+        }
     }
     & .marker {
         font-size: 1.5em;
-        margin-left: 5px;
-        margin-right: 10px;
+        margin-left: 8px;
+        margin-right: 5px;
         &.open {
             color: #68c043;
         }
@@ -55,7 +54,8 @@
         }
     }
     & .expand {
-        margin-left: 10px;
+        margin-left: 20px;
+        font-size: 1.2em;
     }
 }
 .library-is-open {
@@ -251,8 +251,9 @@
         & .ol-popup {
             padding-top: 4px;
             padding-bottom: 5px;
+            z-index: 1;
             & .ol-popup-closer {
-                font-size: 110%;
+                font-size: 120%;
             }
         }
 
@@ -332,10 +333,13 @@
             }
             .ol-zoom {
                 position: absolute;
+                left: auto;
+                top: auto;
                 right: 6px;
-                left: initial;
                 bottom: 35px;
-                top: initial;
+                width: 26px;
+                height: 46px;
+                display: block;
             }
             & .my-location-btn {
                 position: absolute;

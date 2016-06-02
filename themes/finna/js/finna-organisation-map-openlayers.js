@@ -1,6 +1,6 @@
 finna = $.extend(finna, {
     organisationMap: function() {
-        var zoomLevel = {far: 10, close: 14};
+        var zoomLevel = {far: 10, close: 35};
         var holder = null;
         var imgPath = null;
         var map = null;
@@ -17,7 +17,7 @@ finna = $.extend(finna, {
             organisations = organisationList;
 
             var coordinates = organisations[defaultId].address.coordinates;
-            view = new ol.View();
+            view = new ol.View({zoom: 1,zoomFactor: 1.35,minZoom:15});
             reset();
 
 
@@ -45,7 +45,7 @@ finna = $.extend(finna, {
 
                     var el = $('<img/>').attr('src', markerIcon).addClass('marker')
                         .data('id', obj.id).data('lat', point.lat).data('lon', point.lon);
-                    
+
                     el.on("click", function() {
                         infoWindow.hide();
 
@@ -53,12 +53,12 @@ finna = $.extend(finna, {
 
                         var coord = latLonToCoord($(this).data('lat'), $(this).data('lon'));
                         var coord2 = latLonToCoord($(this).data('lat'), $(this).data('lon'));
-                        
+
                         if (view.getZoom() != zoomLevel.close) {
                             view.setZoom(zoomLevel.close);
                             view.setCenter(coord);
                         }
-                        
+
                         clearInterval(infoInterval);
                         infoInterval = setTimeout(function() {
                             infoWindow.show(coord, infoWindowContent);
@@ -71,7 +71,7 @@ finna = $.extend(finna, {
                         var point = map.getPixelFromCoordinate(coord);
 
                         me.trigger(
-                            'marker-mouseover', 
+                            'marker-mouseover',
                             {id: $(this).data('id'), x: parseInt(point[0]), y: parseInt(point[1])}
                         );
                     });
@@ -89,7 +89,7 @@ finna = $.extend(finna, {
                 }
             });
         };
-        
+
         var reset = function() {
             var coordinates = organisations[defaultId].address.coordinates;
             view.setCenter(latLonToCoord(coordinates.lat, coordinates.lon));
@@ -130,7 +130,7 @@ finna = $.extend(finna, {
                         var coord = latLonToCoord(pos.coords.latitude, pos.coords.longitude);
                         view.setZoom(zoomLevel.close);
                         view.setCenter(coord);
-                        
+
                         $('.my-location-marker').not('.template').remove();
                         var el = $('.my-location-marker.template').clone().removeClass('hide template');
                         map.addOverlay(new ol.Overlay({
@@ -139,7 +139,7 @@ finna = $.extend(finna, {
                         }));
                     });
                 });
-                
+
                 var control = new ol.control.Control({
                     element: btn[0]
                 });
@@ -150,13 +150,13 @@ finna = $.extend(finna, {
         var latLonToCoord = function(lat, lon) {
             return ol.proj.transform([lon, lat], 'EPSG:4326', 'EPSG:3857');
         };
-        
+
         var init = function(mapHolder, path, id) {
             holder = mapHolder;
             imgPath = path;
             defaultId = id;
         };
-        
+
         var my = {
             hideMarker: hideMarker,
             reset: reset,
