@@ -4,7 +4,6 @@ finna = $.extend(finna, {
         var holder = null;
         var imgPath = null;
         var map = null;
-        var legend = null;
         var view = null;
         var mapMarkers = {};
         var selectedMarker = null;
@@ -22,10 +21,6 @@ finna = $.extend(finna, {
             reset();
 
 
-            if (legend) {
-                map.addControl(legend);
-            }
-
             map = new ol.Map({
                 target: $(holder).attr('id'),
                 renderer: 'canvas',
@@ -35,7 +30,7 @@ finna = $.extend(finna, {
                 view: view
             });
 
-            infoWindow = new ol.Overlay.Popup();
+            infoWindow = new ol.Overlay.Popup({panMapIfOutOfView: true});
             map.addOverlay(infoWindow);
 
             addMyLocationButton(map, $(this), holder);
@@ -57,24 +52,18 @@ finna = $.extend(finna, {
                         me.trigger('marker-click', obj.id);
 
                         var coord = latLonToCoord($(this).data('lat'), $(this).data('lon'));
-                        /*
-                        var point = map.getPixelFromCoordinate(coord);
+                        var coord2 = latLonToCoord($(this).data('lat'), $(this).data('lon'));
                         
-
+                        if (view.getZoom() != zoomLevel.close) {
+                            view.setZoom(zoomLevel.close);
+                            view.setCenter(coord);
+                        }
                         
-                        var coord2 = map.getCoordinateFromPixel([point[0], point[1]-14.0]);
-
-                        console.log("coord: %o", coord);
-                        console.log("point: %o", point);
-                        console.log("coord2: %o", coord2);
-*/
-                        view.setZoom(zoomLevel.close);
-                        view.setCenter(coord);
-
                         clearInterval(infoInterval);
                         infoInterval = setTimeout(function() {
                             infoWindow.show(coord, infoWindowContent);
-                        }, 100);
+                        }, 10);
+
                     });
 
                     el.on('mouseover', function(ev) {
@@ -131,13 +120,6 @@ finna = $.extend(finna, {
             infoWindow.hide();
         };
 
-        var setLegend = function(legend) {
-            var control = new ol.control.Control({
-                element: legend[0]
-            });
-            legend = control;
-        };
-
         var addMyLocationButton = function(map, me, mapHolder) {
             if (navigator.geolocation) {
                 var view = map.getView();
@@ -180,7 +162,6 @@ finna = $.extend(finna, {
             reset: reset,
             resize: resize,
             selectMarker: selectMarker,
-            setLegend: setLegend,
             init: init,
             draw: draw
         };
