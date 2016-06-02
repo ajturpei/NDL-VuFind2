@@ -6,7 +6,6 @@ finna.organisationInfoPage = (function() {
     var service = null;
     var infoWidget = null;
     var organisationList = {};
-    //var organisationListResponse = null;
     var map = null;
     var mapHolder = null;
 
@@ -122,6 +121,7 @@ finna.organisationInfoPage = (function() {
     };
     
     var initSearch = function() {
+        
         $('#office-search').autocomplete({
             source: function (request, response) {
                 var term = request.term.toLowerCase();
@@ -142,6 +142,7 @@ finna.organisationInfoPage = (function() {
                 window.location.hash = ui.item.value;
                 return false;
             },
+            
             focus: function (event, ui) {
                 if ($(window).width() < 768) {
                     $('html, body').animate({
@@ -156,9 +157,11 @@ finna.organisationInfoPage = (function() {
             minLength: 0,
             delay: 100,
             appendTo: ".autocomplete-container",
-            autoFocus: true,
+            autoFocus: false,
+            autoSelect: false            
         });
-
+        
+        
         // show list of
         $("#office-search").on('click', function() {
             $('#office-search').autocomplete("search", $(this).val());
@@ -181,7 +184,7 @@ finna.organisationInfoPage = (function() {
         holder.find('.error, .info-element').hide();
         infoWidget.showDetails(id, '', true);
         $('#office-search').val('');
-
+                
         var notification = holder.find('.office-search-notifications .notification');
         if (id in organisationList) {
             var data = organisationList[id];
