@@ -1,0 +1,67 @@
+body.streetsearch {
+    background-image: @streetsearch-background-image-url;
+    & section {
+        padding-bottom: 60px;
+    }
+    @media (max-width: @screen-xs-max) {
+        & .introductionText {
+            font-size: 1.6em;     
+        }
+    }
+}
+#street-search-button {
+    font-size: 25px;
+    padding: 10px 10px;
+    margin-top: 10px;
+}
+.street-info-box {
+    background: lightblue;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 20px;
+    width: 300px;
+    clear: both;
+    text-align: center;
+    & .info {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+}
+    
+#street-search-terminate {
+    margin-top: 10px;
+    background-color: @brand-primary;
+    padding: 8px;
+    text-decoration: none;
+    color: #fff;
+}
+.fade-screen {
+    position: fixed;
+    z-index: 300;
+    background: black;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    opacity: .5;
+    display: none;
+}
+
+#street-search-spinner {
+    position: relative;
+    z-index: 1000;
+    left: ~"-webkit-calc(50% - 150px)";
+    left: ~"-moz-calc(50% - 150px)";
+    left: ~"calc(50% - 150px)";
+    & .fa-spinner {
+        display: block;
+        width: 100%;
+        height: auto;
+        text-align: center;
+        margin-top: 5px;
+        font-size: 1.2em;
+        &:before {
+            color: @gray;   
+        }
+    }
+}

@@ -1,7 +1,7 @@
 finna.StreetSearch = (function() {
     var ssbutton, terminateButton, buttonArea, spinner, spinnerContainer,
         getPositionSuccess;
-    
+
     var doStreetSearch = function() {
         ssInfo(VuFind.translate('street_search_checking_for_geolocation'), 'continues');
 
@@ -12,7 +12,7 @@ finna.StreetSearch = (function() {
             geoLocationError();
         }
     }
-   
+
     var geoLocationError = function(error) {
         if (!getPositionSuccess) {
             errorString = 'street_search_other_error';
@@ -45,7 +45,7 @@ finna.StreetSearch = (function() {
             'point.lon' : position.coords.longitude,
             'size' : '1'
         };
-        
+
         url = reverseGeocodeService + '?' + $.param(queryParameters);
 
         $.ajax({
@@ -62,17 +62,17 @@ finna.StreetSearch = (function() {
             }
         })
         .fail(function() {
-            ssInfo(VuFind.translate('street_search_reversegeocode_unavailable'), 'stopped');          
+            ssInfo(VuFind.translate('street_search_reversegeocode_unavailable'), 'stopped');
         });
-      
+
     }
- 
+
     var buildSearch = function(street, city) {
         if (!terminate) {
             ssInfo(VuFind.translate('street_search_searching_for') + ' ' + street + ' ' + city, 'stopped');
 
             resultsUrl = VuFind.path + '/Search/Results';
-            
+
             queryParameters = {
                 'lookfor' : street + ' ' + city,
                 'type' : 'AllFields',
@@ -84,46 +84,49 @@ finna.StreetSearch = (function() {
                     'online_boolean:"1"'
                 ]
             };
-        
+
             url = resultsUrl + '?' + $.param(queryParameters);
-            
+
             window.location.href = url;
         }
     }
 
     var ssInfo = function(message, type) {
-        
+
         if (type) {
             if (type === 'stopped') {
                 spinnerContainer.find('.fa-spinner').hide();
                 terminateButton.hide();
+                $('.fade-screen').fadeOut('fast');
             }
         }
         spinnerContainer.find('.info').text(message);
-        
+
     }
 
 
     var my = {
         init: function() {
             getPositionSuccess = false;
-            
+
             ssbutton = $("#street-search-button");
             buttonArea = $("#street-search-button-area");
             terminate = false;
-            terminateButton = $('<button/>').attr('id', 'street-search-terminate').text(VuFind.translate('Abort'));
+            terminateButton = $('<button/>').attr('id', 'street-search-terminate').attr('class', 'btn').text(VuFind.translate('Abort'));
+            spinner = $('<div class="fa fa-spinner fa-spin"></div>');
             infoText = $('<div/>').addClass('info');
             infoArea = $('<div/>').append(infoText).
+                      append(spinner).
                       append(terminateButton);
             infoBox = $('<div/>').addClass('infoBox').append(infoArea);
             spinnerContainer = $('<div/>').attr('id', 'street-search-spinner').hide().
-                               addClass('alert alert-info').
-                               append($('<div/>').addClass('fa fa-spinner fa-spin')).
+                               addClass('street-info-box').
                                append(infoBox);
             buttonArea.append(spinnerContainer);
 
             ssbutton.click(function() {
-                spinnerContainer.show();
+                $('.fade-screen').fadeIn('fast');
+                spinnerContainer.fadeIn(300);
                 spinnerContainer.find('.fa-spinner').show();
                 terminate = false;
                 terminateButton.show();
@@ -134,6 +137,7 @@ finna.StreetSearch = (function() {
                 terminate = true;
                 terminateButton.hide();
                 spinnerContainer.hide();
+                $('.fade-screen').fadeOut('fast');
             });
         }
     };

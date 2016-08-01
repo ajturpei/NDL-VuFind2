@@ -6,12 +6,12 @@
     $this->body()->appendClass('streetsearch');
 
     $introText = '<div class="introduction"><h1 class="introductionText">' . $this->translate('street_search_header') . '</h1></div>';
-    $button = '<div id="street-search-button-area"><button class="btn btn-primary" id="street-search-button">' . $this->transEsc('street_search_button') . '</button></div>';
-    
+    $button = '<div id="street-search-button-area"><button class="btn btn-primary" id="street-search-button">' . $this->transEsc('street_search_button') . ' <i class="fa fa-search"></i></button></div>';
+
     $this->layout()->searchbox = $introText . $button;
-    
+
     $this->headScript()->appendFile('finna-street-search.js', 'text/javascript', '');
-   
+
     $this->jsTranslations()->addStrings(
       array(
         'street_search_geolocation_inactive' => 'street_search_geolocation_inactive',
@@ -27,7 +27,7 @@
         'Abort' => 'Abort'
       )
     );
-      
+
 ?>
 <div class="row">
  <div class="col-md-10 col-lg-8">
@@ -37,4 +37,5 @@
    </p>
  </div>
 </div>
+<div class="fade-screen"></div>
 <!-- END of: finna - content/street_search_fi.phtml -->
