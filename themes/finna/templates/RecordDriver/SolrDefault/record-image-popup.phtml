@@ -93,6 +93,18 @@ $numOfImages = $this->record($this->driver)->getNumOfRecordImages('large');
                       $desc = isset($url['desc']) ? $url['desc'] : $this->truncateUrl($url['url']);
                     ?>
                     <div class="record-online-link"><a href="<?=$this->escapeHtmlAttr($this->proxyUrl($url['url'])) ?>" target="_blank" title="<?=$this->escapeHtmlAttr($url['url']) ?>"><i class="fa fa-external-link"></i> <? if (count($urls) == 1): ?>  <?=$this->transEsc('open_online_link', ['%%format%%' => $translatedFormat])?><? else: ?><?=$this->transEsc('default::link_' . $desc, null, $desc) ?><? endif; ?></a></div>
+                    <? if (strpos($this->escapeHtmlAttr($this->proxyUrl($url['url'])), 'vimeo.com') !== false): ?>
+                    <? $vimeoId = filter_var($this->proxyUrl($url['url']), FILTER_SANITIZE_NUMBER_INT);?>
+                    <script>
+                      $('.imagepopup-container .image').html('<iframe src="https://player.vimeo.com/video/<?=$vimeoId?>?autoplay=1" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="display: inline-block;position:relative;max-width: 100%;width: 540px;height: 310px"></iframe><p><a href="https://vimeo.com/85437924"></a></p>');
+                    </script>
+                    <? endif; ?>
+                    <? if (strpos($this->escapeHtmlAttr($this->proxyUrl($url['url'])), 'youtube.com') !== false): ?>
+                    <? $youtubeId = explode("watch?v=",$this->proxyUrl($url['url']))[1];?>
+                    <script>
+                      $('.imagepopup-container .image').html('<iframe width="560" height="315" src="https://www.youtube.com/embed/<?=$youtubeId;?>?autoplay=1" frameborder="0" allowfullscreen style="display: inline-block;position:relative;max-width: 100%;width: 540px;height: 310px">></iframe></iframe>');
+                    </script>
+                    <? endif; ?>
                     <? $index++; ?>
                     <? if ($index > 4): ?>
                     <div>...</div>
