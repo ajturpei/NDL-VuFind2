@@ -62,6 +62,10 @@
       </li>
       <? endif; ?>
 
+        <li role="menuitem" class="accessibility-switch">
+        <a href="<?=$this->url('home');?><?=$_SESSION['accessibility'] == true ? '?accessibility=false' : '?accessibility=true';?>" id="accessibility-checkbox"> Accessibility view</a>
+      </li>
+
       <? if (isset($this->layout()->themeOptions) && count($this->layout()->themeOptions) > 1): ?>
       <li role="presentation" class="dropdown">
           <form method="post" name="themeForm" id="themeForm">

@@ -2,6 +2,15 @@
 <!-- START of: finna - layout/layout.phtml -->
 <? $currentTabClass = $this->layout()->currentTabId ? ' tab-' . preg_replace('/[^a-z0-9]/', '', strtolower($this->layout()->currentTabId)) : '' ?>
 <? // Do not use HTML comments before DOCTYPE to avoid quirks-mode in IE ?>
+
+<?
+  if (isset($_GET['accessibility']) && $_GET['accessibility'] == 'true') {
+    $_SESSION['accessibility']= true;
+  }
+  if (isset($_GET['accessibility']) && $_GET['accessibility'] == 'false') {
+    $_SESSION['accessibility']= false;
+  }
+?>
 <html lang="<?=$this->layout()->userLang?>">
   <head>
     <?$this->headThemeResources()?>
@@ -30,10 +39,14 @@
       // IE-specific stylesheet
       $this->headLink()->appendStylesheet('ie9-and-lower.css', 'screen', 'lte IE 9');
       $this->headLink()->appendStylesheet('ie8-and-lower.css', 'screen', 'lt IE 9');
+      if (isset($_SESSION["accessibility"]) && $_SESSION["accessibility"] == 'true') {
+        $this->headLink()->appendStylesheet('/vufind2/themes/finna/css/accessibility.css');
+      }
       $this->headScript()->appendFile('vendor/html5shiv.js', 'text/javascript', ['conditional' => 'lt IE 9']);
       $this->headScript()->appendFile('vendor/respond.js', 'text/javascript', ['conditional' => 'lt IE 9']);
       $this->headScript()->appendFile("vendor/imagesloaded.pkgd.min.js");
       $this->headScript()->appendFile("vendor/masonry.pkgd.min.js");
+
 
     ?>
     <?=$this->headLink()?>
@@ -196,6 +209,7 @@ JS;
     <? if ($template = $this->content()->findTemplateForLng("content/Additions/general-post-head")): ?>
       <?=$this->render($template)?>
     <? endif; ?>
+
   </head>
   <body>
     <? // Set up the search box -- there are three possible cases:
@@ -350,3 +364,4 @@ JS;
   </body>
 </html>
 <!-- END of: finna - layout/layout.phtml -->
+
